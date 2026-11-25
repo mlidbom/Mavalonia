@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+   <!-- Measures how fast the controls are. Run it in Release: see README.md. -->
+   <PropertyGroup>
+      <OutputType>Exe</OutputType>
+      <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+   </PropertyGroup>
+   <ItemGroup>
+      <PackageReference Include="Avalonia.Fonts.Inter" />
+      <PackageReference Include="Avalonia.Headless" />
+      <PackageReference Include="Avalonia.Skia" />
+      <PackageReference Include="Avalonia.Themes.Fluent" />
+      <ProjectReference Include="..\Mavalonia.MarkdownEditing.Controls\Mavalonia.MarkdownEditing.Controls.csproj" />
+   </ItemGroup>
+</Project>

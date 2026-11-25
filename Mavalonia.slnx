@@ -12,6 +12,7 @@
       <Project Path="Mavalonia.MarkdownEditing.Specifications/Mavalonia.MarkdownEditing.Specifications.csproj" />
    </Folder>
    <Project Path="Mavalonia.DesktopHost/Mavalonia.DesktopHost.csproj" />
+   <Project Path="Mavalonia.MarkdownEditing.Controls.Measurements/Mavalonia.MarkdownEditing.Controls.Measurements.csproj" />
    <Project Path="Mavalonia.MarkdownEditing.Controls/Mavalonia.MarkdownEditing.Controls.csproj" />
    <Project Path="Mavalonia.MarkdownEditing/Mavalonia.MarkdownEditing.csproj" />
 </Solution>

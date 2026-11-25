@@ -15,12 +15,16 @@ namespace Mavalonia.MarkdownEditing.Controls.Rendered;
 public abstract partial class RenderedMarkdownView : Control
 {
    const double WidthWhenAnyIsAvailable = 600;
+   const double HeightDrawnBeyondWhatIsSeen = 1200;
 
    static readonly RenderedMarkdown NothingRendered = RenderedMarkdown.Of("");
 
    readonly PointerInput _pointer;
    readonly LatestLayout _latestLayout = new();
    Rect _viewport = new(0, 0, double.MaxValue, double.MaxValue);
+
+   ///<summary>The part of the view that was drawn last. Scrolling inside it needs nothing to be drawn anew.</summary>
+   Rect _drawn;
 
    static RenderedMarkdownView()
    {
@@ -79,7 +83,7 @@ public abstract partial class RenderedMarkdownView : Control
    ///<summary>The layout of what is rendered now, also when it has changed since the view was measured.</summary>
    internal DocumentLayout Layout => LayOut(Bounds.Width);
 
-   DocumentLayout LayOut(double width) => _latestLayout.LayOut(Rendered, Appearance, width, Padding);
+   DocumentLayout LayOut(double width) => _latestLayout.LayOut(Rendered, () => Appearance, width, Padding);
 
    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
    {
@@ -102,15 +106,17 @@ public abstract partial class RenderedMarkdownView : Control
    void ShowWhatIsIn(Rect viewport)
    {
       _viewport = viewport;
-      InvalidateVisual();
+      var seen = viewport.Intersect(new Rect(Bounds.Size));
+      if(seen is { Width: > 0, Height: > 0 } && !_drawn.Contains(seen)) InvalidateVisual();
    }
 
    public sealed override void Render(DrawingContext context)
    {
       context.FillRectangle(Brushes.Transparent, new Rect(Bounds.Size)); // So that the pointer hits the view where nothing is drawn.
+      _drawn = _viewport.Inflate(new Thickness(0, HeightDrawnBeyondWhatIsSeen));
       if(Shown is not {} shown) return;
 
-      Layout.Draw(context, shown.Selection.IsEmpty ? null : shown.Selection.Range, HighlightsToDraw, _viewport);
+      Layout.Draw(context, shown.Selection.IsEmpty ? null : shown.Selection.Range, HighlightsToDraw, _drawn);
       DrawOver(context);
    }
 

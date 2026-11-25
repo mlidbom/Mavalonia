@@ -15,6 +15,9 @@ class LaidOutText : IDisposable
    readonly bool _dependsOnTheWidth;
    readonly List<(double Width, TextLayout Layout)> _layouts = [];
 
+   ///<summary>The glyphs of the text, which are the same at all widths.</summary>
+   readonly TextRunCache _glyphs = new();
+
    ///<param name="runsAtWidth">The runs of the text, where it may be so wide.</param>
    ///<param name="dependsOnTheWidth">Whether its runs are others at another width, as an image's are.</param>
    internal LaidOutText(Func<double, RunsOfABlock> runsAtWidth, bool dependsOnTheWidth)
@@ -38,7 +41,7 @@ class LaidOutText : IDisposable
    {
       var runs = _runsAtWidth(width);
       var paragraph = new GenericTextParagraphProperties(FlowDirection.LeftToRight, TextAlignment.Left, firstLineInParagraph: true, alwaysCollapsible: false, runs.PropertiesOfTheParagraph, TextWrapping.Wrap, lineHeight: double.NaN, indent: 0, letterSpacing: 0);
-      var layout = new TextLayout(runs.Text, paragraph, maxWidth: width);
+      var layout = new TextLayout(runs.Text, paragraph, maxWidth: width, textRunCache: _dependsOnTheWidth ? null : _glyphs);
 
       _layouts.Add((width, layout));
       if(_layouts.Count > MostLayoutsKept) ForgetTheOldest();
@@ -57,5 +60,6 @@ class LaidOutText : IDisposable
    public void Dispose()
    {
       while(_layouts.Count > 0) ForgetTheOldest();
+      _glyphs.Dispose();
    }
 }
