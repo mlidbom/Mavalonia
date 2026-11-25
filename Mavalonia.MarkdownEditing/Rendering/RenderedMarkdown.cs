@@ -1,23 +1,27 @@
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Containers;
 using Mavalonia.MarkdownEditing.Rendering.Reading;
+using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Rendering;
 
 ///<summary>What a markdown text is shown as when it's rendered.</summary>
 public class RenderedMarkdown
 {
-   RenderedMarkdown(string source, IReadOnlyList<RenderedBlock> blocks)
+   RenderedMarkdown(string source, MarkdownDialect dialect, IReadOnlyList<RenderedBlock> blocks)
    {
       Source = source;
+      Dialect = dialect;
       Blocks = blocks;
    }
 
    public static RenderedMarkdown Of(string markdown) => Of(markdown, MarkdownDialect.ForEditing);
-   public static RenderedMarkdown Of(string markdown, MarkdownDialect dialect) => new(markdown, MarkdownReader.Read(markdown, dialect));
+   public static RenderedMarkdown Of(string markdown, MarkdownDialect dialect) => new(markdown, dialect, MarkdownReader.Read(markdown, dialect));
 
    ///<summary>The markdown.</summary>
    public string Source { get; }
+
+   internal MarkdownDialect Dialect { get; }
 
    ///<summary>The blocks from the first to the last. There is always at least one: an empty markdown text is rendered as an empty paragraph.</summary>
    public IReadOnlyList<RenderedBlock> Blocks { get; }
@@ -26,6 +30,9 @@ public class RenderedMarkdown
    internal string Text => TextOf(Blocks);
 
    internal static string TextOf(IEnumerable<RenderedBlock> blocks) => string.Concat(blocks.Select(it => it.Text.Value));
+
+   ///<summary>All the text that is shown, in one.</summary>
+   public PlainText PlainText => new(Blocks);
 
    public RenderedPosition Start => RenderedPosition.AtTheStartOf(Blocks[0]);
    public RenderedPosition End => RenderedPosition.AtTheEndOf(Blocks[^1]);

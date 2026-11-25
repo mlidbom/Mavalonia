@@ -13,11 +13,10 @@ using Mavalonia.MarkdownEditing.Rendering.Texts;
 namespace Mavalonia.MarkdownEditing.Editing;
 
 ///<summary>Edits a markdown document as it is rendered: what a person does is said in terms of what they see, and changes the markdown text.</summary>
-public sealed class RenderedEditor : IDisposable
+public sealed class RenderedEditor : SelectableMarkdown, IDisposable
 {
    readonly RenderedDocument _document;
    readonly UndoSteps _undoSteps;
-   TextSelection _selection;
 
    ///<summary>The formatting of the next text typed, when it isn't that of the markup where the caret is.</summary>
    TextFormatting? _formattingToType;
@@ -26,32 +25,15 @@ public sealed class RenderedEditor : IDisposable
    {
       _document = new RenderedDocument(document);
       _undoSteps = new UndoSteps(document);
-      _selection = WhereItIsShown(selection);
+      Selection = WhereItIsShown(selection);
       _document.ChangedByOthers += FollowTheChange;
    }
 
    public TextDocument Document => _document.Document;
 
-   ///<summary>Tells that what is rendered or selected has changed.</summary>
-   public event EventHandler? Changed;
-
    public void Dispose() => _document.Dispose();
 
-   public RenderedMarkdown Rendered => _document.Rendered;
-
-   public TextSelection Selection
-   {
-      get => _selection;
-      private set
-      {
-         _selection = value;
-         Changed?.Invoke(this, EventArgs.Empty);
-      }
-   }
-
-   Caret Caret => new(Rendered, Selection.Caret);
-   public RenderedPosition CaretPosition => Caret.Position;
-   internal RenderedRange Selected => new(Rendered, Rendered.PositionAt(Selection.Start), Rendered.PositionAt(Selection.End));
+   public override RenderedMarkdown Rendered => _document.Rendered;
 
    ///<summary>The formatting that text typed now gets.</summary>
    TextFormatting FormattingToType => _formattingToType ?? FormattingOfTheSelection;
@@ -59,34 +41,6 @@ public sealed class RenderedEditor : IDisposable
    TextFormatting FormattingOfTheSelection => Selection.IsEmpty ? Caret.Formatting : FirstSelectedChar?.Formatting ?? TextFormatting.None;
 
    RenderedChar? FirstSelectedChar => Selected.Start is { IsAtTheEndOfItsBlock: false } start ? start.Block.Text.Chars[start.Index] : null;
-
-   ///<summary>The markdown of what is selected.</summary>
-   public string SelectedMarkdown => Selection.IsEmpty ? "" : new MarkdownOfASelection(Selected).Markdown;
-
-   ///<summary>Puts the caret at <paramref name="position"/>. With <paramref name="extendSelection"/>, what is selected then reaches to there.</summary>
-   public void MoveTo(RenderedPosition position, bool extendSelection = false)
-   {
-      StopTyping();
-      Selection = extendSelection ? Selection with { Caret = position.Offset } : TextSelection.CaretAt(position.Offset);
-   }
-
-   ///<summary>Selects what is between two offsets in the markdown.</summary>
-   public void Select(TextSelection selection)
-   {
-      StopTyping();
-      Selection = WhereItIsShown(selection);
-   }
-
-   ///<summary>The selection in terms of what is shown. In the source, it may start or end where there is nothing to see, such as inside an entity.</summary>
-   TextSelection WhereItIsShown(TextSelection selection) => new(Rendered.OffsetWhereTextCanBeTyped(selection.Anchor), Rendered.OffsetWhereTextCanBeTyped(selection.Caret));
-
-   public void Move(CaretMovement movement, bool extendSelection = false) => MoveTo(movement.From(this), extendSelection);
-
-   public void SelectAll()
-   {
-      StopTyping();
-      Selection = new TextSelection(Rendered.Start.Offset, Rendered.End.Offset);
-   }
 
    public void Type(string text)
    {
@@ -225,11 +179,13 @@ public sealed class RenderedEditor : IDisposable
       _undoSteps.AsOneStep(action);
    }
 
+   private protected override void WhenASelectionIsMade() => StopTyping();
+
    void StopTyping()
    {
       _formattingToType = null;
       _undoSteps.EndTyping();
    }
 
-   void FollowTheChange(object? sender, DocumentChangeEventArgs change) => Selection = new TextSelection(change.GetNewOffset(_selection.Anchor), change.GetNewOffset(_selection.Caret));
+   void FollowTheChange(object? sender, DocumentChangeEventArgs change) => Selection = new TextSelection(change.GetNewOffset(Selection.Anchor), change.GetNewOffset(Selection.Caret));
 }

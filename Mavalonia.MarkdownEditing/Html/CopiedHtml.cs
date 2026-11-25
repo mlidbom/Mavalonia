@@ -1,4 +1,3 @@
-using System.Text;
 using AngleSharp.Html.Parser;
 
 namespace Mavalonia.MarkdownEditing.Html;
@@ -15,13 +14,8 @@ public class CopiedHtml
 
    public static CopiedHtml Parse(string html) => new(HtmlReader.ReadBlocksIn(new HtmlParser().ParseDocument(html).Body!));
 
-   ///<summary>Parses what Windows has on the clipboard as <c>HTML Format</c>: UTF-8, where lines that say where the HTML starts and ends precede it.</summary>
-   public static CopiedHtml ParseHtmlFormatOfWindows(byte[] htmlFormat)
-   {
-      var text = Encoding.UTF8.GetString(htmlFormat).TrimEnd('\0');
-      var startOfHtml = text.IndexOf('<', StringComparison.Ordinal);
-      return Parse(startOfHtml < 0 ? "" : text[startOfHtml..]);
-   }
+   ///<summary>Parses HTML in the form of <see cref="HtmlFormatOfWindows"/>.</summary>
+   public static CopiedHtml ParseHtmlFormatOfWindows(byte[] htmlFormat) => Parse(HtmlFormatOfWindows.Read(htmlFormat));
 
    ///<summary>Whether there is no text in it, such as when it is an image.</summary>
    public bool IsEmpty => _blocks.Count == 0;

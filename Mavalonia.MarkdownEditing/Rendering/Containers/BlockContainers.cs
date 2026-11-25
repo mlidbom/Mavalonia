@@ -18,6 +18,9 @@ public class BlockContainers
    internal BlockContainers WithoutTheInnermost => Outermost(Count - 1);
    internal BlockContainers WithoutTheOutermost(int count) => new([..OutermostFirst.Skip(count)]);
 
+   ///<summary>The containers that <paramref name="container"/> is inside. All of them, when it isn't one of them.</summary>
+   internal BlockContainers Around(BlockContainer container) => Outermost(OutermostFirst.TakeWhile(it => it != container).Count());
+
    ///<summary>The containers that <paramref name="others"/> has too.</summary>
    internal BlockContainers SharedWith(BlockContainers others) => Outermost(OutermostFirst.Zip(others.OutermostFirst).TakeWhile(it => it.First == it.Second).Count());
 

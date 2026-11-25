@@ -22,12 +22,12 @@ class MarkdownOfASelection
    string MarkdownOfTextIn(RenderedBlock block)
    {
       var text = FormattedText.In(_selected);
-      return block is CodeBlock ? text.Value : WithoutPrefixesOf(block.Containers, InlineMarkdownWriter.PreferredWayToWrite(text));
+      return block is CodeBlock or AlertTitle ? text.Value : WithoutPrefixesOf(block.Containers, InlineMarkdownWriter.PreferredWayToWrite(text));
    }
 
    string MarkdownOfSeveralBlocks()
    {
-      var shared = _selected.Blocks.Select(it => it.Containers).Aggregate((all, it) => all.SharedWith(it));
+      var shared = ContainersToLeaveOut();
       var (start, startOfSource) = MarkdownOfTheStart();
       var (end, endOfSource) = MarkdownOfTheEnd();
 
@@ -38,6 +38,13 @@ class MarkdownOfASelection
          var block = _selected.Start.Block;
          return block.Containers.WithoutTheOutermost(shared.Count).PrefixOfALine(isTheFirstOf: it => _rendered.IsTheFirstBlockInside(it, block));
       }
+   }
+
+   ///<summary>Those that all of the blocks are inside. But the title of an alert isn't one outside the alert.</summary>
+   BlockContainers ContainersToLeaveOut()
+   {
+      var shared = _selected.Blocks.Select(it => it.Containers).Aggregate((all, it) => all.SharedWith(it));
+      return _selected.Start.Block is AlertTitle title ? shared.Around(title.Alert) : shared;
    }
 
    ///<summary>The markdown of what is selected of the first block, as far as it isn't just its source, and the offset from which it is.</summary>
