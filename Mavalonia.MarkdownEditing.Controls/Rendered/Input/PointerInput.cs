@@ -20,8 +20,8 @@ class PointerInput
    ///<summary>Null when the button isn't pressed, or when it has become more than a click.</summary>
    Point? _pressedAt;
 
-   ///<summary>Where the link or the image that the button is pressed on leads. Null when it isn't pressed on one.</summary>
-   string? _targetPressedOn;
+   ///<summary>Null when the button isn't pressed on a link or an image.</summary>
+   PressOnALink? _pressedOnALink;
 
    Point _latestInTheWindow;
 
@@ -64,7 +64,7 @@ class PointerInput
       _view.SelectingStarts();
       _isPressed = true;
       _pressedAt = point;
-      _targetPressedOn = _view.Layout.TargetAt(point);
+      _pressedOnALink = _view.Layout.TargetAt(point) is {} target ? new PressOnALink(point, target) : null;
 
       var position = _view.Layout.PositionNearestTo(point);
       switch(e.ClickCount)
@@ -115,14 +115,15 @@ class PointerInput
    string? TargetClickedBy(PointerReleasedEventArgs e)
    {
       var isAClick = e.InitialPressMouseButton == MouseButton.Left && _pressedAt is not null && _view.Shown?.Selection.IsEmpty == true;
-      return isAClick && _view.Layout.TargetAt(e.GetPosition(_view)) == _targetPressedOn ? _targetPressedOn : null;
+      var point = e.GetPosition(_view);
+      return isAClick && _pressedOnALink is {} press && press.IsClickedBy(point, _view.Layout.TargetAt(point)) ? press.Target : null;
    }
 
    internal void EndSelecting()
    {
       _isPressed = false;
       _pressedAt = null;
-      _targetPressedOn = null;
+      _pressedOnALink = null;
       _selecting.Stop();
    }
 }
