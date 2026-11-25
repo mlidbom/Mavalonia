@@ -47,6 +47,8 @@ partial class InlineMarkdownWriter
       {
          CloseWhatDoesNotFormat(_chars[index]);
          OpenWhatFormatsFrom(index);
+         //bug: A | in code is written as it is also in a cell of a table, where GitHub takes it for the end of the cell. Markdig
+         //   doesn't, so the edit looks right to us: making a \| b in a cell code writes `a | b`. In a cell, it is to be \|.
          _markdown.Append(_chars[index].IsCode ? _chars[index].Value : _chars[index].Markdown);
       }
 
