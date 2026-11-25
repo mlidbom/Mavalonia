@@ -122,11 +122,22 @@ class TextReader
 
    void ReadImage(LinkInline image, TextFormatting formatting)
    {
-      var description = string.Concat(image.Descendants<LiteralInline>().Select(it => it.Content.ToString()));
+      var description = string.Concat(image.Descendants<Inline>().Select(AsPlainText));
       var itsFormatting = formatting with { Image = new InlineImage(image.GetDynamicUrl?.Invoke() ?? image.Url ?? "") };
 
       foreach(var value in description.Length > 0 ? description : DescriptionOfAnImageWithoutOne) _text.Add(value, RangeOf(image), itsFormatting);
    }
+
+   static string AsPlainText(Inline inline) => inline switch
+   {
+      LiteralInline literal => literal.Content.ToString(),
+      CodeInline code => code.Content,
+      HtmlEntityInline entity => entity.Transcoded.ToString(),
+      AutolinkInline link => link.Url,
+      DelimiterInline delimiter => delimiter.ToLiteral(),
+      LineBreakInline => " ",
+      _ => ""
+   };
 
    void ReadAutolink(AutolinkInline autolink, TextFormatting formatting)
    {

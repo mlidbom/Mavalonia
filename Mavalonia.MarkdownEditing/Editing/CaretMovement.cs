@@ -27,7 +27,8 @@ public class CaretMovement
    static RenderedPosition Before(SelectableMarkdown selectable, Func<TextBoundaries, int, int> indexBefore)
    {
       var caret = selectable.CaretPosition;
-      if(!caret.IsAtTheStartOfItsBlock) return caret with { Index = indexBefore(caret.Block.Text.Boundaries, caret.Index) };
+      var text = caret.Block.Text;
+      if(!caret.IsAtTheStartOfItsBlock) return caret with { Index = text.StartOfCharsWithTheSameSourceAs(indexBefore(text.Boundaries, caret.Index)) };
       return selectable.Rendered.BlockBefore(caret.Block) is {} previous ? RenderedPosition.AtTheEndOf(previous) : caret;
    }
 

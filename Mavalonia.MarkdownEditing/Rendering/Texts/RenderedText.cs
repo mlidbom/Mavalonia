@@ -61,6 +61,13 @@ public class RenderedText
    ///<summary>The index of the first char that is not before <paramref name="offset"/>.</summary>
    public int IndexAt(int offset) => Chars.TakeWhile(it => it.Source.End <= offset).Count();
 
+   ///<summary>The index of the first of the chars that stand for the same markdown as the char at <paramref name="index"/> does, as those of an image's description do. No caret can be between them.</summary>
+   internal int StartOfCharsWithTheSameSourceAs(int index)
+   {
+      while(index > 0 && index < Length && Chars[index - 1].Source == Chars[index].Source) index--;
+      return index;
+   }
+
    ///<summary>The formatting that text typed at <paramref name="offset"/> gets from the markup it is inside.</summary>
    internal TextFormatting FormattingAt(int offset) =>
       Markups.Where(it => it.Content.Touches(offset))

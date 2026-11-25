@@ -2,8 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
-using Mavalonia.MarkdownEditing.Editing;
-using Mavalonia.MarkdownEditing.Rendering;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 
@@ -42,25 +40,10 @@ class PointerInput
       var position = _view.Layout.PositionNearestTo(e.GetPosition(_view));
       switch(e.ClickCount)
       {
-         case 2: SelectTheWordAt(position, selectable); break;
-         case 3: Select(selectable, RenderedPosition.AtTheStartOf(position.Block), RenderedPosition.AtTheEndOf(position.Block)); break;
+         case 2: selectable.SelectTheWordAt(position); break;
+         case 3: selectable.SelectTheBlockAt(position); break;
          default: selectable.MoveTo(position, extendSelection: e.KeyModifiers.HasFlag(KeyModifiers.Shift)); break;
       }
-   }
-
-   static void SelectTheWordAt(RenderedPosition position, SelectableMarkdown selectable)
-   {
-      var boundaries = position.Block.Text.Boundaries;
-      var end = position.IsAtTheEndOfItsBlock ? position.Index : boundaries.EndOfWordWithoutSpacesAfter(position.Index);
-      var start = boundaries.StartOfWordBefore(end);
-
-      Select(selectable, position with { Index = start }, position with { Index = end });
-   }
-
-   static void Select(SelectableMarkdown selectable, RenderedPosition start, RenderedPosition end)
-   {
-      selectable.MoveTo(start);
-      selectable.MoveTo(end, extendSelection: true);
    }
 
    internal void Move(PointerEventArgs e)

@@ -15,6 +15,34 @@ public class Markdown_that_is_read
       return read;
    }
 
+   public class Selecting_with_the_caret : Markdown_that_is_read
+   {
+      static string Select(string markdown, CaretMovement movement, int times)
+      {
+         var read = Read(markdown);
+         for(var time = 0; time < times; time++) read.Move(movement, extendSelection: true);
+         return read.SelectedMarkdown;
+      }
+
+      [XF] public void a_character_back_over_an_image_selects_all_of_it() => Select("a ![b c](d.png)‸ e", CaretMovement.ToTheCharacterBefore, times: 1).Must().Be("![b c](d.png)");
+      [XF] public void a_character_back_goes_on_before_an_image() => Select("a ![b c](d.png)‸ e", CaretMovement.ToTheCharacterBefore, times: 2).Must().Be(" ![b c](d.png)");
+      [XF] public void a_word_back_over_an_image_selects_all_of_it() => Select("a ![b c](d.png)‸ e", CaretMovement.ToTheWordBefore, times: 1).Must().Be("![b c](d.png)");
+      [XF] public void a_character_on_over_an_image_selects_all_of_it() => Select("a ‸![b c](d.png) e", CaretMovement.ToTheCharacterAfter, times: 1).Must().Be("![b c](d.png)");
+   }
+
+   public class Selecting_a_word : Markdown_that_is_read
+   {
+      static string SelectTheWordAt(int index, string markdown)
+      {
+         var read = new MarkdownToRead(markdown, MarkdownDialect.ForReading);
+         read.SelectTheWordAt(new RenderedPosition(read.Rendered.Blocks[0], index));
+         return read.SelectedMarkdown;
+      }
+
+      [XF] public void selects_it_without_the_space_after_it() => SelectTheWordAt(3, "a **two** b").Must().Be("**two**");
+      [XF] public void of_the_description_of_an_image_selects_the_image() => SelectTheWordAt(5, "a ![b cd](e.png) f").Must().Be("![b cd](e.png)");
+   }
+
    public class Copying : Markdown_that_is_read
    {
       static string Copied(string markdown) => Read(markdown).SelectedMarkdown;

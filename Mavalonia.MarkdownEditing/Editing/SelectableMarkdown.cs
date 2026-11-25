@@ -53,10 +53,25 @@ public abstract class SelectableMarkdown
 
    public void Move(CaretMovement movement, bool extendSelection = false) => MoveTo(movement.From(this), extendSelection);
 
-   public void SelectAll()
+   public void SelectAll() => Select(Rendered.Start, Rendered.End);
+
+   ///<summary>Selects the word that <paramref name="position"/> is in, or the punctuation or white space, where there is no word.</summary>
+   public void SelectTheWordAt(RenderedPosition position)
+   {
+      var text = position.Block.Text;
+      var end = position.IsAtTheEndOfItsBlock ? position.Index : text.Boundaries.EndOfWordWithoutSpacesAfter(position.Index);
+      var start = text.StartOfCharsWithTheSameSourceAs(text.Boundaries.StartOfWordBefore(end));
+
+      Select(position with { Index = start }, position with { Index = end });
+   }
+
+   ///<summary>Selects all of the block that <paramref name="position"/> is in.</summary>
+   public void SelectTheBlockAt(RenderedPosition position) => Select(RenderedPosition.AtTheStartOf(position.Block), RenderedPosition.AtTheEndOf(position.Block));
+
+   void Select(RenderedPosition start, RenderedPosition end)
    {
       WhenASelectionIsMade();
-      Selection = new TextSelection(Rendered.Start.Offset, Rendered.End.Offset);
+      Selection = new TextSelection(start.Offset, end.Offset);
    }
 
    private protected virtual void WhenASelectionIsMade() {}
