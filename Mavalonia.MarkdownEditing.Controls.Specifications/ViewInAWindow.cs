@@ -40,6 +40,13 @@ class ViewInAWindow
       return [..Enumerable.Range(0, shown.Length).Where(it => shown.AsSpan(it).StartsWith(text)).Select(it => View.BoundsOf(new PlainTextRange(it, text.Length)).First())];
    }
 
+   ///<summary>Clicks where <paramref name="text"/> is first shown.</summary>
+   internal ViewInAWindow Click(string text)
+   {
+      Window.Click(CenterOf(text));
+      return this;
+   }
+
    internal ViewInAWindow Select(string from, string to)
    {
       Window.Drag(StartOf(from), EndOf(to));
