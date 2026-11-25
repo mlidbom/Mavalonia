@@ -24,6 +24,7 @@ Controls for Avalonia®. The first is a WYSIWYG markdown editor for writing mess
 - **Run the specifications:** `dotnet test --solution Mavalonia.slnx`
 - **Run one project's:** `dotnet test --project Mavalonia.MarkdownEditing.Controls.Specifications`
 - **Try the controls, reloading code changes:** `dotnet watch --project Mavalonia.DesktopHost`
+- **Check that typing works on the real desktop:** `dotnet run --project Mavalonia.DesktopHost -- --check-typing`. The specifications run on the headless platform, which has no input methods. The window is off the screen and doesn't take the focus. The exit code is 0 when typing works.
 
 ## Specifications that use controls
 

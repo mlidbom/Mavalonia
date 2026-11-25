@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Mavalonia.DesktopHost.Checks;
 
 namespace Mavalonia.DesktopHost;
 
@@ -12,7 +13,11 @@ class App : Application
    public override void OnFrameworkInitializationCompleted()
    {
       if(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-         desktop.MainWindow = new MainWindow();
+      {
+         var window = new MainWindow();
+         desktop.MainWindow = window;
+         if(desktop.Args?.Contains(TypingCheck.Argument) == true) new TypingCheck(window, desktop).RunWhenTheWindowOpens();
+      }
 
       base.OnFrameworkInitializationCompleted();
    }
