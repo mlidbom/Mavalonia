@@ -1,1 +1,8 @@
 * text=auto
+
+# CRLF breaks these under bash.
+*.sh text eol=lf
+
+# Checked out before .claude-shared is attached, Git for Windows would make these file symlinks.
+.claude/rules/01-universal-shared symlink=dir
+.claude/skills/shared-* symlink=dir

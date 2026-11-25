@@ -5,3 +5,7 @@
 *.ncrunchsolution.user
 *.ncrunchproject.user
 /.idea/*/.idea/.name
+/artifacts/
+
+# The shared Claude config: a worktree of the machine's clone of it, attached by the SessionStart hook.
+/.claude-shared
