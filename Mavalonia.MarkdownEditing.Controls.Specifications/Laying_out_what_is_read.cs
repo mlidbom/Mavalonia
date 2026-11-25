@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Compze.Must;
 using Mavalonia.MarkdownEditing.Controls.Specifications.HeadlessAvalonia;
+using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Controls.Specifications;
 
@@ -15,6 +16,8 @@ public class Laying_out_what_is_read
 
    [XFOnUIThread] public void shows_the_same_long_text_in_each_of_the_columns_of_a_table_that_it_is_in() =>
       new ViewInAWindow($"| a | b | c |\n|---|---|---|\n| {LongText} | {LongText} | {LongText} |\n| {LongText} {LongText} | a | {LongText} {LongText} {LongText} |").BoundsOfEach("word0").Select(it => it.Width).Must().Satisfy(it => it.Count() == 8 && it.All(width => width > 20));
+
+   [XFOnUIThread] public void says_where_text_is_also_before_it_is_shown() => new MarkdownView { Markdown = "a" }.BoundsOf(new PlainTextRange(0, 1)).Must().HaveCount(1);
 
    public class Code : Laying_out_what_is_read
    {

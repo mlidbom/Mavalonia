@@ -3,6 +3,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
+using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Input;
@@ -46,7 +47,11 @@ public abstract partial class RenderedMarkdownView : Control
       Cursor = Cursors.OfText;
       EffectiveViewportChanged += (_, change) => ShowWhatIsIn(change.EffectiveViewport);
       ActualThemeVariantChanged += (_, _) => LayOutAnew();
+      ResourcesChanged += (_, _) => LayOutAnewWhenItLooksOtherwise();
    }
+
+   ///<summary>Avalonia shows a control as in a mirror where the direction is from right to left, unless it says that its text mustn't be.</summary>
+   protected override bool BypassFlowDirectionPolicies => true;
 
    ///<summary>What is shown. Null while nothing is.</summary>
    private protected abstract SelectableMarkdown? Shown { get; }
@@ -69,6 +74,12 @@ public abstract partial class RenderedMarkdownView : Control
       _latestLayout.Forget();
       InvalidateMeasure();
       InvalidateVisual();
+   }
+
+   ///<summary>Resources change for many reasons, most of which change nothing about the view. While it isn't in a window, it has none, and keeps the looks that it had.</summary>
+   void LayOutAnewWhenItLooksOtherwise()
+   {
+      if(((ILogical)this).IsAttachedToLogicalTree && _latestLayout.LooksOtherwiseThan(Appearance)) LayOutAnew();
    }
 
    private protected void ShowAnImageThatHasBecomeKnown()

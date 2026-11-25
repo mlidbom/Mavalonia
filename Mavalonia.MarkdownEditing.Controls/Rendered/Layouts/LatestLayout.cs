@@ -24,6 +24,9 @@ class LatestLayout
       return _layout = _texts.Use(() => DocumentLayoutBuilder.LayOut(rendered, _appearance, _texts, width, padding));
    }
 
+   ///<summary>Whether what is laid out, if anything, is laid out to look otherwise than as <paramref name="appearance"/> says.</summary>
+   internal bool LooksOtherwiseThan(MarkdownAppearance appearance) => _appearance is not null && _appearance != appearance;
+
    ///<summary>To be done when some texts look otherwise than when they were laid out. The layouts of the others are used again.</summary>
    internal void LayOutAgain() => _layout = null;
 
