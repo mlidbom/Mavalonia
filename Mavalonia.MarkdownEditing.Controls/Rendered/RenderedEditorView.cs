@@ -41,7 +41,7 @@ public partial class RenderedEditorView : RenderedMarkdownView
       }
    }
 
-   private protected override SelectableMarkdown? Shown => Editor;
+   internal override SelectableMarkdown? Shown => Editor;
 
    void ShowTheChange(object? sender, EventArgs e)
    {

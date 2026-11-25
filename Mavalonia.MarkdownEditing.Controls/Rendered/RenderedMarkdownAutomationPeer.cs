@@ -15,7 +15,7 @@ class RenderedMarkdownAutomationPeer : ControlAutomationPeer, IValueProvider
    protected override bool IsContentElementCore() => true;
    protected override bool IsControlElementCore() => true;
 
-   string Text => View.Selectable?.Rendered.PlainText.Value ?? "";
+   string Text => View.Shown?.Rendered.PlainText.Value ?? "";
 
    public virtual bool IsReadOnly => true;
    public virtual string? Value => Text;

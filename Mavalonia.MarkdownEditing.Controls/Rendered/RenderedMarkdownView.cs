@@ -54,9 +54,7 @@ public abstract partial class RenderedMarkdownView : Control
    protected override bool BypassFlowDirectionPolicies => true;
 
    ///<summary>What is shown. Null while nothing is.</summary>
-   private protected abstract SelectableMarkdown? Shown { get; }
-
-   internal SelectableMarkdown? Selectable => Shown;
+   internal abstract SelectableMarkdown? Shown { get; }
 
    internal PlatformHotkeyConfiguration Hotkeys => this.GetPlatformSettings()!.HotkeyConfiguration;
 

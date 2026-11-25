@@ -93,7 +93,7 @@ public class MarkdownView : RenderedMarkdownView
    ///<summary>Puts what is selected on the clipboard: as markdown, and as rich text for programs that take that. Does nothing when nothing is selected.</summary>
    public Task CopySelection() => IsAnythingSelected ? ClipboardContent.Write(_read, TopLevel.GetTopLevel(this)!.Clipboard!) : Task.CompletedTask;
 
-   private protected override SelectableMarkdown Shown => _read;
+   internal override SelectableMarkdown Shown => _read;
 
    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
    {

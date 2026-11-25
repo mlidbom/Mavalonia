@@ -32,7 +32,7 @@ class PointerInput
 
    internal void Press(PointerPressedEventArgs e)
    {
-      if(_view.Selectable is not {} selectable || !e.GetCurrentPoint(_view).Properties.IsLeftButtonPressed) return;
+      if(_view.Shown is not {} selectable || !e.GetCurrentPoint(_view).Properties.IsLeftButtonPressed) return;
 
       e.Handled = true;
       _view.Focus(NavigationMethod.Pointer);
@@ -68,7 +68,7 @@ class PointerInput
 
    void SelectUpTo(Point inTheWindow)
    {
-      if(_view.Selectable is not {} selectable || TopLevel.GetTopLevel(_view)?.TranslatePoint(inTheWindow, _view) is not {} point) return;
+      if(_view.Shown is not {} selectable || TopLevel.GetTopLevel(_view)?.TranslatePoint(inTheWindow, _view) is not {} point) return;
 
       var position = _view.Layout.PositionNearestTo(point);
       if(position.Offset == selectable.Selection.Caret) return;
@@ -79,7 +79,7 @@ class PointerInput
 
    internal void Release(PointerReleasedEventArgs e)
    {
-      var isAClick = e.InitialPressMouseButton == MouseButton.Left && _pressedAt is not null && _view.Selectable?.Selection.IsEmpty == true;
+      var isAClick = e.InitialPressMouseButton == MouseButton.Left && _pressedAt is not null && _view.Shown?.Selection.IsEmpty == true;
       var point = e.GetPosition(_view);
 
       e.Pointer.Capture(null);

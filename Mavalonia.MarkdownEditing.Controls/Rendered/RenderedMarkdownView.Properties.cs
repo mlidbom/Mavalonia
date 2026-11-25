@@ -49,6 +49,7 @@ partial class RenderedMarkdownView
    public IBrush LineBrush { get => GetValue(LineBrushProperty); set => SetValue(LineBrushProperty, value); }
 
    public IBrush SelectionBrush { get => GetValue(SelectionBrushProperty); set => SetValue(SelectionBrushProperty, value); }
+
    ///<summary>Whether code in a language that is known is drawn in the colours that it has in VS Code.</summary>
    public bool ColoursCode { get => GetValue(ColoursCodeProperty); set => SetValue(ColoursCodeProperty, value); }
 

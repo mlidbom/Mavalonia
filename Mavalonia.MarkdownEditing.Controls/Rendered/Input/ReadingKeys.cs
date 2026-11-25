@@ -31,7 +31,7 @@ class ReadingKeys
    }
 
    Action? ExtensionOfTheSelection(KeyEventArgs e) =>
-      _movement.ActionOf(e, _view.Selectable!) is {} move
+      _movement.ActionOf(e, _view.Shown) is {} move
          ? () =>
          {
             _view.SelectingStarts();
