@@ -48,7 +48,7 @@ public class MarkdownView : RenderedMarkdownView
    {
       _keys = new ReadingKeys(this);
       _read.Changed += (_, _) => ShowTheChange();
-      SetCurrentValue(ContextFlyoutProperty, new MenuOfAView(this));
+      SetCurrentValue(ContextFlyoutProperty, new MenuOfAMarkdownView(this));
    }
 
    void ShowTheChange()

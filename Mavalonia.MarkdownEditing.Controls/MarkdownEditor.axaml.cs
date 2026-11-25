@@ -19,7 +19,7 @@ public partial class MarkdownEditor : UserControl
       InitializeComponent();
       SourceView.Options.AllowScrollBelowDocument = false;
       _source = new SourceInput(this, SourceView);
-      SetCurrentValue(ContextFlyoutProperty, new MenuOfAnEditor(this));
+      SetCurrentValue(ContextFlyoutProperty, new MenuOfAMarkdownEditor(this));
       SetCurrentValue(DocumentProperty, new TextDocument());
    }
 

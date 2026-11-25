@@ -5,11 +5,11 @@ using Avalonia.Input.Platform;
 namespace Mavalonia.MarkdownEditing.Controls.Menus;
 
 ///<summary>The menu that a <see cref="MarkdownView"/> has when the application gives it no other.</summary>
-class MenuOfAView : MenuMadeWhenItOpens
+class MenuOfAMarkdownView : MenuMadeWhenItOpens
 {
    readonly MarkdownView _view;
 
-   internal MenuOfAView(MarkdownView view) : base(view) => _view = view;
+   internal MenuOfAMarkdownView(MarkdownView view) : base(view) => _view = view;
 
    private protected override Point PlaceBelowTheCaret => _view.CaretRectangle.BottomLeft;
 

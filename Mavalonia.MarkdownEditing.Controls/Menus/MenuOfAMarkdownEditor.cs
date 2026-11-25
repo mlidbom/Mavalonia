@@ -4,11 +4,11 @@ using Avalonia.Controls;
 namespace Mavalonia.MarkdownEditing.Controls.Menus;
 
 ///<summary>The menu that a <see cref="MarkdownEditor"/> has when the application gives it no other.</summary>
-class MenuOfAnEditor : MenuMadeWhenItOpens
+class MenuOfAMarkdownEditor : MenuMadeWhenItOpens
 {
    readonly MarkdownEditor _editor;
 
-   internal MenuOfAnEditor(MarkdownEditor editor) : base(editor) => _editor = editor;
+   internal MenuOfAMarkdownEditor(MarkdownEditor editor) : base(editor) => _editor = editor;
 
    private protected override Point PlaceBelowTheCaret => _editor.PlaceBelowTheCaret;
 
