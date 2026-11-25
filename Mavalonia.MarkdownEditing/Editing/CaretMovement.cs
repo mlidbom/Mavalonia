@@ -15,6 +15,9 @@ public class CaretMovement
    public static readonly CaretMovement ToTheStart = new(editor => editor.Rendered.Start);
    public static readonly CaretMovement ToTheEnd = new(editor => editor.Rendered.End);
 
+   public static readonly CaretMovement ToTheStartOfTheSelection = new(editor => editor.Selected.Start);
+   public static readonly CaretMovement ToTheEndOfTheSelection = new(editor => editor.Selected.End);
+
    readonly Func<RenderedEditor, RenderedPosition> _move;
 
    CaretMovement(Func<RenderedEditor, RenderedPosition> move) => _move = move;

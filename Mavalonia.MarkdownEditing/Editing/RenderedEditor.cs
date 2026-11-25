@@ -12,36 +12,31 @@ using Mavalonia.MarkdownEditing.Rendering.Texts;
 namespace Mavalonia.MarkdownEditing.Editing;
 
 ///<summary>Edits a markdown document as it is rendered: what a person does is said in terms of what they see, and changes the markdown text.</summary>
-///<remarks>
-/// The document is the only state, apart from the selection. Others may change it at any time, such as an editor of its source.
-/// </remarks>
 public sealed class RenderedEditor : IDisposable
 {
-   RenderedMarkdown? _rendered;
+   readonly RenderedDocument _document;
+   readonly UndoSteps _undoSteps;
    TextSelection _selection;
-   bool _isMakingAChange;
 
    ///<summary>The formatting of the next text typed, when it isn't that of the markup where the caret is.</summary>
    TextFormatting? _formattingToType;
 
-   ///<summary>Marks the changes that one undo undoes together, while text is typed without a break.</summary>
-   object _typingWithoutABreak = new();
-
    public RenderedEditor(TextDocument document, TextSelection selection)
    {
-      Document = document;
+      _document = new RenderedDocument(document);
+      _undoSteps = new UndoSteps(document);
       _selection = WhereItIsShown(selection);
-      document.Changed += FollowTheChange;
+      _document.ChangedByOthers += FollowTheChange;
    }
 
-   public TextDocument Document { get; }
+   public TextDocument Document => _document.Document;
 
    ///<summary>Tells that what is rendered or selected has changed.</summary>
    public event EventHandler? Changed;
 
-   public void Dispose() => Document.Changed -= FollowTheChange;
+   public void Dispose() => _document.Dispose();
 
-   public RenderedMarkdown Rendered => _rendered ??= RenderedMarkdown.Of(Document.Text);
+   public RenderedMarkdown Rendered => _document.Rendered;
 
    public TextSelection Selection
    {
@@ -54,12 +49,15 @@ public sealed class RenderedEditor : IDisposable
    }
 
    public RenderedPosition CaretPosition => Rendered.PositionAt(Selection.Caret);
-   RenderedRange Selected => new(Rendered, Rendered.PositionAt(Selection.Start), Rendered.PositionAt(Selection.End));
+   internal RenderedRange Selected => new(Rendered, Rendered.PositionAt(Selection.Start), Rendered.PositionAt(Selection.End));
 
    ///<summary>The formatting that text typed now gets.</summary>
    TextFormatting FormattingToType => _formattingToType ?? FormattingOfTheSelection;
 
-   TextFormatting FormattingOfTheSelection => Selection.IsEmpty ? CaretPosition.Block.Text.FormattingAt(Selection.Caret) : FirstSelectedCharacter?.Formatting ?? TextFormatting.None;
+   TextFormatting FormattingOfTheSelection => Selection.IsEmpty ? FormattingAtTheCaret : FirstSelectedCharacter?.Formatting ?? TextFormatting.None;
+
+   ///<summary>The formatting that the markup around the caret gives.</summary>
+   TextFormatting FormattingAtTheCaret => CaretPosition.Block.Text.FormattingAt(Selection.Caret);
 
    RenderedCharacter? FirstSelectedCharacter => Selected.Start is { IsAtTheEndOfItsBlock: false } start ? start.Block.Text.Characters[start.Index] : null;
 
@@ -95,19 +93,16 @@ public sealed class RenderedEditor : IDisposable
    {
       var formatting = FormattingToType;
 
-      AsPartOfTyping(() =>
+      _undoSteps.AsPartOfTyping(() =>
       {
          DeleteTheSelection();
-         var typed = new Typing(Rendered, Selection.Caret, formatting).Of(text);
-         Make(typed);
+         Make(new Typing(Rendered, Selection.Caret, formatting).Of(text));
       });
 
-      _formattingToType = FormattingAroundTheCaretHas(formatting) || !LooksTyped() ? null : formatting;
+      _formattingToType = formatting != FormattingAtTheCaret && IsShownAsTyped() ? formatting : null;
 
-      bool LooksTyped() => CaretPosition is { Index: > 0 } caret && caret.Index >= text.Length && caret.Block.Text.Value[(caret.Index - text.Length)..caret.Index] == text;
+      bool IsShownAsTyped() => CaretPosition is { Index: > 0 } caret && caret.Index >= text.Length && caret.Block.Text.Value[(caret.Index - text.Length)..caret.Index] == text;
    }
-
-   bool FormattingAroundTheCaretHas(TextFormatting formatting) => CaretPosition.Block.Text.FormattingAt(Selection.Caret) == formatting;
 
    ///<summary>Starts a new block, such as a paragraph or a list item, where the caret is.</summary>
    public void StartNewBlock() => Edit(() => new StartingANewBlock(Rendered, CaretPosition).Change());
@@ -139,12 +134,12 @@ public sealed class RenderedEditor : IDisposable
    public void Toggle(TextFormats format)
    {
       if(Selection.IsEmpty)
-         _formattingToType = FormattingToType.Has(format) ? FormattingToType.Without(format) : FormattingToType.With(format);
+         _formattingToType = FormattingToType.WithToggled(format);
       else
-         ToggleOfTheSelection(format);
+         ToggleForTheSelection(format);
    }
 
-   void ToggleOfTheSelection(TextFormats format)
+   void ToggleForTheSelection(TextFormats format)
    {
       var selected = Selected;
       AsOneUndo(() => MakeAll(new TogglingAFormat(selected, format).Changes()));
@@ -197,41 +192,21 @@ public sealed class RenderedEditor : IDisposable
 
    void Make(SourceChange change)
    {
-      _isMakingAChange = true;
-      if(!change.ChangesNothing) Document.Replace(change.Replaced.Start, change.Replaced.Length, change.Replacement);
-      _isMakingAChange = false;
-
-      _rendered = change.After;
+      _document.Make(change);
       Selection = TextSelection.CaretAt(change.Caret);
    }
 
    void AsOneUndo(Action action)
    {
-      StopTyping();
-      using(Document.RunUpdate()) action();
-   }
-
-   void AsPartOfTyping(Action action)
-   {
-      if(Document.UndoStack.LastGroupDescriptor == _typingWithoutABreak)
-         Document.UndoStack.StartContinuedUndoGroup(_typingWithoutABreak);
-      else
-         Document.UndoStack.StartUndoGroup(_typingWithoutABreak);
-
-      action();
-      Document.UndoStack.EndUndoGroup();
+      _formattingToType = null;
+      _undoSteps.AsOneStep(action);
    }
 
    void StopTyping()
    {
       _formattingToType = null;
-      _typingWithoutABreak = new object();
+      _undoSteps.EndTyping();
    }
 
-   void FollowTheChange(object? sender, DocumentChangeEventArgs change)
-   {
-      if(_isMakingAChange) return;
-
-      _rendered = null;
-      Selection = new TextSelection(change.GetNewOffset(_selection.Anchor), change.GetNewOffset(_selection.Caret));
-   }}
+   void FollowTheChange(object? sender, DocumentChangeEventArgs change) => Selection = new TextSelection(change.GetNewOffset(_selection.Anchor), change.GetNewOffset(_selection.Caret));
+}

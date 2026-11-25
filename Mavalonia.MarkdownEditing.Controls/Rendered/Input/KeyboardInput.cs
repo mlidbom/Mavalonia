@@ -91,8 +91,8 @@ class KeyboardInput
 
       return (e.Key, modifiers) switch
       {
-         (Key.Left, KeyModifiers.None) when !extendsSelection && !editor.Selection.IsEmpty => () => editor.MoveTo(editor.Rendered.PositionAt(editor.Selection.Start)),
-         (Key.Right, KeyModifiers.None) when !extendsSelection && !editor.Selection.IsEmpty => () => editor.MoveTo(editor.Rendered.PositionAt(editor.Selection.End)),
+         (Key.Left, KeyModifiers.None) when !extendsSelection && !editor.Selection.IsEmpty => Move(CaretMovement.ToTheStartOfTheSelection),
+         (Key.Right, KeyModifiers.None) when !extendsSelection && !editor.Selection.IsEmpty => Move(CaretMovement.ToTheEndOfTheSelection),
          (Key.Left, KeyModifiers.None) => Move(CaretMovement.ToTheCharacterBefore),
          (Key.Right, KeyModifiers.None) => Move(CaretMovement.ToTheCharacterAfter),
          (Key.Left, _) when isForWords => Move(CaretMovement.ToTheWordBefore),

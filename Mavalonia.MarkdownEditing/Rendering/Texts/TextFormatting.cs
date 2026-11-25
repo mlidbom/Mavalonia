@@ -15,4 +15,5 @@ public readonly record struct TextFormatting(TextFormats Formats, Link? Link = n
 
    internal TextFormatting With(TextFormats format) => this with { Formats = Formats | format };
    internal TextFormatting Without(TextFormats format) => this with { Formats = Formats & ~format };
+   internal TextFormatting WithToggled(TextFormats format) => Has(format) ? Without(format) : With(format);
 }
