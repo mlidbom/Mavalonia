@@ -28,6 +28,12 @@ public class RenderedText
    public int Length => Characters.Count;
    public bool IsEmpty => Length == 0;
 
+   ///<summary>Whether the source of each character is after that of the one before it, and within that of the text.</summary>
+   internal bool IsOfCharactersInOrder =>
+      Source.Start <= Source.End
+   && Characters.All(it => Source.Start <= it.Source.Start && it.Source.Start < it.Source.End && it.Source.End <= Source.End)
+   && Characters.Zip(Characters.Skip(1)).All(it => it.First.Source == it.Second.Source || it.First.Source.End <= it.Second.Source.Start);
+
    internal bool LooksLike(RenderedText other) => Value == other.Value && Characters.Zip(other.Characters).All(it => it.First.Formatting.LooksLike(it.Second.Formatting));
 
    ///<summary>The offset at which text typed before the character at <paramref name="index"/> goes. It continues the character before that one, so after a bold character it is inside the bold markup.</summary>

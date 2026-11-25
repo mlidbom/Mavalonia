@@ -16,12 +16,25 @@ public class Rendered_text
    [XF] public void is_code_between_two_backticks() => Of("a `**b**` c").Must().Be("a [Code: **b**] c");
    [XF] public void shows_the_label_of_a_link_only() => Of("a [b *c*](https://example.org \"title\") d").Must().Be("a [link to https://example.org: b ][Italic, link to https://example.org: c] d");
    [XF] public void shows_a_link_in_angle_brackets_without_them() => Of("<https://example.org>").Must().Be("[link to https://example.org: https://example.org]");
+   [XF] public void shows_a_link_without_a_label_as_source() => Of("a [](b)").Must().Be("a [source: [](b)]");
+   [XF] public void shows_a_link_whose_label_starts_with_a_line_break() => Of("a [\nb](c)").Must().Be("a [link to c: \nb]");
+   [XF] public void shows_a_heading_with_a_tab_after_the_number_sign() => Of("#\ta **b**").Must().Be("a [Bold: b]");
    [XF] public void shows_an_image_as_source() => Of("a ![b](c.png)").Must().Be("a [source: ![b](c.png)]");
    [XF] public void shows_inline_HTML_as_source() => Of("a <b>c</b>").Must().Be("a [source: <b>]c[source: </b>]");
    [XF] public void shows_an_entity_as_what_it_stands_for() => Of("a &amp; b").Must().Be("a & b");
    [XF] public void shows_an_escaped_character_without_its_backslash() => Of(@"a \* b").Must().Be("a * b");
    [XF] public void shows_a_line_break_after_two_spaces_without_the_spaces() => Of("a  \nb").Must().Be("a\nb");
    [XF] public void shows_a_line_break_after_a_backslash_without_the_backslash() => Of("a\\\nb").Must().Be("a\nb");
+
+   [XF] public void shows_an_opening_bracket_that_none_closes() => Of("a [ b").Must().Be("a [ b");
+   [XF] public void shows_an_opening_bracket_that_none_closes_before_a_line_break() => Of("[\na").Must().Be("[\na");
+   [XF] public void shows_a_closing_bracket_that_none_opens() => Of("a ] b").Must().Be("a ] b");
+   [XF] public void shows_a_pipe_that_is_not_in_a_table() => Of("a | b").Must().Be("a | b");
+   [XF] public void shows_asterisks_that_delimit_nothing() => Of("a * b ** c").Must().Be("a * b ** c");
+   [XF] public void shows_underscores_inside_words() => Of("a_b_c").Must().Be("a_b_c");
+   [XF] public void shows_tildes_that_delimit_nothing() => Of("a ~~ b ~ c").Must().Be("a ~~ b ~ c");
+   [XF] public void shows_a_backtick_that_none_closes() => Of("a ` b").Must().Be("a ` b");
+   [XF] public void shows_a_less_than_sign() => Of("a < b").Must().Be("a < b");
 
    [XF] public void shows_the_spaces_at_the_end_of_a_paragraph() => Of("a  ").Must().Be("a  ");
    [XF] public void shows_the_spaces_after_bold_text_at_the_end_of_a_paragraph() => Of("**a** ").Must().Be("[Bold: a] ");

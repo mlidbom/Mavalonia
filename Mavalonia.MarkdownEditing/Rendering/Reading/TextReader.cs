@@ -11,11 +11,15 @@ class TextReader
    readonly string _markdown;
    readonly BlockContainers _containers;
 
-   internal TextReader(string markdown, BlockContainers containers)
+   internal TextReader(string markdown, BlockContainers containers, int shift = 0)
    {
+      _shift = shift;
       _markdown = markdown;
       _containers = containers;
    }
+
+   ///<summary>How much further on everything is than Markdig says.</summary>
+   readonly int _shift;
 
    readonly List<RenderedCharacter> _characters = [];
    readonly List<InlineMarkup> _markups = [];
@@ -49,7 +53,7 @@ class TextReader
    int StartOfText => _markups.Where(it => it.FirstIndex == 0).Select(it => it.Source.Start).Append(_characters[0].Source.Start).Min();
    int EndOfText => _markups.Where(it => it.EndIndex == _characters.Count).Select(it => it.Source.End).Append(_characters[^1].Source.End).Max();
 
-   static SourceRange RangeOf(MarkdownObject it) => new(it.Span.Start, it.Span.End + 1);
+   SourceRange RangeOf(MarkdownObject it) => new(it.Span.Start + _shift, it.Span.End + 1 + _shift);
 
    void ReadAll(ContainerInline inlines, TextFormatting formatting)
    {
@@ -63,10 +67,11 @@ class TextReader
          case LiteralInline literal: ReadLiteral(literal, formatting); break;
          case EmphasisInline emphasis: ReadEmphasis(emphasis, formatting); break;
          case CodeInline code: ReadCode(code, formatting); break;
-         case LinkInline { IsImage: false } link: ReadLink(link, formatting); break;
+         case LinkInline { IsImage: false, FirstChild: not null } link: ReadLink(link, formatting); break;
          case AutolinkInline link: ReadAutolink(link, formatting); break;
          case HtmlEntityInline entity: ReadEntity(entity, formatting); break;
          case LineBreakInline lineBreak: ReadLineBreak(lineBreak, formatting); break;
+         case DelimiterInline delimiter: ReadDelimiterThatDelimitsNothing(delimiter, formatting); break;
          case ContainerInline container and not LinkInline: ReadAll(container, formatting); break;
          default: ReadSource(RangeOf(inline), formatting with { IsShownAsSource = true }); break;
       }
@@ -75,9 +80,23 @@ class TextReader
    void ReadLiteral(LiteralInline literal, TextFormatting formatting)
    {
       var range = RangeOf(literal);
-      if(literal.IsFirstCharacterEscaped && _markdown[range.Start] != '\\') range = range with { Start = range.Start - 1 };
+      var text = literal.Content.ToString();
+      if(literal.IsFirstCharacterEscaped)
+      {
+         var escaped = range with { End = range.Start + 2 };
+         _characters.Add(new RenderedCharacter(text[0], escaped, formatting));
+         (range, text) = (range with { Start = escaped.End }, text[1..]);
+      }
 
-      ReadCharactersAlong(range, literal.Content.ToString(), formatting);
+      ReadCharactersAlong(range, text, formatting);
+   }
+
+   ///<summary>Such as a <c>[</c> that no <c>]</c> follows.</summary>
+   void ReadDelimiterThatDelimitsNothing(DelimiterInline delimiter, TextFormatting formatting)
+   {
+      var text = delimiter.ToLiteral();
+      ReadCharactersAlong(RangeOf(delimiter), text, formatting);
+      ReadAll(delimiter, formatting);
    }
 
    void ReadEmphasis(EmphasisInline emphasis, TextFormatting formatting)
@@ -96,7 +115,7 @@ class TextReader
    void ReadLink(LinkInline markdigLink, TextFormatting formatting)
    {
       var range = RangeOf(markdigLink);
-      var content = markdigLink.FirstChild is {} first ? new SourceRange(first.Span.Start, markdigLink.LastChild!.Span.End + 1) : SourceRange.EmptyAt(range.Start + 1);
+      var content = new SourceRange(RangeOf(markdigLink.FirstChild!).Start, RangeOf(markdigLink.LastChild!).End);
       var link = new Link(markdigLink.GetDynamicUrl?.Invoke() ?? markdigLink.Url ?? "", opening: _markdown[range.Start..content.Start], closing: _markdown[content.End..range.End]);
 
       ReadMarkup(range, content, new TextFormatting(TextFormats.None, link), () => ReadAll(markdigLink, formatting with { Link = link }));
@@ -126,7 +145,7 @@ class TextReader
 
    void ReadLineBreak(LineBreakInline lineBreak, TextFormatting formatting)
    {
-      var endOfLine = EndOfTheLineThatEndsAt(lineBreak.Span);
+      var endOfLine = _markdown.EndOfLineAt(RangeOf(lineBreak).Start);
 
       if(lineBreak.IsHard)
          ReadLineBreak(lineBreak.IsBackslash ? endOfLine - 1 : StartOfTheSpacesBefore(endOfLine), formatting);
@@ -137,16 +156,10 @@ class TextReader
       }
    }
 
-   int EndOfTheLineThatEndsAt(SourceSpan lineBreak)
-   {
-      var start = lineBreak.Start;
-      return _markdown.EndOfLineAt(_markdown[start] == '\n' && _markdown[start - 1] == '\r' ? start - 1 : start);
-   }
-
    ///<summary>Where the spaces before <paramref name="offset"/> start that haven't been read: Markdig leaves some spaces at the end of a line in the text, and others not.</summary>
    int StartOfTheSpacesBefore(int offset)
    {
-      var endOfWhatIsRead = _characters[^1].Source.End;
+      var endOfWhatIsRead = _characters.Count > 0 ? _characters[^1].Source.End : offset;
       while(offset > endOfWhatIsRead && _markdown[offset - 1] is ' ' or '\t') offset--;
       return offset;
    }

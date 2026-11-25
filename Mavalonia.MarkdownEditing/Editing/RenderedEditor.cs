@@ -26,7 +26,7 @@ public sealed class RenderedEditor : IDisposable
    public RenderedEditor(TextDocument document, TextSelection selection)
    {
       Document = document;
-      _selection = selection;
+      _selection = WhereItIsShown(selection);
       document.Changed += FollowTheChange;
    }
 
@@ -74,8 +74,11 @@ public sealed class RenderedEditor : IDisposable
    public void Select(TextSelection selection)
    {
       StopTyping();
-      Selection = selection;
+      Selection = WhereItIsShown(selection);
    }
+
+   ///<summary>The selection in terms of what is shown. In the source, it may start or end where there is nothing to see, such as inside an entity.</summary>
+   TextSelection WhereItIsShown(TextSelection selection) => new(Rendered.OffsetWhereTextCanBeTyped(selection.Anchor), Rendered.OffsetWhereTextCanBeTyped(selection.Caret));
 
    public void Move(CaretMovement movement, bool extendSelection = false) => MoveTo(movement.From(this), extendSelection);
 
@@ -178,7 +181,7 @@ public sealed class RenderedEditor : IDisposable
 
       var start = Place.Of(StartOfSelection, Rendered);
       foreach(var change in new DeletingASelection(Rendered, StartOfSelection, EndOfSelection).Changes().ToList()) Make(change(Rendered));
-      if(start.BlockNumber < Rendered.Blocks.Count) Selection = TextSelection.CaretAt(start.In(Rendered).Offset);
+      Selection = TextSelection.CaretAt(start.In(Rendered).Offset);
    }
 
    void Edit(Func<SourceChange> change) => AsOneUndo(() =>
@@ -233,6 +236,6 @@ public sealed class RenderedEditor : IDisposable
    {
       internal static Place Of(RenderedPosition position, RenderedMarkdown rendered) => new(rendered.NumberOf(position.Block), position.Index);
 
-      internal RenderedPosition In(RenderedMarkdown rendered) => new(rendered.Blocks[BlockNumber], Math.Min(Index, rendered.Blocks[BlockNumber].Text.Length));
+      internal RenderedPosition In(RenderedMarkdown rendered) => rendered.PositionNearestTo(BlockNumber, Index);
    }
 }

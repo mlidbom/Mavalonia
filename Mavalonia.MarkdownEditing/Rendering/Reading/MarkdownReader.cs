@@ -25,7 +25,16 @@ class MarkdownReader
       var reader = new MarkdownReader(markdown);
       reader.ReadBlocksIn(Markdown.Parse(markdown, Pipeline), Place.OutsideAllContainers);
 
-      return new EmptyParagraphs(markdown).AddedTo([..reader._blocks.OrderBy(it => it.Text.Source.Start)]);
+      return new EmptyParagraphs(markdown).AddedTo(reader.BlocksWhoseSourceIsKnown());
+   }
+
+   ///<summary>The blocks from the first to the last. Of rare markdown, such as a link that goes on into the next row of a table, Markdig says the wrong source. To edit that would change something else than what is shown, so then all of the markdown is shown as source.</summary>
+   IReadOnlyList<RenderedBlock> BlocksWhoseSourceIsKnown()
+   {
+      var blocks = _blocks.OrderBy(it => it.Text.Source.Start).ToList();
+      var isKnown = blocks.All(it => it.Text.IsOfCharactersInOrder) && blocks.Zip(blocks.Skip(1)).All(it => it.First.Text.Source.End <= it.Second.Text.Source.Start);
+
+      return isKnown ? blocks : [new SourceBlock(BlockContainers.None, new TextReader(_markdown, BlockContainers.None).ReadAsSource(new SourceRange(0, _markdown.Length)))];
    }
 
    static MarkdownPipeline CreatePipeline()
@@ -134,9 +143,16 @@ class MarkdownReader
          _blocks.Add(new Paragraph(place.Containers, new TextReader(_markdown, place.Containers).ReadAsText(RangeOf(heading)))); // So far, it may be the start of anything, such as of #5.
       else
          _blocks.Add(new Heading(place.Containers,
-                                 new TextReader(_markdown, place.Containers).Read(heading.Inline) ?? RenderedText.EmptyAt(endOfMarks + 1),
+                                 new TextReader(_markdown, place.Containers, ShiftOfTheText()).Read(heading.Inline) ?? RenderedText.EmptyAt(endOfMarks + 1),
                                  new SourceRange(heading.Span.Start, _markdown.EndOfLineAt(heading.Span.Start)),
                                  heading.Level));
+
+      // Markdig doesn't count a tab that the text starts with.
+      int ShiftOfTheText()
+      {
+         var startOfText = _markdown.SkipSpaces(endOfMarks);
+         return _markdown[endOfMarks..startOfText].Contains('\t', StringComparison.Ordinal) && heading.Inline?.FirstChild is {} first ? startOfText - first.Span.Start : 0;
+      }
    }
 
    void ReadParagraph(ParagraphBlock paragraph, Place place)

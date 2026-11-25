@@ -26,7 +26,7 @@ class CodeBlockReader
    {
       var lines = LinesOf(code).ToList();
       var text = lines.Count == 0 ? RenderedText.EmptyAt(_markdown.EndOfLineAt(code.Span.Start)) : TextOf(lines);
-      var source = new SourceRange(code.Span.Start, Math.Max(code.Span.End + 1, text.Source.End));
+      var source = new SourceRange(code.Span.Start, Math.Clamp(code.Span.End + 1, text.Source.End, _markdown.Length)); // Markdig takes code that no fence ends to go on after the end of the document.
 
       return new CodeBlock(_containers, text, source, code.Info ?? "", hasNoLine: lines.Count == 0);
    }

@@ -52,7 +52,7 @@ class TextReplacement
    ///<summary>Replaces only the source between the positions.</summary>
    internal SourceChange Plain() => SourceChange.Replace(_rendered, PlainRange, _text.MarkdownWithoutFormatting);
 
-   SourceRange PlainRange => new(_from.IsAtTheEndOfItsBlock ? _from.Block.Text.Source.End : _from.Offset, _to.Offset);
+   SourceRange PlainRange => new(_from.IsAtTheEndOfItsBlock && _from.Block != _to.Block ? _from.Block.Text.Source.End : _from.Offset, _to.Offset);
 
    ///<summary>The markup that the positions touch, or that only white space separates from them.</summary>
    IEnumerable<SourceChange> MarkupAtThePositionsWrittenAnew() =>
@@ -77,7 +77,7 @@ class TextReplacement
    ///<summary>In markdown, an empty list item can't follow a paragraph without a blank line between them.</summary>
    IEnumerable<SourceChange> AfterABlankLine()
    {
-      if(_from.Block.Containers.Innermost is not ListItem || _rendered.BlockBefore(_from.Block) is not {} previous) yield break;
+      if(_from.Block.Containers.Innermost is not ListItem item || !_rendered.IsTheFirstIn(item, _from.Block) || _rendered.BlockBefore(_from.Block) is not {} previous) yield break;
 
       var blankLine = new Separator(_rendered, _from.Block.Containers.SharedWith(previous.Containers)).BlankLine;
       var change = SourceChange.Replace(_rendered, PlainRange with { Start = previous.Source.End }, blankLine + _rendered.Source[previous.Source.End..PlainRange.Start] + _text.MarkdownWithoutFormatting);

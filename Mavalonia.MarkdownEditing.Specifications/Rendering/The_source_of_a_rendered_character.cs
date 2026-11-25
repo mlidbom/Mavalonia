@@ -11,6 +11,7 @@ public class The_source_of_a_rendered_character
    static SourceRange Range(string markdown, string ofText) => new(markdown.IndexOf(ofText, StringComparison.Ordinal), markdown.IndexOf(ofText, StringComparison.Ordinal) + ofText.Length);
 
    [XF] public void includes_the_backslash_of_an_escaped_character() => Of('*', @"a \* b").Must().Be(Range(@"a \* b", @"\*"));
+   [XF] public void includes_both_backslashes_of_an_escaped_backslash() => Of('\\', @"a \\ b").Must().Be(Range(@"a \\ b", @"\\"));
    [XF] public void is_all_of_an_entity() => Of('&', "a &amp; b").Must().Be(Range("a &amp; b", "&amp;"));
    [XF] public void includes_the_quote_mark_after_a_line_break() => Of('\n', "> a\n> b").Must().Be(Range("> a\n> b", "\n> "));
    [XF] public void includes_the_quote_mark_after_a_line_break_with_windows_line_breaks() => Of('\n', "> a\r\n> b").Must().Be(Range("> a\r\n> b", "\r\n> "));

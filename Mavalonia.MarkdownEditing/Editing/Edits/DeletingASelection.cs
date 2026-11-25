@@ -63,9 +63,10 @@ class DeletingASelection
       return startsInTheSelection && endsInTheSelection;
    }
 
-   static Func<RenderedMarkdown, SourceChange> Removal(int number, int numberOfTheLast) => rendered => new RemovingBlocks(rendered).Remove(rendered.Blocks[number], rendered.Blocks[numberOfTheLast]).WithTheCaretAtTheEndOf(number - 1);
+   static Func<RenderedMarkdown, SourceChange> Removal(int number, int numberOfTheLast) => rendered =>
+      new RemovingBlocks(rendered).Remove(rendered.PositionNearestTo(number, 0).Block, rendered.PositionNearestTo(numberOfTheLast, 0).Block).WithTheCaretAtTheEndOf(number - 1);
 
-   static Func<RenderedMarkdown, SourceChange> Text(int number, int from, int to) => rendered => TextIn(rendered, new RenderedPosition(rendered.Blocks[number], from), new RenderedPosition(rendered.Blocks[number], to));
+   static Func<RenderedMarkdown, SourceChange> Text(int number, int from, int to) => rendered => TextIn(rendered, rendered.PositionNearestTo(number, from), rendered.PositionNearestTo(number, to));
 
    static Func<RenderedMarkdown, SourceChange> Text(RenderedPosition from, RenderedPosition to) => rendered => TextIn(rendered, from, to);
 

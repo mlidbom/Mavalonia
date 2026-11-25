@@ -39,8 +39,8 @@ class SourceChange
 
    internal SourceChange WithTheCaretAt(int offset) => new(Replaced, Replacement, After, offset);
 
-   ///<summary>Puts the caret in block number <paramref name="blockNumber"/> after the change, before its character number <paramref name="index"/>.</summary>
-   internal SourceChange WithTheCaretIn(int blockNumber, int index) => WithTheCaretAt(new RenderedPosition(After.Blocks[blockNumber], Math.Min(index, After.Blocks[blockNumber].Text.Length)).Offset);
+   ///<summary>Puts the caret in block number <paramref name="blockNumber"/> after the change, before its character number <paramref name="index"/>. Where the change has made less of the text than that, as near to there as there is text.</summary>
+   internal SourceChange WithTheCaretIn(int blockNumber, int index) => WithTheCaretAt(After.PositionNearestTo(blockNumber, index).Offset);
 
-   internal SourceChange WithTheCaretAtTheEndOf(int blockNumber) => WithTheCaretIn(blockNumber, After.Blocks[blockNumber].Text.Length);
+   internal SourceChange WithTheCaretAtTheEndOf(int blockNumber) => WithTheCaretIn(blockNumber, int.MaxValue);
 }
