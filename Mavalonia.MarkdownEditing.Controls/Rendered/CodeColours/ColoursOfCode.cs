@@ -7,7 +7,6 @@ namespace Mavalonia.MarkdownEditing.Controls.Rendered.CodeColours;
 ///<summary>The colours of all code that an application shows. They are worked out off the UI thread, and kept for the code that was shown latest. Used on the UI thread only.</summary>
 class ColoursOfCode
 {
-   const int MostThatIsKept = 400;
    const int LongestToColour = 60_000;
 
    static readonly ConditionalWeakTable<Application, ColoursOfCode> OfApplications = [];
@@ -17,9 +16,7 @@ class ColoursOfCode
    readonly Lazy<Colourer> _light = new(() => new Colourer(isDark: false));
    readonly Lazy<Colourer> _dark = new(() => new Colourer(isDark: true));
 
-   ///<summary>The code whose colours are known, the one that was asked for latest last.</summary>
-   readonly Dictionary<CodeToColour, LinkedListNode<(CodeToColour Code, ColouredCode Colours)>> _known = [];
-   readonly LinkedList<(CodeToColour Code, ColouredCode Colours)> _byWhenAskedFor = [];
+   readonly KnownColours _known = new();
 
    ///<summary>The code whose colours aren't known yet, with what to do when they are.</summary>
    readonly Dictionary<CodeToColour, HashSet<Action>> _waiting = [];
@@ -35,25 +32,14 @@ class ColoursOfCode
       if(block.Language.Length == 0 || block.Text.Length > LongestToColour) return null;
 
       var code = new CodeToColour(block.Text.Value, LanguageIn(block.Language), isDark);
-      if(_known.TryGetValue(code, out var known)) return AskedForNow(known);
+      if(_known.Of(code) is {} known) return known;
 
       WorkOut(code, whenKnown);
-      return OfCodeThatStartsTheSame(code);
+      return _known.OfCodeThatStartsAs(code); // While code is written, its colours would go away at each change otherwise, until they are worked out anew.
    }
 
    ///<summary>What follows the language, as in <c>cs title="x"</c>, says something else.</summary>
    static string LanguageIn(string info) => info.Split([' ', ',', '{'], 2)[0].ToLowerInvariant();
-
-   ColouredCode AskedForNow(LinkedListNode<(CodeToColour Code, ColouredCode Colours)> known)
-   {
-      _byWhenAskedFor.Remove(known);
-      _byWhenAskedFor.AddLast(known);
-      return known.Value.Colours;
-   }
-
-   ///<summary>While code is written, its colours would go away at each change otherwise, until they are worked out anew.</summary>
-   ColouredCode? OfCodeThatStartsTheSame(CodeToColour code) =>
-      _byWhenAskedFor.Select(it => it.Colours).MaxBy(it => it.LengthInCommonWith(code)) is {} similar && similar.LengthInCommonWith(code) > 0 ? similar.AsFarAsInCommonWith(code) : null;
 
    void WorkOut(CodeToColour code, Action whenKnown)
    {
@@ -83,18 +69,9 @@ class ColoursOfCode
 
       _beingWorkedOut = code;
       var colourer = code.IsDark ? _dark : _light;
-      Keep(code, new ColouredCode(code, await Task.Run(() => colourer.Value.StretchesOf(code))));
+      _known.Keep(code, new ColouredCode(code, await Task.Run(() => colourer.Value.StretchesOf(code))));
 
       _waiting.Remove(code, out var waiting);
       foreach(var whenKnown in waiting!) whenKnown();
-   }
-
-   void Keep(CodeToColour code, ColouredCode colours)
-   {
-      _known[code] = _byWhenAskedFor.AddLast((code, colours));
-      if(_known.Count <= MostThatIsKept) return;
-
-      _known.Remove(_byWhenAskedFor.First!.Value.Code);
-      _byWhenAskedFor.RemoveFirst();
    }
 }
