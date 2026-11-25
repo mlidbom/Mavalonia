@@ -40,22 +40,22 @@ public partial class MarkdownEditor : UserControl
       else _renderedEditor.SelectAll();
    }
 
-   IClipboardInput Clipboard => ShowsSource ? _source.Clipboard : RenderedView.Clipboard;
+   IClipboardInput ClipboardInputOfTheViewShown => ShowsSource ? _source.ClipboardInput : RenderedView.ClipboardInput;
 
    ///<summary>Puts what is selected on the clipboard: as markdown, and, from the rendered view, as rich text for programs that take that. Does nothing when nothing is selected.</summary>
-   public Task Copy() => Clipboard.Copy();
+   public Task Copy() => ClipboardInputOfTheViewShown.Copy();
 
    ///<summary>Does what <see cref="Copy"/> does, and deletes what is selected.</summary>
-   public Task Cut() => Clipboard.Cut();
+   public Task Cut() => ClipboardInputOfTheViewShown.Cut();
 
    ///<summary>Pastes what is on the clipboard in place of the selection: rich text as the markdown for it.</summary>
-   public Task Paste() => Clipboard.Paste();
+   public Task Paste() => ClipboardInputOfTheViewShown.Paste();
 
    ///<summary>Pastes only the text of what is on the clipboard, in place of the selection.</summary>
-   public Task PasteText() => Clipboard.PasteText();
+   public Task PasteText() => ClipboardInputOfTheViewShown.PasteText();
 
    ///<summary>Pastes what is on the clipboard as a quote, in place of the selection.</summary>
-   public Task PasteAsQuote() => Clipboard.PasteAsQuote();
+   public Task PasteAsQuote() => ClipboardInputOfTheViewShown.PasteAsQuote();
 
    ///<summary>Puts a quote of <paramref name="markdown"/> in place of the selection, and the caret in a paragraph after it.</summary>
    public void Quote(string markdown) => EditInEitherView(it => it.Quote(markdown));

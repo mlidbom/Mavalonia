@@ -88,11 +88,11 @@ class KeyboardInput
 
    Action? ClipboardActionOf(KeyEventArgs e)
    {
-      if(Is(Hotkeys.Copy, e)) return () => _view.Clipboard.Copy().SurfaceExceptions();
-      if(Is(Hotkeys.Cut, e)) return () => _view.Clipboard.Cut().SurfaceExceptions();
-      if(_view.PasteAsQuoteGesture?.Matches(e) == true) return () => _view.Clipboard.PasteAsQuote().SurfaceExceptions();
-      if(_view.PasteTextGesture?.Matches(e) == true) return () => _view.Clipboard.PasteText().SurfaceExceptions();
-      if(Is(Hotkeys.Paste, e)) return () => _view.Clipboard.Paste().SurfaceExceptions();
+      if(Is(Hotkeys.Copy, e)) return () => _view.ClipboardInput.Copy().SurfaceExceptions();
+      if(Is(Hotkeys.Cut, e)) return () => _view.ClipboardInput.Cut().SurfaceExceptions();
+      if(_view.PasteAsQuoteGesture?.Matches(e) == true) return () => _view.ClipboardInput.PasteAsQuote().SurfaceExceptions();
+      if(_view.PasteTextGesture?.Matches(e) == true) return () => _view.ClipboardInput.PasteText().SurfaceExceptions();
+      if(Is(Hotkeys.Paste, e)) return () => _view.ClipboardInput.Paste().SurfaceExceptions();
       return null;
    }
 

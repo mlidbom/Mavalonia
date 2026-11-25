@@ -24,7 +24,7 @@ public partial class RenderedEditorView : RenderedMarkdownView
    public RenderedEditorView()
    {
       _blinkingCaret = new BlinkingCaret(InvalidateVisual);
-      Clipboard = new ClipboardInput(this);
+      ClipboardInput = new ClipboardInput(this);
       _keyboard = new KeyboardInput(this);
       _inputMethod = new InputMethodClient(this);
    }
@@ -44,7 +44,7 @@ public partial class RenderedEditorView : RenderedMarkdownView
 
    internal override SelectableMarkdown? Shown => Editor;
 
-   internal IClipboardInput Clipboard { get; }
+   internal IClipboardInput ClipboardInput { get; }
 
    void ShowTheChange(object? sender, EventArgs e)
    {

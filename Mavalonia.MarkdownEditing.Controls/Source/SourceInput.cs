@@ -16,11 +16,11 @@ class SourceInput
       _editor = editor;
       _view = view;
       _ = new PointerInput(editor, view);
-      Clipboard = new ClipboardInput(editor, view);
+      ClipboardInput = new ClipboardInput(editor, view);
       view.AddHandler(InputElement.KeyDownEvent, Press, RoutingStrategies.Tunnel); // Before the view pastes text itself.
    }
 
-   internal IClipboardInput Clipboard { get; }
+   internal IClipboardInput ClipboardInput { get; }
 
    void Press(object? sender, KeyEventArgs e)
    {
@@ -32,9 +32,9 @@ class SourceInput
 
    Func<Task>? ActionOf(KeyEventArgs e)
    {
-      if(_editor.PasteAsQuoteGesture?.Matches(e) == true) return Clipboard.PasteAsQuote;
-      if(_editor.PasteTextGesture?.Matches(e) == true) return Clipboard.PasteText;
-      if(_view.GetPlatformSettings()!.HotkeyConfiguration.Paste.Any(it => it.Matches(e))) return Clipboard.Paste;
+      if(_editor.PasteAsQuoteGesture?.Matches(e) == true) return ClipboardInput.PasteAsQuote;
+      if(_editor.PasteTextGesture?.Matches(e) == true) return ClipboardInput.PasteText;
+      if(_view.GetPlatformSettings()!.HotkeyConfiguration.Paste.Any(it => it.Matches(e))) return ClipboardInput.Paste;
       return null;
    }
 }
