@@ -172,14 +172,23 @@ public sealed class RenderedEditor : IDisposable
       if(Selection.IsEmpty)
          Edit(() => delete(new Deleting(Caret)));
       else
-         AsOneUndo(DeleteTheSelection);
+         AsOneUndo(Selected.IsAllThatIsRendered ? DeleteAll : DeleteTheSelection);
    }
+
+   ///<summary>With nothing left to see, there is nothing to be a heading, or to be in a list.</summary>
+   void DeleteAll() => Make(SourceChange.Remove(Rendered, new SourceRange(0, Rendered.Source.Length)));
 
    void DeleteTheSelection()
    {
       if(Selection.IsEmpty) return;
 
       var selected = Selected;
+      if(selected is { IsAllThatIsRendered: true, IsInOneBlock: false })
+      {
+         DeleteAll();
+         return;
+      }
+
       MakeAll(new DeletingASelection(selected).Changes());
       Selection = TextSelection.CaretAt(selected.ByNumbers.In(Rendered).Start.Offset);
    }

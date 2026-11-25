@@ -13,6 +13,9 @@ readonly record struct RenderedRange(RenderedMarkdown Rendered, RenderedPosition
    internal bool IsEmpty => Start == End;
    internal bool IsInOneBlock => Start.Block == End.Block;
 
+   ///<summary>Whether it's all there is to see.</summary>
+   internal bool IsAllThatIsRendered => Start == Rendered.Start && End == Rendered.End;
+
    ///<summary>The blocks that the range is in, from the first to the last.</summary>
    internal IReadOnlyList<RenderedBlock> Blocks => [..Rendered.Blocks.SkipWhile(IsNotTheFirst).TakeWhile(IsNotTheLast), End.Block];
 

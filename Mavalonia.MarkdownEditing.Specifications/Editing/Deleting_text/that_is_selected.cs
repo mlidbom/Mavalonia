@@ -21,4 +21,21 @@ public class that_is_selected
    [XF] public void deletes_a_table_up_to_whose_end_is_selected() => From("a⟦b\n\n| A |\n|---|\n| 1⟧ |").Must().Be("a‸");
    [XF] public void deletes_the_code_between_two_paragraphs() => From("a⟦b\n\n```\nx\n```\n\nc⟧d").Must().Be("a‸d");
    [XF] public void deletes_a_part_of_code_and_leaves_it_code() => From("a⟦b\n\n```\nxy⟧z\n```").Must().Be("a‸\n\n```\nz\n```");
+
+   public class and_is_all_of_the_document : that_is_selected
+   {
+      static string Delete(string markdown) => Of(markdown, it => it.SelectAll(), it => it.DeleteCharacterBefore());
+      static string TypeOver(string markdown) => Of(markdown, it => it.SelectAll(), it => it.Type("x"));
+
+      [XF] public void leaves_nothing_of_a_heading_and_what_follows_it() => Delete("## a‸\n\nb").Must().Be("‸");
+      [XF] public void leaves_nothing_of_a_quote_and_what_follows_it() => Delete("> a‸\n\nb").Must().Be("‸");
+      [XF] public void leaves_nothing_of_a_list() => Delete("- a‸\n- b").Must().Be("‸");
+      [XF] public void leaves_nothing_of_code_and_what_follows_it() => Delete("```\na‸\n```\n\nb").Must().Be("‸");
+      [XF] public void leaves_nothing_of_a_table_and_what_follows_it() => Delete("| a‸ |\n|---|\n| b |\n\nc").Must().Be("‸");
+      [XF] public void leaves_nothing_of_a_single_heading() => Delete("# a‸").Must().Be("‸");
+      [XF] public void leaves_nothing_of_a_single_list_item() => Delete("- a‸").Must().Be("‸");
+      [XF] public void is_undone_at_once() => Of("## a‸\n\nb", it => it.SelectAll(), it => it.DeleteCharacterBefore(), it => it.Undo()).Must().Satisfy(it => it.Replace("‸", "") == "## a\n\nb");
+      [XF] public void and_is_typed_over_leaves_only_what_is_typed() => TypeOver("## a‸\n\n> b").Must().Be("x‸");
+      [XF] public void and_is_a_single_heading_that_is_typed_over_leaves_it_a_heading() => TypeOver("# a‸").Must().Be("# x‸");
+   }
 }
