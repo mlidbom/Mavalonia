@@ -46,7 +46,7 @@ public class Editing_at_random
 
    static void EditAtRandom(RenderedEditor editor, Random random)
    {
-      switch(random.Next(17))
+      switch(random.Next(18))
       {
          case 0 or 1 or 2: editor.Type(AnyOf(Typed)); break;
          case 3 or 4: editor.StartNewBlock(); break;
@@ -57,6 +57,7 @@ public class Editing_at_random
          case 10: editor.DeleteWordAfter(); break;
          case 11: editor.Paste(AnyOf(Pasted)); break;
          case 12: editor.Toggle(AnyOf(Formats)); break;
+         case 17: editor.Quote(AnyOf(Pasted)); break;
          case 13: editor.Select(new TextSelection(AnyOffset(), AnyOffset())); break;
          case 14: editor.Move(AnyOf(Movements), extendSelection: random.Next(2) == 0); break;
          case 15 when editor.CanIndent: editor.Indent(); break;

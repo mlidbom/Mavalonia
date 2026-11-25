@@ -128,6 +128,14 @@ public sealed class RenderedEditor : IDisposable
    ///<summary>Puts markdown, which may be of several blocks, in place of the selection.</summary>
    public void Paste(string markdown) => Edit(() => new Pasting(Caret).Of(markdown));
 
+   ///<summary>Puts a quote of markdown in place of the selection, and the caret in a paragraph after it.</summary>
+   public void Quote(string markdown) => AsOneUndo(() =>
+   {
+      DeleteTheSelection();
+      if(new Quoting(Caret) is { IsPossible: false } elsewhere) Make(elsewhere.GoToWhereItIsPossible());
+      Make(new Quoting(Caret).Of(markdown));
+   });
+
    ///<summary>Formats the selected text, or takes the format away when all of it has it. With nothing selected, it's the text typed next that gets or loses the format.</summary>
    public void Toggle(TextFormats format)
    {
