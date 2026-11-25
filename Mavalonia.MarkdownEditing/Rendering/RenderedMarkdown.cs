@@ -21,6 +21,11 @@ public class RenderedMarkdown
    ///<summary>The blocks from the first to the last. There is always at least one: an empty markdown text is rendered as an empty paragraph.</summary>
    public IReadOnlyList<RenderedBlock> Blocks { get; }
 
+   ///<summary>All the text that is shown, from the first block to the last.</summary>
+   internal string Text => TextOf(Blocks);
+
+   internal static string TextOf(IEnumerable<RenderedBlock> blocks) => string.Concat(blocks.Select(it => it.Text.Value));
+
    public RenderedPosition Start => RenderedPosition.AtTheStartOf(Blocks[0]);
    public RenderedPosition End => RenderedPosition.AtTheEndOf(Blocks[^1]);
 
