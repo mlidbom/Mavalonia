@@ -32,7 +32,7 @@ public class RenderedMarkdown
    internal static string TextOf(IEnumerable<RenderedBlock> blocks) => string.Concat(blocks.Select(it => it.Text.Value));
 
    ///<summary>All the text that is shown, in one.</summary>
-   public PlainText PlainText => new(Blocks);
+   public PlainText PlainText => field ??= new PlainText(Blocks);
 
    public RenderedPosition Start => RenderedPosition.AtTheStartOf(Blocks[0]);
    public RenderedPosition End => RenderedPosition.AtTheEndOf(Blocks[^1]);
