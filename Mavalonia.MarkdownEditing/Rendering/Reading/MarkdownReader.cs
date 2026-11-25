@@ -1,5 +1,6 @@
 using System.Globalization;
 using Markdig.Extensions.Alerts;
+using Markdig.Helpers;
 using Markdig.Syntax;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Containers;
@@ -25,9 +26,10 @@ class MarkdownReader
 
    internal static IReadOnlyList<RenderedBlock> Read(string markdown, MarkdownDialect dialect)
    {
-      var blocks = dialect == MarkdownDialect.PlainText ? ReadPlainText(markdown) : new MarkdownReader(markdown, dialect).ReadBlocks();
+      var markdownToShow = markdown.Replace('\0', CharHelper.ReplacementChar); // Markdig does that too, and then reads the replacement.
+      var blocks = dialect == MarkdownDialect.PlainText ? ReadPlainText(markdownToShow) : new MarkdownReader(markdownToShow, dialect).ReadBlocks();
 
-      if(dialect == MarkdownDialect.ForEditing) return new EmptyParagraphs(markdown).AddedTo(blocks);
+      if(dialect == MarkdownDialect.ForEditing) return new EmptyParagraphs(markdownToShow).AddedTo(blocks);
       return blocks.Count > 0 ? blocks : [Paragraph.EmptyAt(0, BlockContainers.None)];
    }
 
@@ -43,7 +45,9 @@ class MarkdownReader
 
    IReadOnlyList<RenderedBlock> ReadBlocks()
    {
-      ReadBlocksIn(MarkdigParser.Parse(_markdown, _dialect), PlaceOfBlocks.OutsideAllContainers);
+      if(MarkdigParser.Parse(_markdown, _dialect) is not {} document) return [AllAsSource];
+
+      ReadBlocksIn(document, PlaceOfBlocks.OutsideAllContainers);
       return BlocksWhoseSourceIsKnown();
    }
 
@@ -57,7 +61,7 @@ class MarkdownReader
    IReadOnlyList<RenderedBlock> BlocksWhoseSourceIsKnown()
    {
       var blocks = _blocks.OrderBy(it => it.Text.Source.Start).ToList();
-      return !_isTheSourceOfATableUnknown && IsSourceKnownOf(blocks) ? blocks : [AsSource(new SourceRange(0, _markdown.Length), BlockContainers.None)];
+      return !_isTheSourceOfATableUnknown && IsSourceKnownOf(blocks) ? blocks : [AllAsSource];
    }
 
    static bool IsSourceKnownOf(IReadOnlyList<RenderedBlock> blocks) =>
@@ -88,6 +92,8 @@ class MarkdownReader
    }
 
    static SourceRange RangeOf(MarkdownObject it) => new(it.Span.Start, it.Span.End + 1);
+
+   SourceBlock AllAsSource => AsSource(new SourceRange(0, _markdown.Length), BlockContainers.None);
 
    SourceBlock AsSource(SourceRange range, BlockContainers containers) => new(containers, ReaderOfText(containers).ReadAsSource(range));
 

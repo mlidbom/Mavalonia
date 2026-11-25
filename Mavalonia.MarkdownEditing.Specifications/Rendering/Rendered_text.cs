@@ -35,6 +35,8 @@ public class Rendered_text
    [XF] public void shows_tildes_that_delimit_nothing() => Of("a ~~ b ~ c").Must().Be("a ~~ b ~ c");
    [XF] public void shows_a_backtick_that_none_closes() => Of("a ` b").Must().Be("a ` b");
    [XF] public void shows_a_less_than_sign() => Of("a < b").Must().Be("a < b");
+   [XF] public void shows_a_NUL_as_the_character_that_replaces_it() => Of("a" + (char)0 + "b").Must().Be("a" + (char)0xFFFD + "b");
+   [XF] public void shows_thousands_of_opening_brackets_that_none_closes() => Of(new string('[', 5_000)).Must().Be(new string('[', 5_000));
 
    [XF] public void shows_the_spaces_at_the_end_of_a_paragraph() => Of("a  ").Must().Be("a  ");
    [XF] public void shows_the_spaces_after_bold_text_at_the_end_of_a_paragraph() => Of("**a** ").Must().Be("[Bold: a] ");

@@ -7,6 +7,7 @@ namespace Mavalonia.MarkdownEditing.Specifications.Rendering;
 public class Rendered_blocks
 {
    static void Rendered(string markdown, params string[] blocks) => RenderedMarkdown.Of(markdown).Described.Must().SequenceEqual(blocks);
+   static string Repeated(string text, int times) => string.Concat(Enumerable.Repeat(text, times));
 
    [XF] public void are_paragraphs_for_texts_with_a_blank_line_between_them() => Rendered("one\n\ntwo", "paragraph \"one\"", "paragraph \"two\"");
    [XF] public void have_a_single_line_break_in_the_text_of_the_paragraph() => Rendered("one\ntwo", "paragraph \"one\ntwo\"");
@@ -36,6 +37,9 @@ public class Rendered_blocks
    [XF] public void show_a_table_with_no_cell_at_all_as_source() => Rendered("a\n\n|\n-|", "paragraph \"a\"", "source \"|\n-|\"");
    [XF] public void show_all_as_source_when_a_link_goes_on_into_the_header_of_a_table() => Rendered("*[|\n]()-|-", "source \"*[|\n]()-|-\"");
    [XF] public void show_a_table_as_source_when_a_link_goes_on_outside_its_cell() => Rendered("| A | B[**#** |\n|---|---|\n|   | 2](x) |", "source \"| A | B[**#** |\n|---|---|\n|   | 2](x) |\"");
+   [XF] public void show_all_as_source_when_quotes_are_inside_one_another_hundreds_deep() => Rendered(new string('>', 500) + "a", $"source \"{new string('>', 500)}a\"");
+   [XF] public void show_all_as_source_when_list_items_are_inside_one_another_hundreds_deep() => Rendered(Repeated("- ", 500) + "a", $"source \"{Repeated("- ", 500)}a\"");
+   [XF] public void show_all_as_source_when_formats_are_inside_one_another_hundreds_deep() => Rendered(Repeated("*a **a ", 250) + Repeated("a** a* ", 250) + "b", $"source \"{Repeated("*a **a ", 250) + Repeated("a** a* ", 250)}b\"");
    [XF] public void show_an_escaped_pipe_in_a_cell_without_its_backslash() => Rendered("| A |\n|---|\n| a \\| b |", "header 0,0 \"A\"", "cell 1,0 \"a | b\"");
 
    [XF] public void are_the_same_with_windows_line_breaks() => Rendered("> one\r\n> two\r\n\r\n- three\r\n- four", "quote > paragraph \"one\ntwo\"", "• > paragraph \"three\"", "• > paragraph \"four\"");

@@ -77,7 +77,7 @@ partial class TextReader
          case HtmlInline html when IsForReading && TagOfALineBreak().IsMatch(html.Tag): _text.Add('\n', RangeOf(html), formatting); break;
          case HtmlEntityInline entity: ReadEntity(entity, formatting); break;
          case LineBreakInline lineBreak: ReadLineBreak(lineBreak, formatting); break;
-         case DelimiterInline delimiter: ReadDelimiterThatDelimitsNothing(delimiter, formatting); break;
+         case DelimiterInline delimiter: ReadCharactersAlong(RangeOf(delimiter), delimiter.ToLiteral(), formatting); break;
          case ContainerInline container and not LinkInline: ReadAll(container, formatting); break;
          default: _text.AddSource(RangeOf(inline), formatting with { IsShownAsSource = true }); break;
       }
@@ -95,13 +95,6 @@ partial class TextReader
       }
 
       ReadCharactersAlong(range, text, formatting);
-   }
-
-   ///<summary>Such as a <c>[</c> that no <c>]</c> follows.</summary>
-   void ReadDelimiterThatDelimitsNothing(DelimiterInline delimiter, TextFormatting formatting)
-   {
-      ReadCharactersAlong(RangeOf(delimiter), delimiter.ToLiteral(), formatting);
-      ReadAll(delimiter, formatting);
    }
 
    void ReadEmphasis(EmphasisInline emphasis, TextFormatting formatting)
