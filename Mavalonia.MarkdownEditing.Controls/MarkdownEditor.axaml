@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rendered="using:Mavalonia.MarkdownEditing.Controls.Rendered"
              xmlns:edit="using:AvaloniaEdit"
+             xmlns:editRendering="using:AvaloniaEdit.Rendering"
              x:Class="Mavalonia.MarkdownEditing.Controls.MarkdownEditor"
              x:Name="Root">
    <UserControl.Styles>
@@ -9,6 +10,10 @@
       <Style Selector="rendered|RenderedEditorView">
          <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
          <Setter Property="Padding" Value="{Binding #Root.Padding}" />
+      </Style>
+      <!-- Otherwise URLs are blue in any theme, which can't be read on a dark one. -->
+      <Style Selector="edit|TextEditor editRendering|TextView">
+         <Setter Property="LinkTextForegroundBrush" Value="{Binding $parent[edit:TextEditor].Foreground}" />
       </Style>
    </UserControl.Styles>
    <UserControl.Template>
