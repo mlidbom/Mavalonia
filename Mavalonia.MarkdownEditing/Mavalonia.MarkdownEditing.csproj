@@ -5,4 +5,7 @@
       <PackageReference Include="Avalonia.AvaloniaEdit" />
       <PackageReference Include="Markdig" />
    </ItemGroup>
+   <ItemGroup>
+      <InternalsVisibleTo Include="Mavalonia.MarkdownEditing.Controls" />
+   </ItemGroup>
 </Project>
