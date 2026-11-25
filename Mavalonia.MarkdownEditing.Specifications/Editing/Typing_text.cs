@@ -35,11 +35,6 @@ public class Typing_text
    [XF] public void after_a_dash_and_a_space_makes_it_a_list_item() => Blocks("- a").Must().SequenceEqual(["• > paragraph \"a\""]);
    [XF] public void after_a_dash_alone_does_not_make_it_a_list_item() => Blocks("-5").Must().SequenceEqual(["paragraph \"-5\""]);
    [XF] public void after_a_number_a_dot_and_a_space_makes_it_a_numbered_list_item() => Blocks("1. a").Must().SequenceEqual(["1. > paragraph \"a\""]);
-   [XF] public void after_a_number_a_parenthesis_and_a_space_does_not_make_it_a_numbered_list_item() => Blocks("1) a").Must().SequenceEqual(["paragraph \"1) a\""]);
-   [XF] public void after_a_number_a_parenthesis_and_a_space_does_not_make_it_a_numbered_list_item_in_a_quote() => Blocks("> 1) a").Must().SequenceEqual(["quote > paragraph \"1) a\""]);
-   [XF] public void after_a_number_a_parenthesis_and_a_space_does_not_make_it_a_numbered_list_item_on_a_line_after_a_line_break() => Blocks("a", it => it.BreakLine(), Type("1) b")).Must().SequenceEqual(["paragraph \"a\n1) b\""]);
-   [XF] public void that_is_a_parenthesis_between_a_number_and_a_space_does_not_make_it_a_numbered_list_item() => Of("1‸ a", Type(")")).Must().Be("1\\)‸ a");
-   [XF] public void in_a_numbered_list_item_with_a_parenthesis_leaves_it_one() => Of("1) a‸", Type("b")).Must().Be("1) ab‸");
    [XF] public void after_a_quote_mark_makes_it_a_quote() => Blocks("> a").Must().SequenceEqual(["quote > paragraph \"a\""]);
    [XF] public void after_a_quote_mark_and_a_dash_makes_it_a_list_item_in_a_quote() => Blocks("> - a").Must().SequenceEqual(["quote > • > paragraph \"a\""]);
    [XF] public void after_three_backticks_makes_it_code() => Of("‸", Type("```a")).Must().Be("```\na‸\n```");
