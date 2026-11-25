@@ -31,6 +31,30 @@ class FormattedText
 
    internal FormattedText Select(Func<FormattedChar, FormattedChar> change) => new([..Chars.Select(change)]);
 
+   internal FormattedText WithoutFormatting => Typed(Value, TextFormatting.None);
+   internal FormattedText WithoutBold => Select(it => it.Without(TextFormats.Bold));
+
+   ///<summary>The text, with what could be taken for markup inside a block escaped.</summary>
+   internal FormattedText WithMarkupEscaped => Select(it => it.WrittenEscaped);
+
+   ///<summary>The text, with all of its punctuation escaped.</summary>
+   internal FormattedText WithPunctuationEscaped => Select(it => it.WrittenEscapedIfPunctuation);
+
+   ///<summary>The text, with what could make a line the start of another block escaped, such as the <c>-</c> of a list item or the <c>.</c> after its number.</summary>
+   internal FormattedText WithTheStartOfItsLinesEscaped
+   {
+      get
+      {
+         var couldBecomeABlock = true;
+         return Select(it =>
+         {
+            var toEscape = couldBecomeABlock && !char.IsAsciiDigit(it.Value) && !it.IsWhiteSpace;
+            couldBecomeABlock = it.Value == '\n' || (couldBecomeABlock && !toEscape);
+            return toEscape ? it.WrittenEscapedIfPunctuation : it;
+         });
+      }
+   }
+
    ///<summary>The text without formatting, written as markdown.</summary>
    internal string MarkdownWithoutFormatting => string.Concat(Chars.Select(it => it.Markdown));
 

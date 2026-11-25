@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
    <!-- Everything about editing markdown that needs no controls. AvaloniaEdit is here for its TextDocument, which works without a UI: never use a control in this project. -->
    <ItemGroup>
+      <PackageReference Include="AngleSharp" />
       <PackageReference Include="Avalonia.AvaloniaEdit" />
       <PackageReference Include="Markdig" />
    </ItemGroup>

@@ -23,7 +23,11 @@ readonly record struct FormattedChar(char Value, TextFormatting Formatting, stri
 
    internal FormattedChar Without(TextFormats format) => this with { Formatting = Formatting.Without(format), Markdown = IsCode && format == TextFormats.Code ? Escaped : Markdown };
 
+   ///<summary>The char, escaped if it could be taken for markup inside a block.</summary>
    internal FormattedChar WrittenEscaped => this with { Markdown = Escaped };
+
+   ///<summary>The char, escaped whatever it is, as far as markdown lets it be.</summary>
+   internal FormattedChar WrittenEscapedIfPunctuation => char.IsAscii(Value) && (char.IsPunctuation(Value) || char.IsSymbol(Value)) ? this with { Markdown = @"\" + Value } : this;
 
    ///<summary>The char escaped, so that it isn't taken for markup.</summary>
    string Escaped => SpecialCharacters.Contains(Value, StringComparison.Ordinal) ? @"\" + Value : Value.ToString();

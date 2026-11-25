@@ -4,6 +4,7 @@
       <AvaloniaVersion>12.2.0</AvaloniaVersion>
    </PropertyGroup>
    <ItemGroup>
+      <PackageVersion Include="AngleSharp" Version="1.11.0" />
       <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)" />
       <PackageVersion Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
       <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
