@@ -22,20 +22,23 @@ class MarkdownOfASelection
    string MarkdownOfTextIn(RenderedBlock block)
    {
       var text = FormattedText.In(_selected);
-      return block is CodeBlock or AlertTitle ? text.Value : WithoutPrefixesOf(block.Containers, InlineMarkdownWriter.PreferredWayToWrite(text));
+      if(block is CodeBlock or AlertTitle) return text.Value;
+
+      var leftOut = ContainersToLeaveOut();
+      return WithoutPrefixesOf(leftOut, PrefixOfTheFirstLineWithout(leftOut) + InlineMarkdownWriter.PreferredWayToWrite(text));
    }
 
    string MarkdownOfSeveralBlocks()
    {
-      var shared = ContainersToLeaveOut();
+      var leftOut = ContainersToLeaveOut();
       var (start, startOfSource) = MarkdownOfTheStart();
       var (end, endOfSource) = MarkdownOfTheEnd();
 
-      return WithoutPrefixesOf(shared, PrefixOfTheFirstLine() + start + _rendered.Source[startOfSource..endOfSource] + end);
-
-      // What is copied is the start of all the containers it starts in, also when it starts in the middle of a list item.
-      string PrefixOfTheFirstLine() => _selected.Start.Block.Containers.WithoutTheOutermost(shared.Count).PrefixOfALine(isTheFirstOf: _ => true);
+      return WithoutPrefixesOf(leftOut, PrefixOfTheFirstLineWithout(leftOut) + start + _rendered.Source[startOfSource..endOfSource] + end);
    }
+
+   ///<summary>What is copied is the start of all the containers it starts in, also when it starts in the middle of a list item.</summary>
+   string PrefixOfTheFirstLineWithout(BlockContainers leftOut) => _selected.Start.Block.Containers.WithoutTheOutermost(leftOut.Count).PrefixOfALine(isTheFirstOf: _ => true);
 
    ///<summary>Those that all of the blocks are inside. But the title of an alert isn't one outside the alert, nor is the box of a task one outside its list.</summary>
    BlockContainers ContainersToLeaveOut()
@@ -43,7 +46,7 @@ class MarkdownOfASelection
       var shared = _selected.Blocks.Select(it => it.Containers).Aggregate((all, it) => all.SharedWith(it));
       return _selected.Start switch
       {
-         { Block: AlertTitle title } => shared.Around(title.Alert),
+         { Index: 0, Block: AlertTitle title } => shared.Around(title.Alert),
          { Index: 0, Block: { Containers.Innermost: ListItem item, Text: var text } } when text.StartsWithTheBoxOfATask => shared.Around(item),
          _ => shared
       };
@@ -53,6 +56,7 @@ class MarkdownOfASelection
    (string Markdown, int StartOfSource) MarkdownOfTheStart()
    {
       var (block, index) = _selected.Start;
+      if(IsNothingSelectedOfTheFirst) return ("", block.Source.End);
 
       return index == 0 || IsCopiedAsAWhole(block)
                 ? ("", block.Source.Start)
@@ -63,11 +67,15 @@ class MarkdownOfASelection
    (string Markdown, int EndOfSource) MarkdownOfTheEnd()
    {
       var (block, index) = _selected.End;
+      if(IsNothingSelectedOfTheLast) return ("", _rendered.Source.StartOfLineAt(block.Source.Start));
 
       return _selected.End.IsAtTheEndOfItsBlock || IsCopiedAsAWhole(block)
                 ? ("", block.Source.End)
                 : (InlineMarkdownWriter.PreferredWayToWrite(FormattedText.Of(_rendered, block)[..index]), block.Text.Source.Start);
    }
+
+   bool IsNothingSelectedOfTheFirst => _selected.Start is { IsAtTheEndOfItsBlock: true, Block: { Text.IsEmpty: false } block } && (block is not TableCell cell || cell == cell.Table.LastCell);
+   bool IsNothingSelectedOfTheLast => _selected.End is { Index: 0, Block: { Text.IsEmpty: false } block } && (block is not TableCell cell || cell == cell.Table.FirstCell);
 
    ///<summary>A part of a table isn't a table, nor is a part of a block of code one.</summary>
    static bool IsCopiedAsAWhole(RenderedBlock block) => block is TableCell or CodeBlock;

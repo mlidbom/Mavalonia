@@ -27,6 +27,18 @@ public class Markdown_that_is_read
       [XF] public void an_alert_copies_its_kind() => Copied("⟦> [!NOTE]\n> a⟧").Must().Be("> [!NOTE]\n> a");
       [XF] public void the_title_of_an_alert_alone_copies_its_text() => Copied("> ⟦[!NOTE]⟧\n> a").Must().Be("Note");
       [XF] public void from_the_middle_of_an_alert_copies_no_kind() => Copied("> [!NOTE]\n> a⟦b\n>\n> c⟧").Must().Be("b\n\nc");
+      [XF] public void from_the_middle_of_the_title_of_an_alert_copies_its_text() => Copied("> [!NO⟦TE]\n> a⟧").Must().Be("te\na");
+      [XF] public void to_the_middle_of_the_title_of_an_alert_copies_its_text() => Copied("⟦a\n\n> [!NO⟧TE]\n> b").Must().Be("a\n\n> No");
+      [XF] public void one_task_copies_its_box() => Copied("- ⟦[x] a⟧").Must().Be("- [x] a");
+      [XF] public void one_task_of_several_lines_copies_its_box_and_lines() => Copied("> 1. ⟦[ ] a\n>    b⟧").Must().Be("1. [ ] a\n   b");
+      [XF] public void a_task_without_its_box_copies_its_text() => Copied("- [x] ⟦a⟧").Must().Be("a");
+      [XF] public void up_to_the_start_of_a_block_of_code_copies_nothing_of_it() => Copied("⟦a\n\n```\n⟧b\n```").Must().Be("a\n\n");
+      [XF] public void up_to_the_start_of_a_table_copies_nothing_of_it() => Copied("⟦a\n\n| ⟧b | c |\n|---|---|").Must().Be("a\n\n");
+      [XF] public void up_to_the_start_of_a_heading_copies_nothing_of_it() => Copied("⟦a\n\n# ⟧b").Must().Be("a\n\n");
+      [XF] public void up_to_the_start_of_a_list_item_copies_nothing_of_it() => Copied("⟦a\n\n- ⟧b").Must().Be("a\n\n");
+      [XF] public void from_the_end_of_a_block_of_code_copies_nothing_of_it() => Copied("```\na⟦\n```\n\nb⟧").Must().Be("\n\nb");
+      [XF] public void from_the_end_of_a_table_copies_nothing_of_it() => Copied("| a | b⟦ |\n|---|---|\n\nc⟧").Must().Be("\n\nc");
+      [XF] public void from_one_cell_to_the_start_of_the_next_copies_the_table() => Copied("| ⟦a | ⟧b |\n|---|---|").Must().Be("| a | b |\n|---|---|");
       [XF] public void indented_code_with_text_copies_its_indentation() => Copied("⟦a\n\n    b\n    c⟧").Must().Be("a\n\n    b\n    c");
       [XF] public void a_part_of_indented_code_copies_it_without_the_indentation() => Copied("    a⟦b\n    c⟧d").Must().Be("b\nc");
       [XF] public void an_underlined_heading_copies_its_line() => Copied("⟦a\n===\nb⟧").Must().Be("a\n===\nb");

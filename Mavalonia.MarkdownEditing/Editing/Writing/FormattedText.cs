@@ -16,6 +16,8 @@ class FormattedText
    ///<summary>Several chars may stand for the same markdown, such as those of an image's description. It is written once.</summary>
    internal static FormattedText Of(RenderedMarkdown rendered, RenderedBlock block)
    {
+      if(block is AlertTitle) return Typed(block.Text.Value, TextFormatting.None); // A part of its markdown, such as NO of [!NOTE], isn't what is shown.
+
       var chars = block.Text.Chars;
       return new FormattedText([..chars.Select((it, index) => index > 0 && chars[index - 1].Source == it.Source ? FormattedChar.In(rendered, it) with { Markdown = "" } : FormattedChar.In(rendered, it))]);
    }

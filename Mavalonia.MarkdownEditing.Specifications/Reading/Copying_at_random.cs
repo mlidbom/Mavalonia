@@ -61,7 +61,7 @@ public class Copying_at_random
 
    static IReadOnlyList<string> Blocks(Random random, int depth, int atLeast = 1) => [..Enumerable.Range(0, random.Next(atLeast, atLeast + 3)).Select(_ => Block(random, depth))];
 
-   static string Block(Random random, int depth) => random.Next(depth < 3 ? 10 : 5) switch
+   static string Block(Random random, int depth) => random.Next(depth < 3 ? 13 : 5) switch
    {
       0 => new string('#', random.Next(1, 4)) + " " + Text(random),
       1 => "```cs\n" + Word(random) + "\n\n   " + Word(random) + "\n```",
@@ -70,7 +70,10 @@ public class Copying_at_random
       6 => Indented("- [x] " + Word(random) + "\n\n", random, depth),
       7 => Indented("7. ", random, depth),
       8 => Quoted(string.Join("\n\n", Blocks(random, depth + 1))),
-      9 when depth == 0 => Quoted("[!TIP]\n" + Text(random)),
+      9 => Text(random) + "\n===",
+      10 => "# " + Word(random) + "\n\n    " + Word(random) + "\n\n      " + Word(random),
+      11 => "![d e](f.png) " + Text(random) + "<br>" + Text(random),
+      12 when depth == 0 => Quoted("[!TIP]\n" + Text(random)),
       _ => Text(random) + "\n" + Text(random)
    };
 
