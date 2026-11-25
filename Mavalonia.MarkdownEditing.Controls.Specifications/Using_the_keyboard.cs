@@ -42,6 +42,7 @@ public class Using_the_keyboard
    [XFOnUIThread] public void redoes_with_Ctrl_and_Y() => new EditorInAWindow("a‸").Type("bc").Press(PhysicalKey.Z, Ctrl).Press(PhysicalKey.Y, Ctrl).Markdown.Must().Be("abc‸");
    [XFOnUIThread] public void indents_a_list_item_with_Tab() => Press(PhysicalKey.Tab, "- a\n- b‸").Must().Be("- a\n  - b‸");
    [XFOnUIThread] public void takes_a_list_item_out_with_Shift_and_Tab() => Press(PhysicalKey.Tab, "- a\n  - b‸", Shift).Must().Be("- a\n- b‸");
+   [XFOnUIThread] public void adds_a_row_with_Tab_in_the_last_cell() => Press(PhysicalKey.Tab, "| A | B‸ |\n|---|---|").Must().Be("| A | B |\n|---|---|\n| ‸ |  |");
    [XFOnUIThread] public void goes_to_the_end_of_the_next_cell_with_Tab() => Press(PhysicalKey.Tab, "| A‸ | B |\n|---|---|").Must().Be("| A | B‸ |\n|---|---|");
 
    [XFOnUIThread] public void moves_the_caret_with_the_arrow_keys() => new EditorInAWindow("a‸b **c**").Press(PhysicalKey.ArrowRight, times: 3).Press(PhysicalKey.ArrowLeft).Markdown.Must().Be("ab ‸**c**");

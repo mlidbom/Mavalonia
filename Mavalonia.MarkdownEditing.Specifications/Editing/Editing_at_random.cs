@@ -15,7 +15,7 @@ public class Editing_at_random
       "", "# a\n\nb **c** d", "- a\n- b\n  - c\n\n1. d", "> a\n>\n> | A | B |\n> |---|---|\n> | 1 | 2 |", "```\na\n\nb\n```\n\nc", "a\r\n\r\n> b\r\n> c\r\n", "| A |  |\n|---|---|\n|  | b |\n\n---\n\n<div>\nx\n</div>\n\n[a]: /b", "- ```\n  x\n  ```\n- > y"
    ];
 
-   static readonly string[] Typed = ["a", " ", "b", "*", "**", "`", "```", "#", "-", ">", "1.", "|", "~~", "[", "](x)", "<", "&", "\\", "_", "!", "👩‍👩‍👧", "é", "\t"];
+   static readonly string[] Typed = ["a", "| a | b |", "|---|---|", " ", "b", "*", "**", "`", "```", "#", "-", ">", "1.", "|", "~~", "[", "](x)", "<", "&", "\\", "_", "!", "👩‍👩‍👧", "é", "\t"];
    static readonly string[] Pasted = ["x", "x\ny", "- a\n- b", "> q\n> r", "| A |\n|---|\n| 1 |", "```\nc\n```", "# h\n\np", "a\r\nb\r\n", "\n", "  \n\n", "1. a\n   - b"];
    static readonly TextFormats[] Formats = [TextFormats.Bold, TextFormats.Italic, TextFormats.Code, TextFormats.Strikethrough];
 
@@ -46,7 +46,7 @@ public class Editing_at_random
 
    static void EditAtRandom(RenderedEditor editor, Random random)
    {
-      switch(random.Next(18))
+      switch(random.Next(19))
       {
          case 0 or 1 or 2: editor.Type(AnyOf(Typed)); break;
          case 3 or 4: editor.StartNewBlock(); break;
@@ -58,6 +58,7 @@ public class Editing_at_random
          case 11: editor.Paste(AnyOf(Pasted)); break;
          case 12: editor.Toggle(AnyOf(Formats)); break;
          case 17: editor.Quote(AnyOf(Pasted)); break;
+         case 18: editor.GoToTheNextCell(); break;
          case 13: editor.Select(new TextSelection(AnyOffset(), AnyOffset())); break;
          case 14: editor.Move(AnyOf(Movements), extendSelection: random.Next(2) == 0); break;
          case 15 when editor.CanIndent: editor.Indent(); break;

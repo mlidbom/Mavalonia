@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Mavalonia.MarkdownEditing.Editing.Changes;
+using Mavalonia.MarkdownEditing.Editing.Edits.Tables;
 using Mavalonia.MarkdownEditing.Editing.Writing;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
@@ -57,12 +58,18 @@ partial class Typing
 
    SourceChange OfOrdinaryText(string text)
    {
-      var replacement = ReplacementWith(FormattedText.Typed(text, _formatting));
+      var typed = FormattedText.Typed(text, _formatting);
+      var replacement = ReplacementWith(typed);
       var inserted = Insert(text);
 
-      var isMarkup = MayBeMarkup(text) && _formatting == _caret.Formatting && !replacement.LooksRight(inserted);
-      return isMarkup ? inserted : replacement.ThatLooksRight(tryFirst: inserted) ?? inserted;
+      var isMarkup = MayBeMarkup(text) && _formatting == _caret.Formatting && !replacement.LooksRight(inserted) && !MakesATable(inserted);
+      return isMarkup ? inserted : replacement.ThatLooksRight(tryFirst: inserted) ?? ReplacementWith(typed.WithPunctuationEscaped).ThatLooksRight() ?? inserted;
    }
+
+   ///<summary>The first part of the line under a header is enough for that, so the rest of the line would end up in a cell. See <see cref="MakingATable"/>.</summary>
+   bool MakesATable(SourceChange change) => CountOfCellsIn(change.After) > CountOfCellsIn(_caret.Rendered);
+
+   static int CountOfCellsIn(RenderedMarkdown rendered) => rendered.Blocks.Count(it => it is TableCell);
 
    TextReplacement ReplacementWith(FormattedText text) => new(_caret.EmptyRange, text);
 

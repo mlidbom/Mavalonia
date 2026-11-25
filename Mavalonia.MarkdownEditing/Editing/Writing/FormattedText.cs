@@ -55,6 +55,27 @@ class FormattedText
       }
    }
 
+   ///<summary>The text as it would be had a person just typed it: without the escapes it was written with.</summary>
+   internal FormattedText AsIfTyped => Select(it => FormattedChar.Typed(it.Value, it.Formatting));
+
+   ///<summary>The text without the white space at its start and its end.</summary>
+   internal FormattedText Trimmed => new([..Chars.SkipWhile(it => it.IsWhiteSpace).Reverse().SkipWhile(it => it.IsWhiteSpace).Reverse()]);
+
+   ///<summary>What is before, between and after the chars that <paramref name="isASeparator"/> says are separators.</summary>
+   internal IReadOnlyList<FormattedText> SplitAt(Func<FormattedChar, bool> isASeparator)
+   {
+      var parts = new List<FormattedText>();
+      var start = 0;
+      foreach(var (index, formattedChar) in Chars.Index())
+         if(isASeparator(formattedChar))
+         {
+            parts.Add(this[start..index]);
+            start = index + 1;
+         }
+
+      return [..parts, this[start..]];
+   }
+
    ///<summary>The text without formatting, written as markdown.</summary>
    internal string MarkdownWithoutFormatting => string.Concat(Chars.Select(it => it.Markdown));
 

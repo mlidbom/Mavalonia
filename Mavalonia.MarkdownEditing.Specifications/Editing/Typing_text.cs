@@ -71,4 +71,7 @@ public class Typing_text
       foreach(var edit in then) edit(editor);
       return editor.Rendered.Described;
    }
+
+   [XF] public void that_is_the_line_under_the_header_of_a_table_shows_it_as_text_until_a_new_block_is_started() =>
+      Of("| a | b |‸", it => it.BreakLine(), Type("|---|---|")).Must().Be("| a | b |\n|---\\|---|‸");
 }

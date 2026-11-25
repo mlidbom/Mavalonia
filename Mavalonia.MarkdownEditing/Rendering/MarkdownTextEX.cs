@@ -35,6 +35,9 @@ static class MarkdownTextEX
          return @this.IsInsideALineBreak(endOfLine + 1) ? endOfLine + 2 : endOfLine + 1;
       }
 
+      ///<summary>The offset after the last character of the line before the one that <paramref name="offset"/> is on, which must not be the first.</summary>
+      internal int EndOfLineBefore(int offset) => @this.EndOfLineAt(@this.StartOfLineAt(offset) - 1);
+
       ///<summary>How far into its line <paramref name="offset"/> is.</summary>
       internal int ColumnAt(int offset) => offset - @this.StartOfLineAt(offset);
 

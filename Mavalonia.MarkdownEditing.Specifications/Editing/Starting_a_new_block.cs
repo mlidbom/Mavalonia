@@ -58,4 +58,19 @@ public class Starting_a_new_block
    [XF] public void at_a_thematic_break_adds_a_paragraph_after_it() => From("a\n\n---‸\n\nb").Must().Be("a\n\n---\n\n‸\n\nb");
 
    [XF] public void after_what_is_selected_replaces_it() => From("a⟦b⟧c").Must().Be("a\n\n‸c");
+
+   [XF] public void after_a_line_that_is_written_as_the_header_of_a_table_makes_a_table_with_an_empty_row() => From("| a | b |‸").Must().Be("| a | b |\n|---|---|\n| ‸ |  |");
+   [XF] public void after_a_header_and_the_line_under_it_makes_a_table_with_an_empty_row() => Of("‸", Type("| a | b |"), it => it.BreakLine(), Type("|---|---|"), it => it.StartNewBlock()).Must().Be("| a | b |\n|---|---|\n| ‸ |  |");
+   [XF] public void after_all_the_lines_of_a_table_makes_a_table_with_an_empty_row_after_them() => Of("‸", Type("| a | b |"), it => it.BreakLine(), Type("| :-- | - |"), it => it.BreakLine(), Type("| 1 | 2 |"), it => it.StartNewBlock()).Must().Be("| a | b |\n|---|---|\n| 1 | 2 |\n| ‸ |  |");
+   [XF] public void that_makes_a_table_keeps_the_formatting_of_the_cells() => From("| **a** | `b` [c](d) |‸").Must().Be("| **a** | `b` [c](d) |\n|---|---|\n| ‸ |  |");
+   [XF] public void that_makes_a_table_in_a_quote_makes_it_there() => From("> | a | b |‸").Must().Be("> | a | b |\n> |---|---|\n> | ‸ |  |");
+   [XF] public void that_makes_a_table_in_a_list_item_makes_it_there() => From("- | a | b |‸").Must().Be("- | a | b |\n  |---|---|\n  | ‸ |  |");
+   [XF] public void that_makes_a_table_before_a_list_leaves_the_list_after_it() => From("| a | b |‸\n- c").Must().Be("| a | b |\n|---|---|\n| ‸ |  |\n\n- c");
+   [XF] public void that_makes_a_table_is_undone_at_once() => Of("| a | b |‸", it => it.StartNewBlock(), it => it.Undo()).Must().Satisfy(it => it.Replace("‸", "") == "| a | b |");
+   [XF] public void after_a_line_with_a_single_cell_starts_a_paragraph() => From("| a |‸").Must().Be("| a |\n\n‸");
+   [XF] public void after_a_line_with_a_pipe_in_it_starts_a_paragraph() => From("a | b | c‸").Must().Be("a | b | c\n\n‸");
+   [XF] public void after_text_and_a_line_that_is_written_as_the_header_of_a_table_starts_a_paragraph() => From("a\n| b | c |‸").Must().Be("a\n| b | c |\n\n‸");
+   [XF] public void in_an_empty_last_row_of_a_table_removes_the_row_and_adds_a_paragraph_after_the_table() => From("| a | b |\n|---|---|\n| 1 | 2 |\n|  | ‸ |").Must().Be("| a | b |\n|---|---|\n| 1 | 2 |\n\n‸");
+   [XF] public void in_an_empty_last_row_of_a_table_with_line_breaks_of_Windows_removes_the_row() => From("| a |\r\n|---|\r\n| ‸ |").Must().Be("| a |\r\n|---|\r\n\r\n‸");
+   [XF] public void in_a_header_without_text_adds_a_paragraph_after_the_table() => From("| ‸ |  |\n|---|---|").Must().Be("|  |  |\n|---|---|\n\n‸");
 }

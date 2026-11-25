@@ -4,6 +4,7 @@ using Mavalonia.MarkdownEditing.Editing.Edits;
 using Mavalonia.MarkdownEditing.Editing.Edits.Deletion;
 using Mavalonia.MarkdownEditing.Editing.Edits.Nesting;
 using Mavalonia.MarkdownEditing.Editing.Edits.NewBlocks;
+using Mavalonia.MarkdownEditing.Editing.Edits.Tables;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Containers;
@@ -119,6 +120,13 @@ public sealed class RenderedEditor : IDisposable
 
    ///<summary>Takes the list item that the caret is in out of its list, into the list that that is in, if any.</summary>
    public void Outdent() => AsOneUndo(() => Make(new LeavingAContainer(Caret).Change()));
+
+   ///<summary>Goes from a cell of a table to the next. From the last, that is in a row that is added.</summary>
+   public void GoToTheNextCell()
+   {
+      if(Caret.Block is TableCell { Table: var table } cell && cell == table.LastCell) AsOneUndo(() => Make(new AddingARow(Rendered, table).Change()));
+      else Move(CaretMovement.ToTheBlockAfter);
+   }
 
    public void DeleteCharacterBefore() => DeleteTheSelectionOr(it => it.TheCharacterBefore());
    public void DeleteCharacterAfter() => DeleteTheSelectionOr(it => it.TheCharacterAfter());

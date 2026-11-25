@@ -72,7 +72,7 @@ class KeyboardInput
    ///<summary>Null where the key isn't for editing, so that it moves the focus as it does everywhere else.</summary>
    static Action? Tab(RenderedEditor editor) => editor.CaretPosition.Block switch
    {
-      TableCell => () => editor.Move(CaretMovement.ToTheBlockAfter),
+      TableCell => editor.GoToTheNextCell,
       CodeBlock => () => editor.Type("   "),
       _ => editor.CanIndent ? editor.Indent : null
    };

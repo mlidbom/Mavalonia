@@ -1,5 +1,6 @@
 using Mavalonia.MarkdownEditing.Editing.Changes;
 using Mavalonia.MarkdownEditing.Editing.Edits.Nesting;
+using Mavalonia.MarkdownEditing.Editing.Edits.Tables;
 using Mavalonia.MarkdownEditing.Editing.Writing;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
@@ -24,13 +25,13 @@ class StartingANewBlock
       Heading { Text.IsEmpty: true } heading => SourceChange.Remove(Rendered, heading.Marks),
       Heading when _caret.IsAtTheStartOfItsBlock => InsertAnEmptyParagraphBefore(),
       { Text.IsEmpty: true, Containers.Innermost: not null } => new LeavingAContainer(_caret).Change(),
-      _ => new SplittingABlock(_caret).Change()
+      _ => MakingATable.Of(_caret)?.Change() ?? new SplittingABlock(_caret).Change()
    };
 
    SourceChange GoToTheCellBelow(TableCell cell) =>
       cell.Table.CellBelow(cell) is {} below
          ? SourceChange.OnlyMoveTheCaretTo(Rendered, RenderedPosition.AtTheEndOf(below))
-         : new GoingToAnEmptyParagraphAfter(Rendered, cell.Table.LastCell).Change();
+         : new LeavingATable(Rendered, cell.Table).Change();
 
    SourceChange InsertAnEmptyParagraphBefore() =>
       SourceChange.Insert(Rendered, Block.Source.Start, new LineBreaksInside(Rendered, Block.Containers).BetweenParagraphs)
