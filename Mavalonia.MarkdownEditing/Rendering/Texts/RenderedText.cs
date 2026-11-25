@@ -27,7 +27,7 @@ public class RenderedText
    public bool IsEmpty => Length == 0;
 
    ///<summary>The box stands for what it's written as, such as <c>[x]</c>.</summary>
-   internal bool StartsWithTheBoxOfATask => !IsEmpty && Chars[0] is { Value: '☐' or '☑', Source.Length: > 1 };
+   internal bool StartsWithTheBoxOfATask => !IsEmpty && Chars[0] is { Value: BoxOfATask.Empty or BoxOfATask.Ticked, Source.Length: > 1 };
 
    ///<summary>Where the characters and words that a person sees in the text start and end.</summary>
    public TextBoundaries Boundaries => new(Value);

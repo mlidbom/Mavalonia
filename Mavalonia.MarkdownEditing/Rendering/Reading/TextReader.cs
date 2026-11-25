@@ -72,7 +72,7 @@ class TextReader
          case LinkInline { IsImage: true } image when IsForReading: ReadImage(image, formatting); break;
          case LinkInline { IsImage: false, FirstChild: not null } link: ReadLink(link, formatting); break;
          case AutolinkInline link: ReadAutolink(link, formatting); break;
-         case TaskList task: _text.Add(task.Checked ? '☑' : '☐', RangeOf(task), formatting); break;
+         case TaskList task: _text.Add(task.Checked ? BoxOfATask.Ticked : BoxOfATask.Empty, RangeOf(task), formatting); break;
          case HtmlInline { IsALineBreak: true } lineBreak when IsForReading: _text.Add('\n', RangeOf(lineBreak), formatting); break;
          case HtmlInline { IsAComment: true } when IsForReading: break;
          case HtmlEntityInline entity: ReadEntity(entity, formatting); break;

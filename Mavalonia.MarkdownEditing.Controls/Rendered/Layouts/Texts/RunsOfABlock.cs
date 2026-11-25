@@ -84,7 +84,7 @@ class RunsOfABlock
       var start = run.Start;
       for(var index = run.Start; index < run.End; index++)
       {
-         if(_block.Text.Value[index] is not (DrawnBox.Empty or DrawnBox.Ticked)) continue;
+         if(_block.Text.Value[index] is not (BoxOfATask.Empty or BoxOfATask.Ticked)) continue;
 
          if(index > start) yield return run with { Start = start, Length = index - start };
          yield return new TextOfABlock.Run(index, 1, run.Properties, new DrawnBox(_block.Text.Value[index], run.Properties));

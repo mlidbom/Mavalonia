@@ -2,24 +2,22 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
+using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Layouts.Texts;
 
 ///<summary>The box of a task, ticked or not.</summary>
 ///<remarks>
-/// The characters <c>☐</c> and <c>☑</c> come from different fonts, one of them as a colour emoji.
+/// The chars of <see cref="BoxOfATask"/> come from different fonts, one of them as a colour emoji.
 /// </remarks>
 class DrawnBox : DrawableTextRun
 {
-   internal const char Empty = '☐';
-   internal const char Ticked = '☑';
-
    readonly bool _isTicked;
    readonly double _side;
 
    internal DrawnBox(char box, TextRunProperties properties)
    {
-      _isTicked = box == Ticked;
+      _isTicked = box == BoxOfATask.Ticked;
       _side = properties.FontRenderingEmSize * 0.9;
       Properties = properties;
       Text = box.ToString(CultureInfo.InvariantCulture).AsMemory();
