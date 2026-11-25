@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 namespace Mavalonia.MarkdownEditing.Specifications.CommonMark;
 
 ///<summary>One of the examples in the specification of CommonMark, which together use all of it.</summary>
+// ReSharper disable once ClassNeverInstantiated.Global : the JSON serializer does.
 record CommonMarkExample([property: JsonPropertyName("markdown")] string Markdown, [property: JsonPropertyName("example")] int Number)
 {
    internal static readonly IReadOnlyList<CommonMarkExample> All =

@@ -1,8 +1,39 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="using:Mavalonia.MarkdownEditing.Controls"
-             x:Class="Mavalonia.MarkdownEditing.Controls.MarkdownEditor">
-   <TextBox Text="{Binding $parent[controls:MarkdownEditor].Markdown, Mode=TwoWay}"
-            AcceptsReturn="True"
-            TextWrapping="Wrap" />
+             xmlns:rendered="using:Mavalonia.MarkdownEditing.Controls.Rendered"
+             xmlns:edit="using:AvaloniaEdit"
+             x:Class="Mavalonia.MarkdownEditing.Controls.MarkdownEditor"
+             x:Name="Root">
+   <UserControl.Styles>
+      <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+      <Style Selector="rendered|RenderedMarkdownView">
+         <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+         <Setter Property="FaintForeground" Value="{DynamicResource TextControlPlaceholderForeground}" />
+         <Setter Property="LinkForeground" Value="{DynamicResource SystemControlForegroundAccentBrush}" />
+         <Setter Property="Padding" Value="{Binding #Root.Padding}" />
+      </Style>
+   </UserControl.Styles>
+   <UserControl.Template>
+      <!-- The views apply the padding, so that they can be clicked in it, and scroll to the edge. -->
+      <ControlTemplate>
+         <ContentPresenter Name="PART_ContentPresenter" Background="{TemplateBinding Background}" Content="{TemplateBinding Content}" />
+      </ControlTemplate>
+   </UserControl.Template>
+   <Panel>
+      <ScrollViewer x:Name="ScrollOfTheRenderedView" Focusable="False">
+         <rendered:RenderedMarkdownView x:Name="RenderedView"
+                                        Watermark="{Binding #Root.Watermark}"
+                                        StartNewBlockGesture="{Binding #Root.StartNewBlockGesture}"
+                                        BreakLineGesture="{Binding #Root.BreakLineGesture}" />
+      </ScrollViewer>
+      <edit:TextEditor x:Name="SourceView"
+                       IsVisible="False"
+                       WordWrap="True"
+                       Background="Transparent"
+                       FontSize="{Binding #Root.FontSize}"
+                       FontFamily="{Binding #RenderedView.MonospaceFontFamily}"
+                       Padding="{Binding #Root.Padding}"
+                       HorizontalScrollBarVisibility="Disabled"
+                       VerticalScrollBarVisibility="Auto" />
+   </Panel>
 </UserControl>

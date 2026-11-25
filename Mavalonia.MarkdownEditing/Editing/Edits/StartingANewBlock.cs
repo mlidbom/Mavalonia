@@ -46,7 +46,7 @@ class StartingANewBlock
       var startOfSecond = Block.Text.SkipWhiteSpaceAfter(_position.Index);
       var (first, second) = (all[..endOfFirst], all[startOfSecond..]);
 
-      var expectedLooks = ExpectedLooks.OfReplacing(_rendered, Block, Block, BlockLooks.Of(_rendered, Block).WithText(first), BlockLooks.OfAParagraph(ContainersOfTheSecond(), second));
+      var expectedLooks = ExpectedLooks.OfReplacing(_rendered, Block, Block, BlockLooks.Of(Block, first), BlockLooks.OfAParagraph(ContainersOfTheSecond(), second));
       var changes = Changes().ToList();
 
       return changes.FirstOrDefault(expectedLooks.AreThoseAfter) ?? changes[0];

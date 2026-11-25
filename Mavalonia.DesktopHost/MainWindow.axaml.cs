@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using AvaloniaEdit.Document;
 
 namespace Mavalonia.DesktopHost;
 
@@ -12,5 +13,5 @@ partial class MainWindow : Window
    }
 
    void OpenSelectedSampleDocument(object? sender, SelectionChangedEventArgs selectionChange) =>
-      Editor.Markdown = ((SampleDocument)SampleDocuments.SelectedItem!).ReadMarkdown();
+      Editor.Document = new TextDocument(((SampleDocument)SampleDocuments.SelectedItem!).ReadMarkdown());
 }

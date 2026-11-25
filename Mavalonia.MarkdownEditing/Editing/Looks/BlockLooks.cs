@@ -1,5 +1,4 @@
 using Mavalonia.MarkdownEditing.Editing.Writing;
-using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Containers;
 
@@ -19,11 +18,10 @@ class BlockLooks
       _text = text;
    }
 
-   internal static BlockLooks Of(RenderedMarkdown rendered, RenderedBlock block) => new(block, block.Containers, FormattedText.Of(rendered, block));
+   ///<summary>As <paramref name="block"/> looks, but with <paramref name="text"/> as its text.</summary>
+   internal static BlockLooks Of(RenderedBlock block, FormattedText text) => new(block, block.Containers, text);
 
    internal static BlockLooks OfAParagraph(BlockContainers containers, FormattedText text) => new(Paragraph.EmptyAt(0, containers), containers, text);
-
-   internal BlockLooks WithText(FormattedText text) => new(_blockOfTheSameKind, _containers, text);
 
    internal bool AreThoseOf(RenderedBlock block) => _blockOfTheSameKind.IsTheSameKindAs(block) && _containers.LookLike(block.Containers) && _text.LooksLike(block.Text);
 }

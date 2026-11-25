@@ -6,17 +6,18 @@
         Title="Mavalonia"
         Width="1000" Height="700">
    <DockPanel>
-      <ComboBox x:Name="SampleDocuments"
-                DockPanel.Dock="Top"
-                Margin="8"
-                HorizontalAlignment="Left"
-                SelectionChanged="OpenSelectedSampleDocument">
-         <ComboBox.ItemTemplate>
-            <DataTemplate x:DataType="host:SampleDocument">
-               <TextBlock Text="{Binding Name}" />
-            </DataTemplate>
-         </ComboBox.ItemTemplate>
-      </ComboBox>
-      <controls:MarkdownEditor x:Name="Editor" Margin="8,0,8,8" />
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="8">
+         <ComboBox x:Name="SampleDocuments" SelectionChanged="OpenSelectedSampleDocument">
+            <ComboBox.ItemTemplate>
+               <DataTemplate x:DataType="host:SampleDocument">
+                  <TextBlock Text="{Binding Name}" />
+               </DataTemplate>
+            </ComboBox.ItemTemplate>
+         </ComboBox>
+         <ToggleButton IsChecked="{Binding #Editor.ShowsSource, Mode=TwoWay}" HotKey="Ctrl+M" ToolTip.Tip="Ctrl+M">Source</ToggleButton>
+      </StackPanel>
+      <Border Margin="8,0,8,8" BorderThickness="1" BorderBrush="{DynamicResource TextControlBorderBrush}" CornerRadius="4">
+         <controls:MarkdownEditor x:Name="Editor" Padding="12,10" Watermark="Write something" />
+      </Border>
    </DockPanel>
 </Window>

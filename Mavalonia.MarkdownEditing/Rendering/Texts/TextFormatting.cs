@@ -8,8 +8,11 @@ public readonly record struct TextFormatting(TextFormats Formats, Link? Link = n
 {
    public static readonly TextFormatting None = new(TextFormats.None);
 
+   ///<summary>Whether text formatted so looks the same as text formatted as <paramref name="other"/>.</summary>
+   internal bool LooksLike(TextFormatting other) => Formats == other.Formats && Link?.Target == other.Link?.Target && IsShownAsSource == other.IsShownAsSource;
+
    public bool Has(TextFormats format) => Formats.HasFlag(format);
 
-   public TextFormatting With(TextFormats format) => this with { Formats = Formats | format };
-   public TextFormatting Without(TextFormats format) => this with { Formats = Formats & ~format };
+   internal TextFormatting With(TextFormats format) => this with { Formats = Formats | format };
+   internal TextFormatting Without(TextFormats format) => this with { Formats = Formats & ~format };
 }

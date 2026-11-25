@@ -8,7 +8,7 @@ public class Table
    internal Table(SourceRange source) => Source = source;
 
    ///<summary>The whole of the table in the markdown.</summary>
-   public SourceRange Source { get; }
+   internal SourceRange Source { get; }
 
    ///<summary>The cells, row by row.</summary>
    public IReadOnlyList<TableCell> Cells => _cells;

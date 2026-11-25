@@ -1,22 +1,127 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data;
+using Avalonia.Input;
+using AvaloniaEdit.Document;
+using Mavalonia.MarkdownEditing.Editing;
 
 namespace Mavalonia.MarkdownEditing.Controls;
 
-///<summary>A control in which a person edits a markdown document.</summary>
+///<summary>A control in which a person edits a markdown document, as it is rendered or as its source.</summary>
 public partial class MarkdownEditor : UserControl
 {
-   //wip: a plain text box stands in for the editor until how it holds the document is decided.
-   public static readonly StyledProperty<string> MarkdownProperty =
-      AvaloniaProperty.Register<MarkdownEditor, string>(nameof(Markdown), defaultValue: "", defaultBindingMode: BindingMode.TwoWay);
+   public static readonly StyledProperty<TextDocument> DocumentProperty = AvaloniaProperty.Register<MarkdownEditor, TextDocument>(nameof(Document));
+   public static readonly StyledProperty<bool> ShowsSourceProperty = AvaloniaProperty.Register<MarkdownEditor, bool>(nameof(ShowsSource));
+   public static readonly StyledProperty<string?> WatermarkProperty = AvaloniaProperty.Register<MarkdownEditor, string?>(nameof(Watermark));
+   public static readonly StyledProperty<KeyGesture?> StartNewBlockGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(StartNewBlockGesture), new KeyGesture(Key.Enter));
+   public static readonly StyledProperty<KeyGesture?> BreakLineGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(BreakLineGesture), new KeyGesture(Key.Enter, KeyModifiers.Shift));
 
-   public MarkdownEditor() => InitializeComponent();
+   RenderedEditor? _renderedEditor;
 
-   ///<summary>The markdown text of the document being edited.</summary>
-   public string Markdown
+   public MarkdownEditor()
    {
-      get => GetValue(MarkdownProperty);
-      set => SetValue(MarkdownProperty, value);
+      InitializeComponent();
+      SourceView.Options.AllowScrollBelowDocument = false;
+      SetCurrentValue(DocumentProperty, new TextDocument());
+   }
+
+   ///<summary>The document. Its text is the markdown, and is all that is edited: the two views show the same text.</summary>
+   public TextDocument Document { get => GetValue(DocumentProperty); set => SetValue(DocumentProperty, value); }
+
+   ///<summary>Whether the source is shown, rather than what it's rendered as.</summary>
+   public bool ShowsSource { get => GetValue(ShowsSourceProperty); set => SetValue(ShowsSourceProperty, value); }
+
+   ///<summary>What is shown while the document is empty.</summary>
+   public string? Watermark { get => GetValue(WatermarkProperty); set => SetValue(WatermarkProperty, value); }
+
+   ///<summary>The keys that start a new block, such as a paragraph or a list item, in the rendered view. Null for none.</summary>
+   public KeyGesture? StartNewBlockGesture { get => GetValue(StartNewBlockGestureProperty); set => SetValue(StartNewBlockGestureProperty, value); }
+
+   ///<summary>The keys that break the line inside a block, in the rendered view. Null for none.</summary>
+   public KeyGesture? BreakLineGesture { get => GetValue(BreakLineGestureProperty); set => SetValue(BreakLineGestureProperty, value); }
+
+   ///<summary>What is selected in the view that is shown.</summary>
+   public TextSelection Selection
+   {
+      get => ShowsSource || _renderedEditor is null ? SelectionInTheSource : _renderedEditor.Selection;
+      set
+      {
+         SelectionInTheSource = value;
+         _renderedEditor?.Select(value);
+      }
+   }
+
+   TextSelection SelectionInTheSource
+   {
+      get => SourceView.CaretOffset == SourceView.SelectionStart
+                ? new TextSelection(SourceView.SelectionStart + SourceView.SelectionLength, SourceView.CaretOffset)
+                : new TextSelection(SourceView.SelectionLength == 0 ? SourceView.CaretOffset : SourceView.SelectionStart, SourceView.CaretOffset);
+      set
+      {
+         SourceView.Select(value.Start, value.End - value.Start);
+         SourceView.CaretOffset = value.Caret;
+         if(!value.IsEmpty) SourceView.Select(value.Start, value.End - value.Start);
+      }
+   }
+
+   ///<summary>Puts the keyboard focus in the view that is shown.</summary>
+   public void FocusTheView()
+   {
+      UpdateLayout(); // A view that has just been made visible can't have the focus before it is laid out.
+      if(ShowsSource) SourceView.TextArea.Focus();
+      else RenderedView.Focus();
+   }
+
+   protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+   {
+      base.OnPropertyChanged(change);
+      if(change.Property == DocumentProperty) Edit(change.GetNewValue<TextDocument>());
+      else if(change.Property == ShowsSourceProperty) Show(source: change.GetNewValue<bool>());
+      else if(change.Property == WatermarkProperty) SourceView.Watermark = change.GetNewValue<string?>();
+   }
+
+   protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+   {
+      base.OnAttachedToVisualTree(e);
+      if(_renderedEditor is null) EditAsRendered(Document, SelectionInTheSource);
+   }
+
+   ///<summary>The document may outlive the control, and must not keep it alive.</summary>
+   protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+   {
+      base.OnDetachedFromVisualTree(e);
+      SelectionInTheSource = Selection;
+      StopEditingAsRendered();
+   }
+
+   void Edit(TextDocument document)
+   {
+      SourceView.Document = document;
+      SourceView.CaretOffset = document.TextLength;
+      EditAsRendered(document, TextSelection.CaretAt(document.TextLength));
+   }
+
+   void EditAsRendered(TextDocument document, TextSelection selection)
+   {
+      StopEditingAsRendered();
+      RenderedView.Editor = _renderedEditor = new RenderedEditor(document, selection);
+   }
+
+   void StopEditingAsRendered()
+   {
+      RenderedView.Editor = null;
+      _renderedEditor?.Dispose();
+      _renderedEditor = null;
+   }
+
+   void Show(bool source)
+   {
+      var hadFocus = IsKeyboardFocusWithin;
+
+      if(source && _renderedEditor is not null) SelectionInTheSource = _renderedEditor.Selection;
+      else _renderedEditor?.Select(SelectionInTheSource);
+
+      SourceView.IsVisible = source;
+      ScrollOfTheRenderedView.IsVisible = !source;
+      if(hadFocus) FocusTheView();
    }
 }

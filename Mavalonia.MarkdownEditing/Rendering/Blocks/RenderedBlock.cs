@@ -19,10 +19,12 @@ public abstract class RenderedBlock
    public RenderedText Text { get; }
 
    ///<summary>The whole of the block in the markdown: its own markup included, but not what its containers put before it on its first line.</summary>
-   public SourceRange Source { get; }
+   internal SourceRange Source { get; }
 
    ///<summary>Whether a paragraph typed on the line right after the block would be a block of its own.</summary>
    internal virtual bool EndsWithItsLastLine => true;
+
+   internal bool LooksLike(RenderedBlock other) => IsTheSameKindAs(other) && Containers.LookLike(other.Containers) && Text.LooksLike(other.Text);
 
    ///<summary>Whether <paramref name="other"/> is the same kind of block, so that the same text in either looks the same.</summary>
    internal abstract bool IsTheSameKindAs(RenderedBlock other);

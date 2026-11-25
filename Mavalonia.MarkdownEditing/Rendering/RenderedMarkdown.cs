@@ -32,7 +32,7 @@ public class RenderedMarkdown
    internal RenderedBlock? BlockAfter(RenderedBlock block) => NumberOf(block) + 1 is var number && number < Blocks.Count ? Blocks[number] : null;
 
    ///<summary>Whether <paramref name="block"/> is the first of the blocks inside <paramref name="container"/>.</summary>
-   public bool IsTheFirstIn(BlockContainer container, RenderedBlock block) => BlockBefore(block) is not {} previous || !previous.Containers.OutermostFirst.Contains(container);
+   internal bool IsTheFirstIn(BlockContainer container, RenderedBlock block) => BlockBefore(block) is not {} previous || !previous.Containers.OutermostFirst.Contains(container);
 
    internal int NumberOf(RenderedBlock block) => Enumerable.Range(0, Blocks.Count).First(it => Blocks[it] == block);
 }

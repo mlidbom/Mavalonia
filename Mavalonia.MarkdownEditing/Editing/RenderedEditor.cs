@@ -15,6 +15,7 @@ public sealed class RenderedEditor : IDisposable
 {
    RenderedMarkdown? _rendered;
    TextSelection _selection;
+   bool _isMakingAChange;
 
    ///<summary>The formatting of the next text typed, when it isn't that of the markup where the caret is.</summary>
    TextFormatting? _formattingToType;
@@ -53,7 +54,7 @@ public sealed class RenderedEditor : IDisposable
    RenderedPosition EndOfSelection => Rendered.PositionAt(Selection.End);
 
    ///<summary>The formatting that text typed now gets.</summary>
-   public TextFormatting FormattingToType => _formattingToType ?? FormattingOfTheSelection;
+   TextFormatting FormattingToType => _formattingToType ?? FormattingOfTheSelection;
 
    TextFormatting FormattingOfTheSelection => Selection.IsEmpty ? CaretPosition.Block.Text.FormattingAt(Selection.Caret) : FirstSelectedCharacter?.Formatting ?? TextFormatting.None;
 
@@ -67,6 +68,13 @@ public sealed class RenderedEditor : IDisposable
    {
       StopTyping();
       Selection = extendSelection ? Selection with { Caret = position.Offset } : TextSelection.CaretAt(position.Offset);
+   }
+
+   ///<summary>Selects what is between two offsets in the markdown.</summary>
+   public void Select(TextSelection selection)
+   {
+      StopTyping();
+      Selection = selection;
    }
 
    public void Move(CaretMovement movement, bool extendSelection = false) => MoveTo(movement.From(this), extendSelection);
@@ -181,7 +189,10 @@ public sealed class RenderedEditor : IDisposable
 
    void Make(SourceChange change)
    {
+      _isMakingAChange = true;
       if(!change.ChangesNothing) Document.Replace(change.Replaced.Start, change.Replaced.Length, change.Replacement);
+      _isMakingAChange = false;
+
       _rendered = change.After;
       Selection = TextSelection.CaretAt(change.Caret);
    }
@@ -211,6 +222,8 @@ public sealed class RenderedEditor : IDisposable
 
    void FollowTheChange(object? sender, DocumentChangeEventArgs change)
    {
+      if(_isMakingAChange) return;
+
       _rendered = null;
       Selection = new TextSelection(change.GetNewOffset(_selection.Anchor), change.GetNewOffset(_selection.Caret));
    }

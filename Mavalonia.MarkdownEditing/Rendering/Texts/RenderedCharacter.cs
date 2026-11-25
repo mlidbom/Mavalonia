@@ -7,6 +7,6 @@ namespace Mavalonia.MarkdownEditing.Rendering.Texts;
 ///<param name="Formatting">How it is formatted.</param>
 public readonly record struct RenderedCharacter(char Value, SourceRange Source, TextFormatting Formatting)
 {
-   public bool IsLineBreak => Value == '\n';
+   internal bool IsLineBreak => Value == '\n';
    public bool IsWhiteSpace => char.IsWhiteSpace(Value);
 }

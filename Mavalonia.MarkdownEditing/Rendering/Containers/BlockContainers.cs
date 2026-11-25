@@ -3,18 +3,18 @@ namespace Mavalonia.MarkdownEditing.Rendering.Containers;
 ///<summary>The containers that a block is inside, the outermost first.</summary>
 public class BlockContainers
 {
-   public static readonly BlockContainers None = new([]);
+   internal static readonly BlockContainers None = new([]);
 
    BlockContainers(IReadOnlyList<BlockContainer> outermostFirst) => OutermostFirst = outermostFirst;
 
    public IReadOnlyList<BlockContainer> OutermostFirst { get; }
 
-   public int Count => OutermostFirst.Count;
+   internal int Count => OutermostFirst.Count;
    public BlockContainer? Innermost => OutermostFirst.Count > 0 ? OutermostFirst[^1] : null;
 
    internal BlockContainers Inside(BlockContainer container) => new([..OutermostFirst, container]);
 
-   internal BlockContainers Outermost(int count) => new([..OutermostFirst.Take(count)]);
+   BlockContainers Outermost(int count) => new([..OutermostFirst.Take(count)]);
    internal BlockContainers WithoutTheInnermost => Outermost(Count - 1);
 
    ///<summary>The containers that <paramref name="others"/> has too.</summary>

@@ -1,14 +1,23 @@
 # Mavalonia
 
-Controls for Avalonia®. The first is a WYSIWYG markdown editor that switches quickly between showing the markdown source and showing it rendered.
+Controls for Avalonia®. The first is a WYSIWYG markdown editor for writing messages, such as in an AI chat. It switches quickly between showing the markdown source and showing it rendered.
 
 | Project | Responsibility |
 | --- | --- |
-| `Mavalonia.MarkdownEditing` | Everything about editing markdown that needs no UI. Never references Avalonia. |
+| `Mavalonia.MarkdownEditing` | Everything about editing markdown that needs no controls. |
 | `Mavalonia.MarkdownEditing.Controls` | The Avalonia controls |
 | `Mavalonia.DesktopHost` | The application in which to try the controls by hand. Each file in `SampleDocuments` is offered in its list. |
 | `Mavalonia.MarkdownEditing.Specifications` | Run in parallel, without UI. Most specifications belong here. |
 | `Mavalonia.MarkdownEditing.Controls.Specifications` | Use real controls in windows that exist only in memory, one specification at a time. |
+
+## How editing works
+
+- **The markdown text is the document.** It is an AvaloniaEdit `TextDocument`, which works without a UI, and has undo. The rendered view and the source view edit the same one, so nothing is converted when switching, and markdown that isn't edited stays as it is written.
+- **The rendered view shows no markup.** Each character it shows knows the markdown it stands for (`RenderedCharacter.Source`).
+- **An edit says what is to be shown,** then finds the least change to the markdown that shows that, and verifies it by rendering the result (`TextReplacement`). Typing a space at the end of bold text must not stop it from being bold, though `**bold **` isn't.
+- **Some markup is turned off** since people type it without meaning to: headings made by underlining, and code made by indenting. Both are shown as ordinary text.
+- **Markup that isn't rendered is shown as source:** HTML, images, link definitions.
+- **The application decides the keys** that start a new block and that break the line, and gets every key that the editor doesn't use, such as one that sends the message.
 
 ## Working with it
 

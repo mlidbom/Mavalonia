@@ -30,7 +30,7 @@ class TextReplacement
       _text = text;
       _textBefore = FormattedText.Of(rendered, from.Block)[..from.Index];
       _textAfter = FormattedText.Of(rendered, to.Block)[to.Index..];
-      _expectedLooks = ExpectedLooks.OfReplacing(rendered, from.Block, to.Block, BlockLooks.Of(rendered, from.Block).WithText(_textBefore.Followed(by: text).Followed(by: _textAfter)));
+      _expectedLooks = ExpectedLooks.OfReplacing(rendered, from.Block, to.Block, BlockLooks.Of(from.Block, _textBefore.Followed(by: text).Followed(by: _textAfter)));
    }
 
    ///<summary>The least change that looks right. Null when none does.</summary>

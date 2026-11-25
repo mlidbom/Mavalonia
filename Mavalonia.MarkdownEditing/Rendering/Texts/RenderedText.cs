@@ -28,6 +28,8 @@ public class RenderedText
    public int Length => Characters.Count;
    public bool IsEmpty => Length == 0;
 
+   internal bool LooksLike(RenderedText other) => Value == other.Value && Characters.Zip(other.Characters).All(it => it.First.Formatting.LooksLike(it.Second.Formatting));
+
    ///<summary>The offset at which text typed before the character at <paramref name="index"/> goes. It continues the character before that one, so after a bold character it is inside the bold markup.</summary>
    public int OffsetAt(int index) => index == 0 ? Source.Start : Characters[index - 1].Source.End;
 
@@ -35,7 +37,7 @@ public class RenderedText
    public int IndexAt(int offset) => Characters.TakeWhile(it => it.Source.End <= offset).Count();
 
    ///<summary>The formatting that text typed at <paramref name="offset"/> gets from the markup it is inside.</summary>
-   public TextFormatting FormattingAt(int offset) =>
+   internal TextFormatting FormattingAt(int offset) =>
       Markups.Where(it => it.Content.Touches(offset))
              .Select(it => it.Formatting)
              .Aggregate(TextFormatting.None, (all, it) => new TextFormatting(all.Formats | it.Formats, it.Link ?? all.Link));
@@ -56,11 +58,14 @@ public class RenderedText
    }
 
    ///<summary>The index after the white space after the word that is at <paramref name="index"/>, or, where there is no word, the punctuation.</summary>
-   public int EndOfWordAfter(int index)
+   internal int EndOfWordAfter(int index) => SkipWhiteSpaceAfter(EndOfWordWithoutSpacesAfter(index));
+
+   ///<summary>The index after the word that is at <paramref name="index"/>, or, where there is no word, the punctuation or the white space.</summary>
+   public int EndOfWordWithoutSpacesAfter(int index)
    {
       var end = index;
       while(end < Length && KindOf(end) == KindOf(index)) end++;
-      return SkipWhiteSpaceAfter(end);
+      return end;
    }
 
    KindOfCharacter KindOf(int index) => Value[index] switch

@@ -1,0 +1,83 @@
+using Avalonia;
+using Avalonia.Media;
+using Avalonia.Media.TextFormatting;
+using Mavalonia.MarkdownEditing.Rendering;
+using Mavalonia.MarkdownEditing.Rendering.Blocks;
+
+namespace Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;
+
+///<summary>Where a block is drawn, and how.</summary>
+class BlockLayout
+{
+   const double ThicknessOfLines = 1;
+
+   readonly TextLayout _text;
+   readonly Point _originOfText;
+   readonly MarkdownAppearance _appearance;
+
+   internal BlockLayout(RenderedBlock block, Rect bounds, TextLayout text, Point originOfText, MarkdownAppearance appearance)
+   {
+      Block = block;
+      Bounds = bounds;
+      _text = text;
+      _originOfText = originOfText;
+      _appearance = appearance;
+   }
+
+   internal RenderedBlock Block { get; }
+   internal Rect Bounds { get; }
+
+   internal void DrawBackground(DrawingContext context)
+   {
+      var pen = new Pen(_appearance.LineBrush, ThicknessOfLines);
+      switch(Block)
+      {
+         case CodeBlock: context.DrawRectangle(_appearance.CodeBackground, null, Bounds, _appearance.Scaled(4), _appearance.Scaled(4)); break;
+         case TableCell cell: context.DrawRectangle(cell.IsInTheHeader ? _appearance.CodeBackground : null, pen, Bounds); break;
+         case ThematicBreak: context.DrawLine(pen, new Point(Bounds.Left, Bounds.Center.Y), new Point(Bounds.Right, Bounds.Center.Y)); break;
+      }
+   }
+
+   ///<summary>Draws that what is between two offsets in the markdown is selected, as far as it is in the block.</summary>
+   internal void DrawSelection(DrawingContext context, SourceRange selected)
+   {
+      if(selected.End < Block.Text.Source.Start || selected.Start > Block.Text.Source.End) return;
+
+      var (start, end) = (Block.Text.IndexAt(selected.Start), Block.Text.IndexAt(selected.End));
+      if(end > start)
+         foreach(var rectangle in _text.HitTestTextRange(start, end - start)) context.FillRectangle(_appearance.SelectionBrush, rectangle.Translate(_originOfText));
+      else if(Block.Text.IsEmpty)
+         context.FillRectangle(_appearance.SelectionBrush, CaretAt(0).WithWidth(_appearance.Scaled(5)));
+   }
+
+   internal void DrawText(DrawingContext context) => _text.Draw(context, _originOfText);
+
+   ///<summary>Where a caret is drawn that is before the character at <paramref name="index"/>.</summary>
+   internal Rect CaretAt(int index) => _text.HitTestTextPosition(index).Translate(_originOfText).WithWidth(1.5);
+
+   ///<summary>Where text as a whole starts on its first line.</summary>
+   internal Point StartOfFirstLine => _originOfText;
+
+   internal IEnumerable<LineLayout> Lines
+   {
+      get
+      {
+         var top = _originOfText.Y;
+         foreach(var line in _text.TextLines)
+         {
+            yield return new LineLayout(this, line, new Rect(_originOfText.X, top, Math.Max(line.WidthIncludingTrailingWhitespace, 1), line.Height));
+            top += line.Height;
+         }
+      }
+   }
+
+   ///<summary>The line that a caret before the character at <paramref name="index"/> is on.</summary>
+   internal LineLayout LineOf(int index) => Lines.ElementAt(_text.GetLineIndexFromCharacterIndex(Math.Min(index, Math.Max(0, Block.Text.Length)), trailingEdge: false));
+
+   ///<summary>The position in the block's text that is nearest to <paramref name="point"/>.</summary>
+   internal RenderedPosition PositionNearestTo(Point point)
+   {
+      var hit = _text.HitTestPoint(point - _originOfText);
+      return new RenderedPosition(Block, Math.Min(hit.TextPosition + (hit.IsTrailing ? 1 : 0), Block.Text.Length));
+   }
+}

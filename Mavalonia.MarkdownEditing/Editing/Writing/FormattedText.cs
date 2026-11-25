@@ -31,7 +31,5 @@ class FormattedText
    ///<summary>Whether the text looks like <paramref name="other"/>. White space looks the same in bold, so only the formatting of the other characters counts.</summary>
    internal bool LooksLike(RenderedText other) => Length == other.Length && Characters.Zip(other.Characters).All(it => LookAlike(it.First, it.Second));
 
-   static bool LookAlike(FormattedCharacter one, RenderedCharacter other) => one.Value == other.Value && (one.IsWhiteSpace || LookAlike(one.Formatting, other.Formatting));
-
-   static bool LookAlike(TextFormatting one, TextFormatting other) => one.Formats == other.Formats && one.Link?.Target == other.Link?.Target && one.IsShownAsSource == other.IsShownAsSource;
+   static bool LookAlike(FormattedCharacter one, RenderedCharacter other) => one.Value == other.Value && (one.IsWhiteSpace || one.Formatting.LooksLike(other.Formatting));
 }

@@ -30,7 +30,7 @@ class InlineMarkdownWriter
    ///<summary>Markup must start and end at a character that isn't white space: <c>**bold **</c> isn't bold.</summary>
    static IReadOnlyList<FormattedCharacter> WithFormattingOnWhiteSpaceOnlyBetweenCharactersThatHaveIt(IReadOnlyList<FormattedCharacter> characters)
    {
-      return [..characters.Select((it, index) => it.IsWhiteSpace && !it.IsCode ? FormatsWithDelimiters.Aggregate(it, (character, format) => IsBetweenCharactersWith(format, index) ? character.With(format) : character.Without(format)) : it)];
+      return [..characters.Select((it, index) => it is { IsWhiteSpace: true, IsCode: false } ? FormatsWithDelimiters.Aggregate(it, (character, format) => IsBetweenCharactersWith(format, index) ? character.With(format) : character.Without(format)) : it)];
 
       bool IsBetweenCharactersWith(TextFormats format, int index) =>
          characters.Take(index).LastOrDefault(it => !it.IsWhiteSpace).Formatting.Has(format) && characters.Skip(index).FirstOrDefault(it => !it.IsWhiteSpace).Formatting.Has(format);

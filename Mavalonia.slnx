@@ -4,6 +4,7 @@
       <File Path="Directory.Build.props" />
       <File Path="Directory.Packages.props" />
       <File Path="global.json" />
+      <File Path="Mavalonia.slnx.DotSettings" />
       <File Path="README.md" />
    </Folder>
    <Folder Name="/Specifications/">
