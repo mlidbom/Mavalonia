@@ -1,5 +1,6 @@
 using Markdig;
 using Markdig.Extensions.EmphasisExtras;
+using Markdig.Extensions.Tables;
 using Markdig.Parsers;
 using Markdig.Syntax;
 
@@ -23,6 +24,7 @@ static class MarkdigParser
 
       var leaves = document.Descendants<LeafBlock>().ToList();
       foreach(var leaf in leaves) leaf.Inline?.TakeWhatFollowsDelimitersOutOfThem();
+      foreach(var cell in document.Descendants<TableCell>()) cell.TakeTheBackslashOutOfEscapedPipesInCode();
 
       return leaves.Any(IsTooDeep) ? null : document;
    }

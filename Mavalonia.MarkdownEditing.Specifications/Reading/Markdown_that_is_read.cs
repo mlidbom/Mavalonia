@@ -100,6 +100,7 @@ public class Markdown_that_is_read
       [XF] public void an_image_copies_a_link_to_it() => Copied("⟦![b](https://c.d)⟧").Must().Be("<p><a href=\"https://c.d\">b</a></p>");
       [XF] public void an_image_without_a_description_copies_a_link_to_it() => Copied("⟦![](https://c.d)⟧").Must().Be("<p><a href=\"https://c.d\">image</a></p>");
       [XF] public void an_image_in_a_link_copies_the_link() => Copied("⟦[![b](https://c.d)](https://e.f)⟧").Must().Be("<p><a href=\"https://e.f\">b</a></p>");
+      [XF] public void code_in_a_cell_copies_an_escaped_pipe_in_it_without_its_backslash() => Copied("⟦| A |\n|---|\n| `a \\| b` |⟧").Must().Contain("<code>a | b</code>");
       [XF] public void nothing_but_code_copies_none() => Copied("```\n⟦a⟧\n```").Must().Be("");
       [XF] public void nothing_copies_none() => Copied("a‸").Must().Be("");
       [XF] public void hundreds_of_opening_brackets_that_none_closes_copies_them() => Copied($"⟦{new string('[', 500)}⟧").Must().Be($"<p>{new string('[', 500)}</p>");

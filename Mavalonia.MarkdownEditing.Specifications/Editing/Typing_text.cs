@@ -46,6 +46,7 @@ public class Typing_text
    [XF] public void in_a_cell_changes_that_cell() => Of("| A | B |\n|---|---|\n| 1‸ | 2 |", Type("x")).Must().Be("| A | B |\n|---|---|\n| 1x‸ | 2 |");
    [XF] public void in_an_empty_cell_changes_that_cell() => Of("| A | B |\n|---|---|\n| 1 | ‸ |", Type("x")).Must().Be("| A | B |\n|---|---|\n| 1 | x‸ |");
    [XF] public void that_is_a_pipe_in_a_cell_escapes_it() => Of("| A |\n|---|\n| 1‸ |", Type("|")).Must().Be("| A |\n|---|\n| 1\\|‸ |");
+   [XF] public void that_is_a_pipe_in_code_in_a_cell_escapes_it() => Of("| A |\n|---|\n| `1‸` |", Type("|")).Must().Be("| A |\n|---|\n| `1\\|‸` |");
    [XF] public void in_code_inserts_it() => Of("```\na‸\n```", Type("*b*")).Must().Be("```\na*b*‸\n```");
    [XF] public void in_code_with_no_line_adds_the_line() => Of("```‸\n```", Type("a")).Must().Be("```\na‸\n```");
    [XF] public void on_an_empty_line_of_code_in_a_list_item_indents_the_line() => Of("- ```\n  a\n‸\n  ```", Type("b")).Must().Be("- ```\n  a\n  b‸\n  ```");

@@ -42,6 +42,8 @@ public class Rendered_blocks
    [XF] public void show_all_as_source_when_list_items_are_inside_one_another_hundreds_deep() => Rendered(Repeated("- ", 500) + "a", $"source \"{Repeated("- ", 500)}a\"");
    [XF] public void show_all_as_source_when_formats_are_inside_one_another_hundreds_deep() => Rendered(Repeated("*a **a ", 250) + Repeated("a** a* ", 250) + "b", $"source \"{Repeated("*a **a ", 250) + Repeated("a** a* ", 250)}b\"");
    [XF] public void show_an_escaped_pipe_in_a_cell_without_its_backslash() => Rendered("| A |\n|---|\n| a \\| b |", "header 0,0 \"A\"", "cell 1,0 \"a | b\"");
+   [XF] public void show_an_escaped_pipe_in_code_in_a_cell_without_its_backslash() => Rendered("| A |\n|---|\n| `a \\| b` |", "header 0,0 \"A\"", "cell 1,0 \"a | b\"");
+   [XF] public void show_an_escaped_pipe_in_code_outside_of_a_table_with_its_backslash() => Rendered("`a \\| b`", "paragraph \"a \\| b\"");
 
    [XF] public void are_the_same_with_windows_line_breaks() => Rendered("> one\r\n> two\r\n\r\n- three\r\n- four", "quote > paragraph \"one\ntwo\"", "• > paragraph \"three\"", "• > paragraph \"four\"");
 }
