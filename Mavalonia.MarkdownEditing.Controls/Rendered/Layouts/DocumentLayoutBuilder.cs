@@ -102,7 +102,7 @@ class DocumentLayoutBuilder
    double IndentationIn(BlockContainer container) => container switch
    {
       Quote => IndentationInAQuote,
-      ListItem { ShownNumber: {} number } => Math.Max(SmallestIndentationInAListItem, _texts.OfListMarker(number).Width + SpaceAfterAMarker),
+      ListItem { ShownNumber: {} shownNumber } => Math.Max(SmallestIndentationInAListItem, _texts.OfListMarker(shownNumber).Width + SpaceAfterAMarker),
       _ => SmallestIndentationInAListItem
    };
 
