@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
+using Avalonia.VisualTree;
 using Compze.Must;
 using Mavalonia.MarkdownEditing.Controls.Specifications.HeadlessAvalonia;
 using Mavalonia.MarkdownEditing.Html;
@@ -75,7 +76,7 @@ public class Reading_markdown
          CopiedHtml.ParseHtmlFormatOfWindows((await CopiedFrom(new ViewInAWindow("a **two** b").Select("a", to: "two")).TryGetValueAsync(HtmlFormat))!).Markdown.Must().Be("a **two**");
 
       [XFOnUIThread] public async Task copies_code_as_text_only() =>
-         new { Text = await CopiedFrom(Code()).TryGetTextAsync(), Html = await CopiedFrom(Code()).TryGetValueAsync(HtmlFormat) }.Must().Satisfy(it => it.Text == "two" && it.Html == null);
+         new { Text = await CopiedFrom(SelectedCode()).TryGetTextAsync(), Html = await CopiedFrom(SelectedCode()).TryGetValueAsync(HtmlFormat) }.Must().Satisfy(it => it.Text == "two" && it.Html == null);
 
       [XFOnUIThread] public async Task and_pasting_in_an_editor_pastes_the_markdown_as_it_is_written()
       {
@@ -87,7 +88,7 @@ public class Reading_markdown
          editor.Markdown.Must().Be("__a__ *  b\n\n*  c‸");
       }
 
-      static ViewInAWindow Code() => new ViewInAWindow("```\none two\n```").Select("two", to: "two");
+      static ViewInAWindow SelectedCode() => new ViewInAWindow("```\none two\n```").Select("two", to: "two");
 
       static IClipboard CopiedFrom(ViewInAWindow view) => view.Press(PhysicalKey.C, Ctrl).Window.Clipboard;
    }
@@ -107,6 +108,52 @@ public class Reading_markdown
          view.Window.MoveThePointerTo(view.CenterOf(text));
          return view.View.Cursor!.ToString()!;
       }
+   }
+
+   public class Code : Reading_markdown
+   {
+      const string Markdown = "text\n\n```csharp\nvar one = 1;\n```\n\n```\ntwo\n```";
+
+      readonly ViewInAWindow _view = new(Markdown);
+
+      Button? CopyButton => _view.View.GetVisualDescendants().OfType<Button>().SingleOrDefault(it => it.IsVisible);
+
+      [XFOnUIThread] public void has_no_copy_button_while_the_pointer_is_elsewhere() => CopyButtonAt("text").Must().BeNull();
+      [XFOnUIThread] public void has_a_copy_button_that_says_its_language_while_the_pointer_is_over_it() => CopyButtonAt("one")!.Content.Must().Be("csharp · Copy");
+      [XFOnUIThread] public void without_a_language_has_a_copy_button_while_the_pointer_is_over_it() => CopyButtonAt("two")!.Content.Must().Be("Copy");
+      [XFOnUIThread] public void has_the_copy_button_at_its_top_right() => CenterOf(CopyButtonAt("one")!).Must().Satisfy(it => it.X > 700 && Math.Abs(it.Y - _view.CenterOf("one").Y) < 15);
+
+      [XFOnUIThread] public async Task is_copied_as_text_with_the_copy_button()
+      {
+         _view.Window.Click(CenterOf(CopyButtonAt("one")!));
+         new { Text = await _view.Window.Clipboard.TryGetTextAsync(), CopyButton!.Content }.Must().Satisfy(it => it.Text == "var one = 1;" && (string?)it.Content == "Copied");
+      }
+
+      [XFOnUIThread] public async Task in_a_language_that_is_known_gets_colours()
+      {
+         var withoutColours = new ViewInAWindow(Markdown) { View = { ColoursCode = false } }.Window.RenderFrame().Fingerprint;
+         for(var time = 0; time < 400 && _view.Window.RenderFrame().Fingerprint == withoutColours; time++) await Task.Delay(10);
+
+         _view.Window.RenderFrame().SaveForInspectionAs("Code with colours");
+         _view.Window.RenderFrame().Fingerprint.Must().NotBe(withoutColours);
+      }
+
+      [XFOnUIThread] public async Task is_as_high_with_colours_as_without_them()
+      {
+         var height = _view.View.DesiredSize.Height;
+         await Task.Delay(500);
+         _view.View.InvalidateMeasure();
+         _view.Window.RenderFrame();
+         _view.View.DesiredSize.Height.Must().Be(height);
+      }
+
+      Button? CopyButtonAt(string text)
+      {
+         _view.Window.MoveThePointerTo(_view.CenterOf(text));
+         return CopyButton;
+      }
+
+      Point CenterOf(Control control) => _view.Window.PointOf(control, new Rect(control.Bounds.Size).Center);
    }
 
    public class The_keys : Reading_markdown

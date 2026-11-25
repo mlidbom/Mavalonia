@@ -49,6 +49,9 @@ class DocumentLayout
    ///<summary>Where a part of a block is: a rectangle for each line of it.</summary>
    internal IEnumerable<Rect> BoundsOf(PartOfABlock part) => LayoutOf(part.Block).BoundsOf(part);
 
+   ///<summary>The code at <paramref name="point"/>, and where its block is. Null when no code is there.</summary>
+   internal (CodeBlock Block, Rect Bounds)? CodeAt(Point point) => _blocks.FirstOrDefault(it => it.Bounds.Contains(point)) is { Block: CodeBlock code } layout ? (code, layout.Bounds) : null;
+
    ///<summary>The link whose label is at <paramref name="point"/>. Null when none is there.</summary>
    internal Link? LinkAt(Point point) => _blocks.FirstOrDefault(it => it.Bounds.Contains(point))?.LinkAt(point);
 

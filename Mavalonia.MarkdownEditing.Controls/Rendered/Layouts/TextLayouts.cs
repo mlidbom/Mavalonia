@@ -28,10 +28,11 @@ partial class TextLayouts : IDisposable
 
    internal TextLayout Of(RenderedBlock block, double width)
    {
-      var looks = Looks.Of(block, width);
+      var colours = block is CodeBlock code ? _appearance.ColoursOf(code) : null;
+      var looks = Looks.Of(block, width, colours);
       if(_used.TryGetValue(looks, out var layout)) return layout;
 
-      return _used[looks] = _usedBefore.TryGetValue(looks, out var before) ? before : TextLayoutBuilder.LayOut(block, _appearance, width);
+      return _used[looks] = _usedBefore.TryGetValue(looks, out var before) ? before : TextLayoutBuilder.LayOut(block, _appearance, width, colours);
    }
 
    internal TextLayout OfListMarker(string marker)

@@ -1,10 +1,12 @@
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
+using Mavalonia.MarkdownEditing.Controls.Rendered.CodeColours;
+using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Containers;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered;
 
-///<summary>The fonts and brushes that rendered markdown is drawn with.</summary>
+///<summary>The fonts and brushes that rendered markdown is drawn with, and the colours of code, as far as they are known.</summary>
 record MarkdownAppearance(
    FontFamily FontFamily,
    FontFamily MonospaceFontFamily,
@@ -16,7 +18,8 @@ record MarkdownAppearance(
    IBrush CodeBackground,
    IBrush LineBrush,
    IBrush SelectionBrush,
-   bool IsDark)
+   bool IsDark,
+   Func<CodeBlock, ColouredCode?> ColoursOf)
 {
    ///<summary>A length that is <paramref name="length"/> where text has a font size of 14, and in proportion where it has another.</summary>
    internal double Scaled(double length) => length * FontSize / 14;

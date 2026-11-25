@@ -2,6 +2,7 @@
    <ItemGroup>
       <PackageReference Include="Avalonia" />
       <PackageReference Include="Avalonia.AvaloniaEdit" />
+      <PackageReference Include="TextMateSharp.Grammars" />
       <ProjectReference Include="..\Mavalonia.MarkdownEditing\Mavalonia.MarkdownEditing.csproj" />
    </ItemGroup>
 </Project>

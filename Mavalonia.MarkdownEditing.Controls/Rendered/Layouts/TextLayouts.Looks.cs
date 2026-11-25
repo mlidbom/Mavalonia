@@ -1,3 +1,4 @@
+using Mavalonia.MarkdownEditing.Controls.Rendered.CodeColours;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Texts;
 
@@ -7,9 +8,9 @@ partial class TextLayouts
 {
    ///<summary>All that decides how a text is laid out.</summary>
    // ReSharper disable NotAccessedPositionalProperty.Local : they are what makes two equal.
-   readonly record struct Looks(string Text, string Formatting, string KindOfBlock, double Width)
+   readonly record struct Looks(string Text, string Formatting, string KindOfBlock, double Width, ColouredCode? Colours)
    {
-      internal static Looks Of(RenderedBlock block, double width) => new(block.Text.Value, new string([..block.Text.Chars.Select(it => InOneChar(it.Formatting))]), KindOf(block), width);
+      internal static Looks Of(RenderedBlock block, double width, ColouredCode? colours) => new(block.Text.Value, new string([..block.Text.Chars.Select(it => InOneChar(it.Formatting))]), KindOf(block), width, colours);
 
       static char InOneChar(TextFormatting formatting) => (char)((int)formatting.Formats + (formatting.Link is null ? 0 : 16) + (formatting.IsShownAsSource ? 32 : 0));
 

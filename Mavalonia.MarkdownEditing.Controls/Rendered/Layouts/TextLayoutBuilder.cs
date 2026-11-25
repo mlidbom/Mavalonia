@@ -1,6 +1,7 @@
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
 using Avalonia.Utilities;
+using Mavalonia.MarkdownEditing.Controls.Rendered.CodeColours;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Texts;
 
@@ -14,14 +15,20 @@ class TextLayoutBuilder
 
    readonly RenderedBlock _block;
    readonly MarkdownAppearance _appearance;
+   readonly ColouredCode? _colours;
 
-   TextLayoutBuilder(RenderedBlock block, MarkdownAppearance appearance)
+   TextLayoutBuilder(RenderedBlock block, MarkdownAppearance appearance, ColouredCode? colours)
    {
       _block = block;
       _appearance = appearance;
+      _colours = colours;
    }
 
-   internal static TextLayout LayOut(RenderedBlock block, MarkdownAppearance appearance, double width) => new TextLayoutBuilder(block, appearance).LayOut(width);
+   ///<param name="block">The block whose text is laid out.</param>
+   ///<param name="appearance">How it's to look.</param>
+   ///<param name="width">How wide it may be.</param>
+   ///<param name="colours">The colours of the block, when it's code and they are known.</param>
+   internal static TextLayout LayOut(RenderedBlock block, MarkdownAppearance appearance, double width, ColouredCode? colours) => new TextLayoutBuilder(block, appearance, colours).LayOut(width);
 
    double FontSize => _block is Heading heading ? _appearance.FontSizeOfHeading(heading.Level) : _appearance.FontSize;
    FontFamily FontFamily => _block is CodeBlock ? _appearance.MonospaceFontFamily : _appearance.FontFamily;
@@ -34,7 +41,26 @@ class TextLayoutBuilder
           _appearance.Foreground,
           textWrapping: TextWrapping.Wrap,
           maxWidth: width,
-          textStyleOverrides: [.._block.Text.StretchesOfTheSameFormatting.Select(it => new ValueSpan<TextRunProperties>(it.Start, it.Length, PropertiesOf(it.Formatting)))]);
+          textStyleOverrides: [..PropertiesOfStretches()]);
+
+   IEnumerable<ValueSpan<TextRunProperties>> PropertiesOfStretches() =>
+      _colours is null ? _block.Text.StretchesOfTheSameFormatting.Select(it => new ValueSpan<TextRunProperties>(it.Start, it.Length, PropertiesOf(it.Formatting))) : PropertiesOfColouredStretches(_colours);
+
+   ///<summary>What is between the stretches that have a colour is drawn as code without any.</summary>
+   IEnumerable<ValueSpan<TextRunProperties>> PropertiesOfColouredStretches(ColouredCode colours)
+   {
+      var end = 0;
+      foreach(var stretch in colours.Stretches)
+      {
+         if(stretch.Start > end) yield return Code(end, stretch.Start, _appearance.Foreground);
+         yield return Code(stretch.Start, stretch.End, stretch.Foreground);
+         end = stretch.End;
+      }
+
+      if(_block.Text.Length > end) yield return Code(end, _block.Text.Length, _appearance.Foreground);
+
+      ValueSpan<TextRunProperties> Code(int start, int endOfStretch, IBrush foreground) => new(start, endOfStretch - start, new GenericTextRunProperties(new Typeface(_appearance.MonospaceFontFamily), FontSize * 0.93, foregroundBrush: foreground));
+   }
 
    TextRunProperties PropertiesOf(TextFormatting formatting)
    {

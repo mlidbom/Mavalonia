@@ -62,6 +62,13 @@ public abstract partial class RenderedMarkdownView : Control
       InvalidateVisual();
    }
 
+   ///<summary>They change no sizes.</summary>
+   void ShowColoursThatHaveBecomeKnown()
+   {
+      _latestLayout.LayOutAgain();
+      InvalidateVisual();
+   }
+
    ///<summary>The layout of what is rendered now, also when it has changed since the view was measured.</summary>
    internal DocumentLayout Layout => LayOut(Bounds.Width);
 

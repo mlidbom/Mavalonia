@@ -4,6 +4,8 @@ using Avalonia.Controls.Documents;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Styling;
+using Mavalonia.MarkdownEditing.Controls.Rendered.CodeColours;
+using Mavalonia.MarkdownEditing.Rendering.Blocks;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered;
 
@@ -19,9 +21,10 @@ partial class RenderedMarkdownView
    public static readonly StyledProperty<IBrush> CodeBackgroundProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush>(nameof(CodeBackground), new ImmutableSolidColorBrush(Colors.Gray, 0.15));
    public static readonly StyledProperty<IBrush> LineBrushProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush>(nameof(LineBrush), new ImmutableSolidColorBrush(Colors.Gray, 0.5));
    public static readonly StyledProperty<IBrush> SelectionBrushProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush>(nameof(SelectionBrush), new ImmutableSolidColorBrush(Colors.DodgerBlue, 0.4));
+   public static readonly StyledProperty<bool> ColoursCodeProperty = AvaloniaProperty.Register<RenderedMarkdownView, bool>(nameof(ColoursCode), true);
    public static readonly StyledProperty<Thickness> PaddingProperty = Decorator.PaddingProperty.AddOwner<RenderedMarkdownView>();
 
-   static readonly AvaloniaProperty[] PropertiesThatTheLayoutDependsOn = [FontFamilyProperty, FontSizeProperty, ForegroundProperty, MonospaceFontFamilyProperty, HeadingFontSizesProperty, FaintForegroundProperty, LinkForegroundProperty, CodeBackgroundProperty, LineBrushProperty, SelectionBrushProperty, PaddingProperty];
+   static readonly AvaloniaProperty[] PropertiesThatTheLayoutDependsOn = [FontFamilyProperty, FontSizeProperty, ForegroundProperty, MonospaceFontFamilyProperty, HeadingFontSizesProperty, FaintForegroundProperty, LinkForegroundProperty, CodeBackgroundProperty, LineBrushProperty, SelectionBrushProperty, ColoursCodeProperty, PaddingProperty];
 
    public FontFamily FontFamily { get => GetValue(FontFamilyProperty); set => SetValue(FontFamilyProperty, value); }
    public double FontSize { get => GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
@@ -45,6 +48,9 @@ partial class RenderedMarkdownView
    public IBrush LineBrush { get => GetValue(LineBrushProperty); set => SetValue(LineBrushProperty, value); }
 
    public IBrush SelectionBrush { get => GetValue(SelectionBrushProperty); set => SetValue(SelectionBrushProperty, value); }
+   ///<summary>Whether code in a language that is known is drawn in the colours that it has in VS Code.</summary>
+   public bool ColoursCode { get => GetValue(ColoursCodeProperty); set => SetValue(ColoursCodeProperty, value); }
+
    public Thickness Padding { get => GetValue(PaddingProperty); set => SetValue(PaddingProperty, value); }
 
    private protected MarkdownAppearance Appearance =>
@@ -58,7 +64,10 @@ partial class RenderedMarkdownView
           CodeBackground,
           LineBrush,
           SelectionBrush,
-          IsDark);
+          IsDark,
+          ColoursOf);
+
+   ColouredCode? ColoursOf(CodeBlock block) => ColoursCode ? ColoursOfCode.OfTheApplication.Of(block, IsDark, ShowColoursThatHaveBecomeKnown) : null;
 
    private protected bool IsDark => ActualThemeVariant == ThemeVariant.Dark;
 

@@ -6,6 +6,7 @@ using Mavalonia.MarkdownEditing.Controls.Rendered;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 using Mavalonia.MarkdownEditing.Editing;
 using Mavalonia.MarkdownEditing.Rendering;
+using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Controls;
@@ -22,6 +23,9 @@ public class MarkdownView : RenderedMarkdownView
 
    readonly ReadingKeys _keys;
    readonly MarkdownToRead _read = new("", MarkdownDialect.ForReading);
+
+   ///<summary>Null until the pointer is over code for the first time.</summary>
+   CopyCodeButton? _copyCode;
 
    static MarkdownView() => IsTabStopProperty.OverrideDefaultValue<MarkdownView>(false);
 
@@ -69,9 +73,46 @@ public class MarkdownView : RenderedMarkdownView
       if(change.Property == MarkdownProperty || change.Property == DialectProperty) _read.Show(Markdown, Dialect);
    }
 
+   protected override Size MeasureOverride(Size availableSize)
+   {
+      _copyCode?.Measure(Size.Infinity);
+      return base.MeasureOverride(availableSize);
+   }
+
+   protected override Size ArrangeOverride(Size finalSize)
+   {
+      _copyCode?.ArrangeAtItsBlock();
+      return base.ArrangeOverride(finalSize);
+   }
+
    protected override void OnKeyDown(KeyEventArgs e) => _keys.Press(e);
 
-   internal override void PointAt(Point point) => Cursor = Layout.LinkAt(point) is null ? Cursors.OfText : Cursors.OfALink;
+   internal override void PointAt(Point point)
+   {
+      Cursor = Layout.LinkAt(point) is null ? Cursors.OfText : Cursors.OfALink;
+
+      if(Layout.CodeAt(point) is {} code) ShowTheCopyButton(code.Block, code.Bounds);
+      else _copyCode?.Hide();
+   }
+
+   void ShowTheCopyButton(CodeBlock block, Rect bounds)
+   {
+      if(_copyCode is null)
+      {
+         _copyCode = new CopyCodeButton();
+         LogicalChildren.Add(_copyCode);
+         VisualChildren.Add(_copyCode);
+      }
+
+      _copyCode.ShowFor(block, bounds);
+      InvalidateArrange();
+   }
+
+   protected override void OnPointerExited(PointerEventArgs e)
+   {
+      base.OnPointerExited(e);
+      _copyCode?.Hide();
+   }
 
    internal override void ClickAt(Point point)
    {
