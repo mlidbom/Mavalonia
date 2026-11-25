@@ -26,11 +26,10 @@ partial class TextLayouts : IDisposable
       return result;
    }
 
-   internal TextLayout Of(RenderedBlock block, double width)
+   internal LaidOutText Of(RenderedBlock block, double width)
    {
-      var colours = block is CodeBlock code ? _appearance.ColoursOf(code) : null;
-      var looks = Looks.Of(block, colours, _appearance);
-      if(!_used.TryGetValue(looks, out var text)) _used[looks] = text = UsedBefore(looks) ?? new LayoutsOfAText(it => new RunsOfABlock(block, _appearance, colours, it), looks.DependsOnTheWidth);
+      var looks = Looks.Of(block, _appearance);
+      if(!_used.TryGetValue(looks, out var text)) _used[looks] = text = UsedBefore(looks) ?? new LayoutsOfAText(it => new RunsOfABlock(block, _appearance, it), looks.DependsOnTheWidth);
 
       return text.At(width);
    }

@@ -25,7 +25,7 @@ partial class RenderedMarkdownView
    public static readonly StyledProperty<bool> ColoursCodeProperty = AvaloniaProperty.Register<RenderedMarkdownView, bool>(nameof(ColoursCode), true);
    public static readonly StyledProperty<Thickness> PaddingProperty = Decorator.PaddingProperty.AddOwner<RenderedMarkdownView>();
 
-   static readonly AvaloniaProperty[] PropertiesThatTheLayoutDependsOn = [FontFamilyProperty, FontSizeProperty, ForegroundProperty, MonospaceFontFamilyProperty, HeadingFontSizesProperty, FaintForegroundProperty, LinkForegroundProperty, CodeBackgroundProperty, LineBrushProperty, SelectionBrushProperty, ColoursCodeProperty, PaddingProperty];
+   static readonly AvaloniaProperty[] PropertiesThatTheLayoutDependsOn = [FontFamilyProperty, FontSizeProperty, ForegroundProperty, MonospaceFontFamilyProperty, HeadingFontSizesProperty, FaintForegroundProperty, LinkForegroundProperty, CodeBackgroundProperty, LineBrushProperty, SelectionBrushProperty, PaddingProperty];
 
    public FontFamily FontFamily { get => GetValue(FontFamilyProperty); set => SetValue(FontFamilyProperty, value); }
    public double FontSize { get => GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
@@ -69,7 +69,7 @@ partial class RenderedMarkdownView
           ColoursOf,
           ImageOf);
 
-   ColouredCode? ColoursOf(CodeBlock block) => ColoursCode ? ColoursOfCode.OfTheApplication.Of(block, IsDark, ShowColoursThatHaveBecomeKnown) : null;
+   ColouredCode? ColoursOf(CodeBlock block) => ColoursCode ? ColoursOfCode.OfTheApplication.Of(block, IsDark, whenKnown: InvalidateVisual) : null;
 
    ///<summary>Null when there is none to show, or not yet.</summary>
    private protected virtual IImage? ImageOf(InlineImage image) => null;

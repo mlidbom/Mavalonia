@@ -1,6 +1,6 @@
 using Avalonia;
 using Avalonia.Media;
-using Avalonia.Media.TextFormatting;
+using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts.Texts;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Texts;
@@ -12,11 +12,11 @@ class BlockLayout
 {
    const double ThicknessOfLines = 1;
 
-   readonly TextLayout _text;
+   readonly LaidOutText _text;
    readonly Point _originOfText;
    readonly MarkdownAppearance _appearance;
 
-   internal BlockLayout(RenderedBlock block, Rect bounds, TextLayout text, Point originOfText, MarkdownAppearance appearance)
+   internal BlockLayout(RenderedBlock block, Rect bounds, LaidOutText text, Point originOfText, MarkdownAppearance appearance)
    {
       Block = block;
       Bounds = bounds;
@@ -52,17 +52,18 @@ class BlockLayout
    }
 
    ///<summary>Where a part of the block is: a rectangle for each line of it.</summary>
-   internal IEnumerable<Rect> BoundsOf(PartOfABlock part) => _text.HitTestTextRange(part.Start, part.End - part.Start).Select(it => it.Translate(_originOfText));
+   internal IEnumerable<Rect> BoundsOf(PartOfABlock part) => _text.BoundsOf(part.Start, part.End).Select(it => it.Translate(_originOfText));
 
    internal void DrawHighlight(DrawingContext context, PartOfABlock part, IBrush background)
    {
       foreach(var rectangle in BoundsOf(part)) context.DrawRectangle(background, null, rectangle, _appearance.Scaled(2), _appearance.Scaled(2));
    }
 
-   internal void DrawText(DrawingContext context) => _text.Draw(context, _originOfText);
+   ///<summary>Draws what is in <paramref name="viewport"/> of the text.</summary>
+   internal void DrawText(DrawingContext context, Rect viewport) => _text.Draw(context, _originOfText, Block is CodeBlock code ? _appearance.ColoursOf(code) : null, viewport);
 
    ///<summary>Where a caret is drawn that is before the character at <paramref name="index"/>.</summary>
-   internal Rect CaretAt(int index) => _text.HitTestTextPosition(index).Translate(_originOfText).WithWidth(1.5);
+   internal Rect CaretAt(int index) => _text.BoundsAt(index).Translate(_originOfText).WithWidth(1.5);
 
    internal double BaselineOfTheFirstLine => _originOfText.Y + _text.Baseline;
 
@@ -74,7 +75,7 @@ class BlockLayout
       get
       {
          var top = _originOfText.Y;
-         foreach(var line in _text.TextLines)
+         foreach(var line in _text.Lines)
          {
             yield return new LineLayout(this, line, new Rect(_originOfText.X, top, Math.Max(line.WidthIncludingTrailingWhitespace, 1), line.Height));
             top += line.Height;
@@ -83,7 +84,7 @@ class BlockLayout
    }
 
    ///<summary>The line that a caret before the character at <paramref name="index"/> is on.</summary>
-   internal LineLayout LineOf(int index) => Lines.ElementAt(_text.GetLineIndexFromCharacterIndex(Math.Min(index, Math.Max(0, Block.Text.Length)), trailingEdge: false));
+   internal LineLayout LineOf(int index) => Lines.ElementAt(_text.NumberOfTheLineAt(index));
 
    ///<summary>Where what can be clicked at <paramref name="point"/> leads: a link, or else an image. Null when none is there.</summary>
    internal string? TargetAt(Point point) =>

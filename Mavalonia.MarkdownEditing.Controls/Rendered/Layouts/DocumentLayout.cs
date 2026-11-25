@@ -37,7 +37,7 @@ class DocumentLayout
       if(selected is {} range)
          foreach(var block in visible) block.DrawSelection(context, range);
 
-      foreach(var block in visible) block.DrawText(context);
+      foreach(var block in visible) block.DrawText(context, viewport);
    }
 
    BlockLayout LayoutOf(RenderedBlock block) => _blocks.First(it => it.Block == block);

@@ -1,5 +1,4 @@
 using Avalonia;
-using Avalonia.Media.TextFormatting;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts.Texts;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 
@@ -53,5 +52,5 @@ class TableLayout
       Bottom += height;
    }
 
-   BlockLayout LayOut(TableCell cell, TextLayout text, Rect bounds) => new(cell, bounds, text, bounds.TopLeft + new Point(HorizontalPadding, VerticalPadding), _appearance);
+   BlockLayout LayOut(TableCell cell, LaidOutText text, Rect bounds) => new(cell, bounds, text, bounds.TopLeft + new Point(HorizontalPadding, VerticalPadding), _appearance);
 }

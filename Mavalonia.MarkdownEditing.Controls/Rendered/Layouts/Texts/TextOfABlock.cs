@@ -6,22 +6,29 @@ namespace Mavalonia.MarkdownEditing.Controls.Rendered.Layouts.Texts;
 class TextOfABlock : ITextSource
 {
    readonly string _text;
+   readonly int _length;
    readonly IReadOnlyList<Run> _runs;
 
    ///<param name="text">The text.</param>
    ///<param name="runs">All of the text, from its start to its end.</param>
-   internal TextOfABlock(string text, IReadOnlyList<Run> runs)
+   internal TextOfABlock(string text, IReadOnlyList<Run> runs) : this(text, text.Length, runs) {}
+
+   TextOfABlock(string text, int length, IReadOnlyList<Run> runs)
    {
       _text = text;
+      _length = length;
       _runs = runs;
    }
 
+   ///<summary>The text as far as the char at <paramref name="end"/>.</summary>
+   internal TextOfABlock UpTo(int end) => new(_text, Math.Min(end, _length), _runs);
+
    public TextRun? GetTextRun(int textSourceIndex)
    {
-      if(textSourceIndex >= _text.Length) return null;
+      if(textSourceIndex >= _length) return null;
 
       var run = RunAt(textSourceIndex);
-      return run.Drawn is {} drawn ? drawn : new TextCharacters(_text.AsMemory(textSourceIndex, run.End - textSourceIndex), run.Properties);
+      return run.Drawn is {} drawn ? drawn : new TextCharacters(_text.AsMemory(textSourceIndex..Math.Min(run.End, _length)), run.Properties);
    }
 
    Run RunAt(int index)

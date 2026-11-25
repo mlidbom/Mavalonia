@@ -16,18 +16,15 @@ class RunsOfABlock
 
    readonly RenderedBlock _block;
    readonly MarkdownAppearance _appearance;
-   readonly ColouredCode? _colours;
    readonly double _widthAvailable;
 
    ///<param name="block">The block.</param>
    ///<param name="appearance">How it's to look.</param>
-   ///<param name="colours">The colours of the block, when it's code and they are known.</param>
    ///<param name="widthAvailable">How wide an image may be.</param>
-   internal RunsOfABlock(RenderedBlock block, MarkdownAppearance appearance, ColouredCode? colours, double widthAvailable)
+   internal RunsOfABlock(RenderedBlock block, MarkdownAppearance appearance, double widthAvailable)
    {
       _block = block;
       _appearance = appearance;
-      _colours = colours;
       _widthAvailable = widthAvailable;
    }
 
@@ -35,18 +32,22 @@ class RunsOfABlock
    FontFamily FontFamily => _block is CodeBlock ? _appearance.MonospaceFontFamily : _appearance.FontFamily;
    bool IsAllBold => _block is Heading or AlertTitle or TableCell { IsInTheHeader: true };
 
-   internal TextRunProperties PropertiesOfTheParagraph => new GenericTextRunProperties(new Typeface(FontFamily), FontSize, foregroundBrush: _appearance.Foreground);
+   TextRunProperties PropertiesOfPlainText => new GenericTextRunProperties(new Typeface(FontFamily), FontSize, foregroundBrush: _appearance.Foreground);
 
-   internal TextOfABlock Text
+   internal TextParagraphProperties PropertiesOfTheParagraph(TextWrapping wrapping) =>
+      new GenericTextParagraphProperties(FlowDirection.LeftToRight, TextAlignment.Left, firstLineInParagraph: true, alwaysCollapsible: false, PropertiesOfPlainText, wrapping, lineHeight: double.NaN, indent: 0, letterSpacing: 0);
+
+   internal TextOfABlock Text => TextOf(FormattedRuns().SelectMany(WithWhatIsDrawn));
+
+   ///<summary>The text of code in its colours.</summary>
+   internal TextOfABlock TextIn(ColouredCode colours) => TextOf(RunsIn(colours));
+
+   TextOfABlock TextOf(IEnumerable<TextOfABlock.Run> runs)
    {
-      get
-      {
-         var text = _block.Text.Value;
-         var runs = (_colours is null ? FormattedRuns() : ColouredRuns(_colours)).SelectMany(WithWhatIsDrawn).ToList();
-         if(text.Length > 0 && !text.EndsWith('\n')) return new TextOfABlock(text, runs);
+      var text = _block.Text.Value;
+      if(text.Length > 0 && !text.EndsWith('\n')) return new TextOfABlock(text, [..runs]);
 
-         return new TextOfABlock(text + ZeroWidthSpace, [..runs, new TextOfABlock.Run(text.Length, ZeroWidthSpace.Length, PropertiesOfTheParagraph)]);
-      }
+      return new TextOfABlock(text + ZeroWidthSpace, [..runs, new TextOfABlock.Run(text.Length, ZeroWidthSpace.Length, PropertiesOfPlainText)]);
    }
 
    IEnumerable<TextOfABlock.Run> FormattedRuns() =>
@@ -55,7 +56,7 @@ class RunsOfABlock
                                                                : new TextOfABlock.Run(it.Start, it.Length, PropertiesOf(it.Formatting)));
 
    ///<summary>What is between the stretches that have a colour is drawn as code without any.</summary>
-   IEnumerable<TextOfABlock.Run> ColouredRuns(ColouredCode colours)
+   IEnumerable<TextOfABlock.Run> RunsIn(ColouredCode colours)
    {
       var end = 0;
       foreach(var stretch in colours.Stretches)

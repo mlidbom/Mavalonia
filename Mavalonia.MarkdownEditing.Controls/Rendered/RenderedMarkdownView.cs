@@ -32,7 +32,7 @@ public abstract partial class RenderedMarkdownView : Control
       FocusableProperty.OverrideDefaultValue<RenderedMarkdownView>(true);
       ClipToBoundsProperty.OverrideDefaultValue<RenderedMarkdownView>(true);
       AffectsMeasure<RenderedMarkdownView>(PropertiesThatTheLayoutDependsOn);
-      AffectsRender<RenderedMarkdownView>(PropertiesThatTheLayoutDependsOn);
+      AffectsRender<RenderedMarkdownView>([..PropertiesThatTheLayoutDependsOn, ColoursCodeProperty]);
       RequestBringIntoViewEvent.AddClassHandler<RenderedMarkdownView>((view, request) => view.StayWhereItIsWhenItGetsTheFocus(request));
    }
 
@@ -71,13 +71,6 @@ public abstract partial class RenderedMarkdownView : Control
    {
       _latestLayout.LayOutAgain();
       InvalidateMeasure();
-      InvalidateVisual();
-   }
-
-   ///<summary>They change no sizes.</summary>
-   void ShowColoursThatHaveBecomeKnown()
-   {
-      _latestLayout.LayOutAgain();
       InvalidateVisual();
    }
 
