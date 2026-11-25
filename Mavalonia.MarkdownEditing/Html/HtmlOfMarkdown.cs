@@ -3,8 +3,6 @@ using Markdig.Helpers;
 using Markdig.Renderers;
 using Markdig.Renderers.Html;
 using Markdig.Renderers.Html.Inlines;
-using Markdig.Syntax;
-using Markdig.Syntax.Inlines;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Containers;
 using Mavalonia.MarkdownEditing.Rendering.Reading;
@@ -12,7 +10,7 @@ using Mavalonia.MarkdownEditing.Rendering.Reading;
 namespace Mavalonia.MarkdownEditing.Html;
 
 ///<summary>Writes markdown as HTML that looks as the markdown does where it's shown. HTML that is shown as its source is text in what is written.</summary>
-static class HtmlOfMarkdown
+static partial class HtmlOfMarkdown
 {
    ///<summary>Empty when <paramref name="markdown"/> is plain text, and when it can't be read.</summary>
    internal static string Of(string markdown, MarkdownDialect dialect)
@@ -40,40 +38,4 @@ static class HtmlOfMarkdown
    ///<summary>Without the icon that GitHub has, which programs show in all sizes.</summary>
    static void WriteTitleOfAnAlert(HtmlRenderer renderer, StringSlice kind) =>
       renderer.Write("<strong>").Write(Enum.TryParse<AlertKind>(kind.ToString(), ignoreCase: true, out var known) ? known.ToString() : kind.ToString()).Write("</strong>");
-
-   class WriterOfHtmlBlocks : HtmlObjectRenderer<HtmlBlock>
-   {
-      readonly MarkdownDialect _dialect;
-
-      internal WriterOfHtmlBlocks(MarkdownDialect dialect) => _dialect = dialect;
-
-      protected override void Write(HtmlRenderer renderer, HtmlBlock block)
-      {
-         if(_dialect == MarkdownDialect.ForReading && block.IsNothingButComments) return;
-
-         renderer.Write("<p>");
-         foreach(var (number, line) in block.Lines.Lines.Take(block.Lines.Count).Index())
-         {
-            if(number > 0) renderer.WriteLine("<br />");
-            renderer.WriteEscape(line.Slice.ToString());
-         }
-
-         renderer.WriteLine("</p>");
-      }
-   }
-
-   class WriterOfInlineHtml : HtmlObjectRenderer<HtmlInline>
-   {
-      readonly MarkdownDialect _dialect;
-
-      internal WriterOfInlineHtml(MarkdownDialect dialect) => _dialect = dialect;
-
-      protected override void Write(HtmlRenderer renderer, HtmlInline html)
-      {
-         if(_dialect == MarkdownDialect.ForReading && html.IsAComment) return;
-
-         if(_dialect == MarkdownDialect.ForReading && html.IsALineBreak) renderer.Write("<br />");
-         else renderer.WriteEscape(html.Tag);
-      }
-   }
 }
