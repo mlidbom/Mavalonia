@@ -2,15 +2,14 @@ using Markdig;
 using Markdig.Extensions.EmphasisExtras;
 using Markdig.Parsers;
 using Markdig.Syntax;
-using Markdig.Syntax.Inlines;
 
 namespace Mavalonia.MarkdownEditing.Rendering.Reading;
 
 ///<summary>Has Markdig parse markdown, with the markup that we render.</summary>
 static class MarkdigParser
 {
-   ///<summary>Fewer than Markdig itself can write as HTML.</summary>
-   const int DeepestInlines = 100;
+   ///<summary>How deep inlines may be, the blocks that they are inside counted too. Markdig itself can't write what is much deeper as HTML.</summary>
+   const int Deepest = 100;
 
    static readonly MarkdownPipeline PipelineForEditing = PipelineWithoutTheMarkupThatPeopleTypeWithoutMeaningTo().Build();
    static readonly MarkdownPipeline PipelineForReading = PipelineOfAllDialects().UseAutoLinks().UseTaskLists().UseAlertBlocks().Build();
@@ -22,11 +21,15 @@ static class MarkdigParser
    {
       if(ParseUnlessBlocksAreTooDeep(markdown, PipelineFor(dialect)) is not {} document) return null;
 
-      var inlinesOfBlocks = document.Descendants<LeafBlock>().Select(it => it.Inline).OfType<ContainerInline>().ToList();
-      foreach(var inlines in inlinesOfBlocks) inlines.TakeWhatFollowsDelimitersOutOfThem();
+      var leaves = document.Descendants<LeafBlock>().ToList();
+      foreach(var leaf in leaves) leaf.Inline?.TakeWhatFollowsDelimitersOutOfThem();
 
-      return inlinesOfBlocks.Any(it => it.AreInsideOneAnotherDeeperThan(DeepestInlines)) ? null : document;
+      return leaves.Any(IsTooDeep) ? null : document;
    }
+
+   static bool IsTooDeep(LeafBlock leaf) => leaf.Inline?.AreInsideOneAnotherDeeperThan(Deepest - DepthOf(leaf)) == true;
+
+   static int DepthOf(Block block) => block.Parent is {} parent ? DepthOf(parent) + 1 : 0;
 
    static MarkdownDocument? ParseUnlessBlocksAreTooDeep(string markdown, MarkdownPipeline pipeline)
    {

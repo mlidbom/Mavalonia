@@ -95,6 +95,7 @@ public class Markdown_that_is_read
       [XF] public void nothing_but_code_copies_none() => Copied("```\n⟦a⟧\n```").Must().Be("");
       [XF] public void nothing_copies_none() => Copied("a‸").Must().Be("");
       [XF] public void hundreds_of_opening_brackets_that_none_closes_copies_them() => Copied($"⟦{new string('[', 500)}⟧").Must().Be($"<p>{new string('[', 500)}</p>");
+      [XF] public void formats_inside_one_another_in_quotes_as_deep_as_can_be_read_copies_none() => Copied($"⟦{new string('>', 125)}*a **b *c ~~d~~ c* b** a*⟧").Must().Be("");
       [XF] public void quotes_inside_one_another_hundreds_deep_copies_none() => Copied($"⟦{new string('>', 500)}a⟧").Must().Be("");
    }
 
