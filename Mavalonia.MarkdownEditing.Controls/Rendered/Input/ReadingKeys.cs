@@ -25,7 +25,7 @@ class ReadingKeys
    Action? ActionOf(KeyEventArgs e)
    {
       if(_view.Hotkeys.SelectAll.Any(it => it.Matches(e))) return _view.SelectAll;
-      if(_view.IsAnythingSelected && _view.Hotkeys.Copy.Any(it => it.Matches(e))) return () => _view.CopySelection().SurfaceExceptions();
+      if(_view.IsAnythingSelected && _view.Hotkeys.Copy.Any(it => it.Matches(e))) return () => _view.Copy().SurfaceExceptions();
       if(_view.IsAnythingSelected && e is { Key: Key.Escape, KeyModifiers: KeyModifiers.None }) return _view.SelectNothing;
       return e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? ExtensionOfTheSelection(e) : null;
    }
