@@ -12,7 +12,7 @@ To use them in an application, see [using the controls in an application](dev_do
 | `Mavalonia.MarkdownEditing` | Everything about editing markdown that needs no controls. |
 | `Mavalonia.MarkdownEditing.Controls` | The Avalonia controls |
 | `Mavalonia.MarkdownEditing.Controls.Measurements` | Measures how fast the controls are. |
-| `Mavalonia.DesktopHost` | The application in which to try the controls by hand: an editor, and beside it what is written there as it's to be read. Each file in `SampleDocuments` is offered in its list. |
+| `Mavalonia.DesktopHost` | The application in which to try the controls by hand: an editor that starts with a sample of all it does, and beside it tabs of what is written there as it's to be read and of sample documents to copy from. Each file in `Samples/Tabs` is a tab. |
 | `Mavalonia.MarkdownEditing.Specifications` | Run in parallel, without UI. Most specifications belong here. |
 | `Mavalonia.MarkdownEditing.Controls.Specifications` | Use real controls in windows that exist only in memory, one specification at a time. |
 

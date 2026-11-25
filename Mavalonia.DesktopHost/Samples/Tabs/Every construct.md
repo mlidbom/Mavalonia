@@ -35,7 +35,7 @@ Setext heading
 Fenced code with no language
 ```
 
-![An image](https://commonmark.org/help/images/favicon.png)
+![An image that comes with the application](sample-image.png) and one that is never loaded, since it's on the web: ![An image on the web](https://commonmark.org/help/images/favicon.png)
 
 Escaped \*asterisks\*, an &amp; entity, and <em>inline HTML</em>.
 

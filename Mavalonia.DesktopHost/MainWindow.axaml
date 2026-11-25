@@ -1,33 +1,41 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="using:Mavalonia.MarkdownEditing.Controls"
-        xmlns:host="using:Mavalonia.DesktopHost"
         x:Class="Mavalonia.DesktopHost.MainWindow"
         Title="Mavalonia"
-        Width="1400" Height="800">
+        Width="1400" Height="800" WindowStartupLocation="CenterScreen">
+   <Window.Styles>
+      <Style Selector="TabItem">
+         <Setter Property="FontSize" Value="14" />
+         <Setter Property="MinHeight" Value="34" />
+         <Setter Property="Padding" Value="10,0" />
+      </Style>
+      <Style Selector="Border.Frame">
+         <Setter Property="BorderThickness" Value="1" />
+         <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
+         <Setter Property="CornerRadius" Value="4" />
+      </Style>
+   </Window.Styles>
    <DockPanel>
       <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="8">
-         <ComboBox x:Name="SampleDocuments" SelectionChanged="OpenSelectedSampleDocument">
-            <ComboBox.ItemTemplate>
-               <DataTemplate x:DataType="host:SampleDocument">
-                  <TextBlock Text="{Binding Name}" />
-               </DataTemplate>
-            </ComboBox.ItemTemplate>
-         </ComboBox>
-         <ToggleButton IsChecked="{Binding #Editor.ShowsSource, Mode=TwoWay}" HotKey="Ctrl+M" ToolTip.Tip="Ctrl+M">Source</ToggleButton>
-         <Button Click="QuoteWhatIsSelected" HotKey="Ctrl+Shift+E" ToolTip.Tip="Ctrl+Shift+E: quotes in the editor what is selected at the right">Quote</Button>
+         <ToggleButton IsChecked="{Binding #Editor.ShowsSource, Mode=TwoWay}" HotKey="Ctrl+M" ToolTip.Tip="Ctrl+M: shows the markdown, or what it is rendered as">Source</ToggleButton>
+         <Button Click="QuoteWhatIsSelected" HotKey="Ctrl+Shift+E" ToolTip.Tip="Ctrl+Shift+E: quotes in the editor what is selected in the tab that is shown">Quote</Button>
          <ToggleButton x:Name="IsDark" IsCheckedChanged="ChangeTheTheme">Dark</ToggleButton>
-         <TextBlock x:Name="ClickedLink" VerticalAlignment="Center" />
+         <TextBlock x:Name="ClickedLink" VerticalAlignment="Center" Margin="8,0" />
       </StackPanel>
       <Grid ColumnDefinitions="*,*" Margin="8,0,8,8">
-         <Border BorderThickness="1" BorderBrush="{DynamicResource TextControlBorderBrush}" CornerRadius="4" Margin="0,0,4,0">
-            <controls:MarkdownEditor x:Name="Editor" Padding="12,10" Watermark="Write something" LinkClicked="TellOfTheClickedLink" />
+         <Border Classes="Frame" Margin="0,0,4,0">
+            <controls:MarkdownEditor x:Name="Editor" Padding="12,10" Watermark="Write something" />
          </Border>
-         <Border Grid.Column="1" BorderThickness="1" BorderBrush="{DynamicResource TextControlBorderBrush}" CornerRadius="4" Margin="4,0,0,0">
-            <ScrollViewer>
-               <controls:MarkdownView x:Name="View" Padding="12,10" LinkClicked="TellOfTheClickedLink" />
-            </ScrollViewer>
-         </Border>
+         <TabControl x:Name="Tabs" Grid.Column="1" Margin="4,0,0,0" Padding="0,4,0,0">
+            <TabItem Header="Preview">
+               <Border Classes="Frame">
+                  <ScrollViewer>
+                     <controls:MarkdownView x:Name="Preview" Padding="12,10" />
+                  </ScrollViewer>
+               </Border>
+            </TabItem>
+         </TabControl>
       </Grid>
    </DockPanel>
 </Window>

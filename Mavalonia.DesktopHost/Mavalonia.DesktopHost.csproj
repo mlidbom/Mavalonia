@@ -9,6 +9,6 @@
       <ProjectReference Include="..\Mavalonia.MarkdownEditing.Controls\Mavalonia.MarkdownEditing.Controls.csproj" />
    </ItemGroup>
    <ItemGroup>
-      <Content Include="SampleDocuments\*.md" CopyToOutputDirectory="PreserveNewest" />
+      <Content Include="Samples\**\*" CopyToOutputDirectory="PreserveNewest" />
    </ItemGroup>
 </Project>
