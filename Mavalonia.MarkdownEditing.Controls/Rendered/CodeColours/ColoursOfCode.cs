@@ -65,7 +65,7 @@ class ColoursOfCode
 
       _waiting[code] = [..WhatWaitsForTheStartOf(code), whenKnown];
       _work = WorkOutAfter(_work, code);
-      Surface(_work);
+      _work.SurfaceExceptions();
    }
 
    ///<summary>While code is written, its colours aren't worked out as it was before. What waits for those waits for the colours of what it is now.</summary>
@@ -75,10 +75,6 @@ class ColoursOfCode
       foreach(var start in starts) _waiting.Remove(start.Key);
       return [..starts.SelectMany(it => it.Value)];
    }
-
-   ///<summary>Has an exception in <paramref name="work"/> surface where all of the application's do.</summary>
-   // ReSharper disable once AsyncVoidMethod
-   static async void Surface(Task work) => await work;
 
    async Task WorkOutAfter(Task workBefore, CodeToColour code)
    {

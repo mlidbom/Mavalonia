@@ -14,10 +14,6 @@ class ClipboardInput
 
    IClipboard Clipboard => TopLevel.GetTopLevel(_view)!.Clipboard!;
 
-   ///<summary>Awaits <paramref name="use"/> of the clipboard, so that an exception in it surfaces where all of the application's do.</summary>
-   // ReSharper disable once AsyncVoidMethod
-   internal static async void Use(Task use) => await use;
-
    internal async Task Copy(RenderedEditor editor)
    {
       if(!editor.Selection.IsEmpty) await ClipboardContent.Write(editor, Clipboard);

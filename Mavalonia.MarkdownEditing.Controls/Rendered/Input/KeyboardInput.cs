@@ -84,11 +84,11 @@ class KeyboardInput
 
    Action? ClipboardActionOf(KeyEventArgs e, RenderedEditor editor)
    {
-      if(Is(Hotkeys.Copy, e)) return () => ClipboardInput.Use(_clipboard.Copy(editor));
-      if(Is(Hotkeys.Cut, e)) return () => ClipboardInput.Use(_clipboard.Cut(editor));
-      if(_view.PasteAsQuoteGesture?.Matches(e) == true) return () => ClipboardInput.Use(_clipboard.PasteAsQuote(editor));
-      if(_view.PasteTextGesture?.Matches(e) == true) return () => ClipboardInput.Use(_clipboard.PasteText(editor));
-      if(Is(Hotkeys.Paste, e)) return () => ClipboardInput.Use(_clipboard.Paste(editor));
+      if(Is(Hotkeys.Copy, e)) return () => _clipboard.Copy(editor).SurfaceExceptions();
+      if(Is(Hotkeys.Cut, e)) return () => _clipboard.Cut(editor).SurfaceExceptions();
+      if(_view.PasteAsQuoteGesture?.Matches(e) == true) return () => _clipboard.PasteAsQuote(editor).SurfaceExceptions();
+      if(_view.PasteTextGesture?.Matches(e) == true) return () => _clipboard.PasteText(editor).SurfaceExceptions();
+      if(Is(Hotkeys.Paste, e)) return () => _clipboard.Paste(editor).SurfaceExceptions();
       return null;
    }
 

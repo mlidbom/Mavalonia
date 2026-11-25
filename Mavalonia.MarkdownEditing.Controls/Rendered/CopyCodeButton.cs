@@ -3,7 +3,6 @@ using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using Avalonia.Threading;
-using Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered;
@@ -23,7 +22,7 @@ class CopyCodeButton : Button
       Padding = new Thickness(8, 2);
       Cursor = Cursors.OfAButton;
       AutomationProperties.SetName(this, "Copy the code");
-      Click += (_, _) => ClipboardInput.Use(CopyTheCode());
+      Click += (_, _) => CopyTheCode().SurfaceExceptions();
       _untilItSaysCopyAgain.Tick += (_, _) => SayCopy();
    }
 
