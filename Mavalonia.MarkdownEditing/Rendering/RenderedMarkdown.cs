@@ -31,14 +31,14 @@ public class RenderedMarkdown
       return new RenderedPosition(block, block.Text.IndexAt(offset));
    }
 
-   ///<summary>The offset nearest to <paramref name="offset"/> at which text can be typed: not inside what is shown as one character, nor outside the text of all blocks.</summary>
+   ///<summary>The offset nearest to <paramref name="offset"/> at which text can be typed: not inside what is shown as one char, nor outside the text of all blocks.</summary>
    internal int OffsetWhereTextCanBeTyped(int offset)
    {
       var position = PositionAt(offset);
       var text = position.Block.Text;
       if(!text.Source.Touches(offset)) return position.Offset;
 
-      return position.IsAtTheEndOfItsBlock ? offset : Math.Min(offset, text.Characters[position.Index].Source.Start);
+      return position.IsAtTheEndOfItsBlock ? offset : Math.Min(offset, text.Chars[position.Index].Source.Start);
    }
 
    internal PositionByNumbers NumbersOf(RenderedPosition position) => new(NumberOf(position.Block), position.Index);

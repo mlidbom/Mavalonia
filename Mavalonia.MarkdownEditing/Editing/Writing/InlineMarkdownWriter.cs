@@ -8,7 +8,7 @@ partial class InlineMarkdownWriter
 {
    static readonly TextFormats[] FormatsWithDelimiters = [TextFormats.Bold, TextFormats.Italic, TextFormats.Strikethrough];
 
-   readonly IReadOnlyList<FormattedCharacter> _characters;
+   readonly IReadOnlyList<FormattedChar> _chars;
    readonly string _italicDelimiter;
    readonly StringBuilder _markdown = new();
 
@@ -17,46 +17,46 @@ partial class InlineMarkdownWriter
 
    InlineMarkdownWriter(FormattedText text, string italicDelimiter)
    {
-      _characters = WithFormattingOnWhiteSpaceOnlyBetweenCharactersThatHaveIt(text.Characters);
+      _chars = WithFormattingOnWhiteSpaceOnlyBetweenCharsThatHaveIt(text.Chars);
       _italicDelimiter = italicDelimiter;
    }
 
    ///<summary>The ways to write <paramref name="text"/>, the preferred first. Next to other markup, one may be read as intended where another isn't.</summary>
    internal static IEnumerable<string> WaysToWrite(FormattedText text) =>
-      text.Characters.Any(it => it.Formatting.Has(TextFormats.Italic)) ? [Write(text, "*"), Write(text, "_")] : [Write(text, "*")];
+      text.Chars.Any(it => it.Formatting.Has(TextFormats.Italic)) ? [Write(text, "*"), Write(text, "_")] : [Write(text, "*")];
 
    internal static string PreferredWayToWrite(FormattedText text) => WaysToWrite(text).First();
 
    static string Write(FormattedText text, string italicDelimiter) => new InlineMarkdownWriter(text, italicDelimiter).Write();
 
-   ///<summary>Markup must start and end at a character that isn't white space: <c>**bold **</c> isn't bold.</summary>
-   static IReadOnlyList<FormattedCharacter> WithFormattingOnWhiteSpaceOnlyBetweenCharactersThatHaveIt(IReadOnlyList<FormattedCharacter> characters)
+   ///<summary>Markup must start and end at a char that isn't white space: <c>**bold **</c> isn't bold.</summary>
+   static IReadOnlyList<FormattedChar> WithFormattingOnWhiteSpaceOnlyBetweenCharsThatHaveIt(IReadOnlyList<FormattedChar> chars)
    {
-      return [..characters.Select((it, index) => it is { IsWhiteSpace: true, IsCode: false } ? FormattedAsTheCharactersAroundIt(it, index) : it)];
+      return [..chars.Select((it, index) => it is { IsWhiteSpace: true, IsCode: false } ? FormattedAsTheCharsAroundIt(it, index) : it)];
 
-      FormattedCharacter FormattedAsTheCharactersAroundIt(FormattedCharacter whiteSpace, int index) =>
-         FormatsWithDelimiters.Aggregate(whiteSpace, (it, format) => IsBetweenCharactersWith(format, index) ? it.With(format) : it.Without(format));
+      FormattedChar FormattedAsTheCharsAroundIt(FormattedChar whiteSpace, int index) =>
+         FormatsWithDelimiters.Aggregate(whiteSpace, (it, format) => IsBetweenCharsWith(format, index) ? it.With(format) : it.Without(format));
 
-      bool IsBetweenCharactersWith(TextFormats format, int index) =>
-         characters.Take(index).LastOrDefault(it => !it.IsWhiteSpace).Formatting.Has(format) && characters.Skip(index).FirstOrDefault(it => !it.IsWhiteSpace).Formatting.Has(format);
+      bool IsBetweenCharsWith(TextFormats format, int index) =>
+         chars.Take(index).LastOrDefault(it => !it.IsWhiteSpace).Formatting.Has(format) && chars.Skip(index).FirstOrDefault(it => !it.IsWhiteSpace).Formatting.Has(format);
    }
 
    string Write()
    {
-      for(var index = 0; index < _characters.Count; index++)
+      for(var index = 0; index < _chars.Count; index++)
       {
-         CloseWhatDoesNotFormat(_characters[index]);
+         CloseWhatDoesNotFormat(_chars[index]);
          OpenWhatFormatsFrom(index);
-         _markdown.Append(_characters[index].IsCode ? _characters[index].Value : _characters[index].Markdown);
+         _markdown.Append(_chars[index].IsCode ? _chars[index].Value : _chars[index].Markdown);
       }
 
       CloseAllFrom(0);
       return _markdown.ToString();
    }
 
-   void CloseWhatDoesNotFormat(FormattedCharacter character)
+   void CloseWhatDoesNotFormat(FormattedChar formattedChar)
    {
-      var firstToClose = _open.FindIndex(it => !it.Markup.Formats(character));
+      var firstToClose = _open.FindIndex(it => !it.Markup.Formats(formattedChar));
       if(firstToClose >= 0) CloseAllFrom(firstToClose);
    }
 
@@ -73,7 +73,7 @@ partial class InlineMarkdownWriter
       foreach(var markup in ToOpenAt(index).OrderBy(it => it.IsCode).ThenByDescending(it => LengthOf(it, index)).ThenByDescending(it => it.Link is not null)) Open(markup, index);
    }
 
-   IReadOnlyList<Markup> ToOpenAt(int index) => [..Markup.Of(_characters[index]).Where(it => _open.All(open => open.Markup != it))];
+   IReadOnlyList<Markup> ToOpenAt(int index) => [..Markup.Of(_chars[index]).Where(it => _open.All(open => open.Markup != it))];
 
    void CloseCode()
    {
@@ -89,13 +89,13 @@ partial class InlineMarkdownWriter
          { Format: TextFormats.Bold } => new OpenMarkup(markup, "**", "**"),
          { Format: TextFormats.Italic } => new OpenMarkup(markup, _italicDelimiter, _italicDelimiter),
          { Format: TextFormats.Strikethrough } => new OpenMarkup(markup, "~~", "~~"),
-         _ => OpenMarkup.OfCode(markup, new string([.._characters.Skip(index).Take(LengthOf(markup, index)).Select(it => it.Value)]))
+         _ => OpenMarkup.OfCode(markup, new string([.._chars.Skip(index).Take(LengthOf(markup, index)).Select(it => it.Value)]))
       };
 
       _markdown.Append(open.Opening);
       _open.Add(open);
    }
 
-   ///<summary>How many characters from <paramref name="index"/> that <paramref name="markup"/> formats.</summary>
-   int LengthOf(Markup markup, int index) => _characters.Skip(index).TakeWhile(markup.Formats).Count();
+   ///<summary>How many chars from <paramref name="index"/> that <paramref name="markup"/> formats.</summary>
+   int LengthOf(Markup markup, int index) => _chars.Skip(index).TakeWhile(markup.Formats).Count();
 }

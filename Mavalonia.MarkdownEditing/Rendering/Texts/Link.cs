@@ -1,6 +1,6 @@
 namespace Mavalonia.MarkdownEditing.Rendering.Texts;
 
-///<summary>A link in a markdown text. The characters that are its label refer to it.</summary>
+///<summary>A link in a markdown text. The chars that are its label refer to it.</summary>
 public class Link
 {
    internal Link(string target, string opening, string closing)

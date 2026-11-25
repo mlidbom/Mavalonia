@@ -36,7 +36,7 @@ class MarkdownReader
    }
 
    static bool IsSourceKnownOf(IReadOnlyList<RenderedBlock> blocks) =>
-      blocks.All(it => it.Text.IsOfCharactersInOrder) && blocks.Zip(blocks.Skip(1)).All(it => it.First.Text.Source.End <= it.Second.Text.Source.Start);
+      blocks.All(it => it.Text.IsOfCharsInOrder) && blocks.Zip(blocks.Skip(1)).All(it => it.First.Text.Source.End <= it.Second.Text.Source.Start);
 
    void ReadBlocksIn(ContainerBlock blocks, PlaceOfBlocks place)
    {

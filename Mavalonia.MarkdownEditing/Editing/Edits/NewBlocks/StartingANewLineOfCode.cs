@@ -27,7 +27,7 @@ class StartingANewLineOfCode
 
    SourceChange LeaveTheCode()
    {
-      var endOfCodeWithoutTheEmptyLine = _code.Text.Characters[^1].Source.Start;
+      var endOfCodeWithoutTheEmptyLine = _code.Text.Chars[^1].Source.Start;
       return new GoingToAnEmptyParagraphAfter(_rendered, _code).AddAfterReplacing(new SourceRange(endOfCodeWithoutTheEmptyLine, _code.Source.End), by: EndOfTheBlock());
    }
 

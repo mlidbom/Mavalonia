@@ -128,7 +128,7 @@ class TextReader
 
    void ReadEntity(HtmlEntityInline entity, TextFormatting formatting)
    {
-      foreach(var character in entity.Transcoded.ToString()) _text.Add(character, RangeOf(entity), formatting);
+      foreach(var value in entity.Transcoded.ToString()) _text.Add(value, RangeOf(entity), formatting);
    }
 
    void ReadLineBreak(LineBreakInline lineBreak, TextFormatting formatting)
@@ -145,23 +145,23 @@ class TextReader
       }
    }
 
-   ///<summary>Finds each character of <paramref name="text"/> in the markdown in <paramref name="range"/>. What there is between them is the backslashes of escaped characters, and, in code of several lines, the line breaks, which code shows as spaces.</summary>
+   ///<summary>Finds each char of <paramref name="text"/> in the markdown in <paramref name="range"/>. What there is between them is the backslashes of escaped chars, and, in code of several lines, the line breaks, which code shows as spaces.</summary>
    void ReadCharactersAlong(SourceRange range, string text, TextFormatting formatting)
    {
       var offset = text.StartsWith(' ') || text.StartsWith('\t') ? range.Start : _markdown.SkipSpaces(range.Start); // Markdig takes the spaces around the text of a cell away, but not from its range.
-      foreach(var character in text)
+      foreach(var value in text)
       {
-         var end = EndOf(character);
-         _text.Add(character, new SourceRange(offset, end), formatting);
+         var end = EndOf(value);
+         _text.Add(value, new SourceRange(offset, end), formatting);
          offset = end;
       }
 
-      int EndOf(char character)
+      int EndOf(char value)
       {
-         if(!formatting.Has(TextFormats.Code)) return _markdown[offset] == character ? offset + 1 : offset + 2;
+         if(!formatting.Has(TextFormats.Code)) return _markdown[offset] == value ? offset + 1 : offset + 2;
 
-         var isALineBreak = character == ' ' && offset == _markdown.EndOfLineAt(offset);
-         return isALineBreak ? _containers.StartOfTextOnTheLineAfter(_markdown, offset) : _markdown.IndexOf(character, offset) + 1;
+         var isALineBreak = value == ' ' && offset == _markdown.EndOfLineAt(offset);
+         return isALineBreak ? _containers.StartOfTextOnTheLineAfter(_markdown, offset) : _markdown.IndexOf(value, offset) + 1;
       }
    }
 }

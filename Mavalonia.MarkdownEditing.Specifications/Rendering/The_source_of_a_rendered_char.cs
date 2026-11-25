@@ -5,9 +5,9 @@ using Mavalonia.MarkdownEditing.Specifications.CommonMark;
 
 namespace Mavalonia.MarkdownEditing.Specifications.Rendering;
 
-public class The_source_of_a_rendered_character
+public class The_source_of_a_rendered_char
 {
-   static SourceRange Of(char character, string markdown) => RenderedMarkdown.Of(markdown).Blocks.SelectMany(it => it.Text.Characters).Single(it => it.Value == character).Source;
+   static SourceRange Of(char character, string markdown) => RenderedMarkdown.Of(markdown).Blocks.SelectMany(it => it.Text.Chars).Single(it => it.Value == character).Source;
    static SourceRange Range(string markdown, string ofText) => new(markdown.IndexOf(ofText, StringComparison.Ordinal), markdown.IndexOf(ofText, StringComparison.Ordinal) + ofText.Length);
 
    [XF] public void includes_the_backslash_of_an_escaped_character() => Of('*', @"a \* b").Must().Be(Range(@"a \* b", @"\*"));
@@ -41,7 +41,7 @@ public class The_source_of_a_rendered_character
       var startOfText = 0;
       foreach(var block in rendered.Blocks)
       {
-         foreach(var (index, character) in block.Text.Characters.Index().Where(it => char.IsAsciiLetter(it.Item.Value) && !it.Item.Formatting.IsShownAsSource && it.Item.Source.Length == 1))
+         foreach(var (index, character) in block.Text.Chars.Index().Where(it => char.IsAsciiLetter(it.Item.Value) && !it.Item.Formatting.IsShownAsSource && it.Item.Source.Length == 1))
          {
             var another = AnotherLetterThan(character.Value);
             yield return (With(rendered.Source, character.Source.Start, another), With(texts, startOfText + index, another));
@@ -67,7 +67,7 @@ public class The_source_of_a_rendered_character
         .Where(it => TextsOf(RenderedMarkdown.Of(it.Markdown)) != it.ExpectedTexts).Must().BeEmpty();
 
    [XF] public void starts_where_the_source_of_the_character_before_it_ends_or_after_that_in_every_CommonMark_example() =>
-      CommonMarkExample.All.Where(example => RenderedMarkdown.Of(example.Markdown).Blocks.Any(block => block.Text.Characters.Zip(block.Text.Characters.Skip(1)).Any(it => it.First.Source != it.Second.Source && it.First.Source.End > it.Second.Source.Start)))
+      CommonMarkExample.All.Where(example => RenderedMarkdown.Of(example.Markdown).Blocks.Any(block => block.Text.Chars.Zip(block.Text.Chars.Skip(1)).Any(it => it.First.Source != it.Second.Source && it.First.Source.End > it.Second.Source.Start)))
                        .Select(it => it.Markdown).Must().BeEmpty();
 
    [XF] public void leads_from_an_index_to_an_offset_and_back_to_that_index_in_every_CommonMark_example() =>

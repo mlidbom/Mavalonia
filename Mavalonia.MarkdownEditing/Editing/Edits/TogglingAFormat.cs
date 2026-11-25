@@ -17,7 +17,7 @@ class TogglingAFormat
    {
       _format = format;
       _texts = [..selected.PartInEachBlock.Where(it => !it.IsEmpty && it.Start.Block is Paragraph or Heading or TableCell)];
-      _allHaveTheFormat = _texts.SelectMany(it => FormattedText.In(it).Characters).All(it => it.IsWhiteSpace || it.Formatting.Has(format));
+      _allHaveTheFormat = _texts.SelectMany(it => FormattedText.In(it).Chars).All(it => it.IsWhiteSpace || it.Formatting.Has(format));
    }
 
    ///<summary>The changes to make, one after the other: each is made to what is rendered after the one before it. Null where no change looks right.</summary>

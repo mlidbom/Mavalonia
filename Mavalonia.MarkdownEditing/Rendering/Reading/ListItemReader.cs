@@ -46,7 +46,7 @@ class ListItemReader
 
    PlaceOfBlocks InTheItem(int column) => _place.In(new ListItem(_marker, _number, WidthUpTo(column)), column);
 
-   ///<summary>No item is narrower than its marker and a space. That has to be said, since Markdig counts tabs in other ways than as characters.</summary>
+   ///<summary>No item is narrower than its marker and a space. That has to be said, since Markdig counts tabs in other ways than as chars.</summary>
    int WidthUpTo(int column) => Math.Max(_marker.Length + 1, column - ColumnThatItIsIndentedFrom());
 
    int ColumnOfItsFirstBlock()

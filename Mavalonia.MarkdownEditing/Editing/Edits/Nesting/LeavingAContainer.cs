@@ -54,7 +54,7 @@ class LeavingAContainer
    {
       var start = Block.Source.Start;
       var text = "";
-      foreach(var lineBreak in Block.Text.Characters.Where(it => it.IsLineBreak))
+      foreach(var lineBreak in Block.Text.Chars.Where(it => it.IsLineBreak))
       {
          text += _rendered.Source[start.._rendered.Source.StartOfLineAfter(lineBreak.Source.Start)!.Value] + _containers.PrefixOfTheirLines;
          start = lineBreak.Source.End;

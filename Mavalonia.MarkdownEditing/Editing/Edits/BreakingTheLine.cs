@@ -30,7 +30,7 @@ class BreakingTheLine
    SourceChange Break()
    {
       var newLine = new LineBreaksInside(_rendered, _position.Block.Containers).NewLine;
-      var lineBreak = new FormattedText([new FormattedCharacter('\n', _position.Block.Text.FormattingAt(_offset), newLine)]);
+      var lineBreak = new FormattedText([new FormattedChar('\n', _position.Block.Text.FormattingAt(_offset), newLine)]);
       var inserted = SourceChange.Insert(_rendered, _offset, newLine);
 
       return new TextReplacement(RenderedRange.EmptyAt(_rendered, _position), lineBreak).ThatLooksRight(tryFirst: inserted) ?? inserted;

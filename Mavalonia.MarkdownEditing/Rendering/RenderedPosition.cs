@@ -2,7 +2,7 @@ using Mavalonia.MarkdownEditing.Rendering.Blocks;
 
 namespace Mavalonia.MarkdownEditing.Rendering;
 
-///<summary>A place where a caret can be in what is rendered: in the text of <paramref name="Block"/>, before its character number <paramref name="Index"/>.</summary>
+///<summary>A place where a caret can be in what is rendered: in the text of <paramref name="Block"/>, before its char number <paramref name="Index"/>.</summary>
 public readonly record struct RenderedPosition(RenderedBlock Block, int Index)
 {
    public static RenderedPosition AtTheStartOf(RenderedBlock block) => new(block, 0);

@@ -13,7 +13,7 @@ Controls for Avalonia®. The first is a WYSIWYG markdown editor for writing mess
 ## How editing works
 
 - **The markdown text is the document.** It is an AvaloniaEdit `TextDocument`, which works without a UI, and has undo. The rendered view and the source view edit the same one, so nothing is converted when switching, and markdown that isn't edited stays as it is written.
-- **The rendered view shows no markup.** Each character it shows knows the markdown it stands for (`RenderedCharacter.Source`).
+- **The rendered view shows no markup.** Each character it shows knows the markdown it stands for (`RenderedChar.Source`).
 - **An edit says what is to be shown,** then finds the least change to the markdown that shows that, and verifies it by rendering the result (`TextReplacement`). Typing a space at the end of bold text must not stop it from being bold, though `**bold **` isn't.
 - **Some markup is turned off** since people type it without meaning to: headings made by underlining, and code made by indenting. Both are shown as ordinary text.
 - **Markup that isn't rendered is shown as source:** HTML, images, link definitions.

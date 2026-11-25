@@ -54,12 +54,12 @@ public sealed class RenderedEditor : IDisposable
    ///<summary>The formatting that text typed now gets.</summary>
    TextFormatting FormattingToType => _formattingToType ?? FormattingOfTheSelection;
 
-   TextFormatting FormattingOfTheSelection => Selection.IsEmpty ? FormattingAtTheCaret : FirstSelectedCharacter?.Formatting ?? TextFormatting.None;
+   TextFormatting FormattingOfTheSelection => Selection.IsEmpty ? FormattingAtTheCaret : FirstSelectedChar?.Formatting ?? TextFormatting.None;
 
    ///<summary>The formatting that the markup around the caret gives.</summary>
    TextFormatting FormattingAtTheCaret => CaretPosition.Block.Text.FormattingAt(Selection.Caret);
 
-   RenderedCharacter? FirstSelectedCharacter => Selected.Start is { IsAtTheEndOfItsBlock: false } start ? start.Block.Text.Characters[start.Index] : null;
+   RenderedChar? FirstSelectedChar => Selected.Start is { IsAtTheEndOfItsBlock: false } start ? start.Block.Text.Chars[start.Index] : null;
 
    ///<summary>The markdown of what is selected.</summary>
    public string SelectedMarkdown => Selection.IsEmpty ? "" : new MarkdownOfASelection(Selected).Markdown;

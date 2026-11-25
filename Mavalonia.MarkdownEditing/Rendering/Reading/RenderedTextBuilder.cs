@@ -3,12 +3,12 @@ using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Rendering.Reading;
 
-///<summary>Puts the text of a block together, from its first character to its last.</summary>
+///<summary>Puts the text of a block together, from its first char to its last.</summary>
 class RenderedTextBuilder
 {
    readonly string _markdown;
    readonly BlockContainers _containers;
-   readonly List<RenderedCharacter> _characters = [];
+   readonly List<RenderedChar> _chars = [];
    readonly List<InlineMarkup> _markups = [];
 
    internal RenderedTextBuilder(string markdown, BlockContainers containers)
@@ -17,17 +17,17 @@ class RenderedTextBuilder
       _containers = containers;
    }
 
-   internal bool IsEmpty => _characters.Count == 0;
+   internal bool IsEmpty => _chars.Count == 0;
 
-   ///<summary>The text. There must be at least one character in it.</summary>
-   internal RenderedText Text => new(_characters, _markups, new SourceRange(Start, End));
+   ///<summary>The text. There must be at least one char in it.</summary>
+   internal RenderedText Text => new(_chars, _markups, new SourceRange(Start, End));
 
-   int Start => _markups.Where(it => it.FirstIndex == 0).Select(it => it.Source.Start).Append(_characters[0].Source.Start).Min();
+   int Start => _markups.Where(it => it.FirstIndex == 0).Select(it => it.Source.Start).Append(_chars[0].Source.Start).Min();
 
    ///<summary>Where the source of the text ends, with the markup that ends there.</summary>
-   internal int End => _markups.Where(it => it.EndIndex == _characters.Count).Select(it => it.Source.End).Append(_characters[^1].Source.End).Max();
+   internal int End => _markups.Where(it => it.EndIndex == _chars.Count).Select(it => it.Source.End).Append(_chars[^1].Source.End).Max();
 
-   internal void Add(char character, SourceRange source, TextFormatting formatting) => _characters.Add(new RenderedCharacter(character, source, formatting));
+   internal void Add(char value, SourceRange source, TextFormatting formatting) => _chars.Add(new RenderedChar(value, source, formatting));
 
    ///<summary>Adds the line break that is at <paramref name="start"/>. What precedes the text on the next line belongs to it.</summary>
    internal void AddLineBreak(int start, TextFormatting formatting) => Add('\n', new SourceRange(start, _containers.StartOfTextOnTheLineAfter(_markdown, start)), formatting);
@@ -35,7 +35,7 @@ class RenderedTextBuilder
    ///<summary>Adds the markdown in <paramref name="range"/> as it is written.</summary>
    internal void AddSource(SourceRange range, TextFormatting formatting)
    {
-      for(var offset = range.Start; offset < range.End; offset = _characters[^1].Source.End)
+      for(var offset = range.Start; offset < range.End; offset = _chars[^1].Source.End)
       {
          if(offset == _markdown.EndOfLineAt(offset))
             AddLineBreak(offset, formatting);
@@ -54,16 +54,16 @@ class RenderedTextBuilder
    ///<summary>Where the spaces before <paramref name="offset"/> start that haven't been added.</summary>
    internal int StartOfTheSpacesBefore(int offset)
    {
-      var endOfWhatIsAdded = IsEmpty ? offset : _characters[^1].Source.End;
+      var endOfWhatIsAdded = IsEmpty ? offset : _chars[^1].Source.End;
       while(offset > endOfWhatIsAdded && _markdown[offset - 1] is ' ' or '\t') offset--;
       return offset;
    }
 
-   ///<summary>Adds the characters that <paramref name="addContent"/> does, as formatted by the markup in <paramref name="range"/>.</summary>
+   ///<summary>Adds the chars that <paramref name="addContent"/> does, as formatted by the markup in <paramref name="range"/>.</summary>
    internal void AddMarkup(SourceRange range, SourceRange content, TextFormatting itsFormatting, Action addContent)
    {
-      var firstIndex = _characters.Count;
+      var firstIndex = _chars.Count;
       addContent();
-      _markups.Add(new InlineMarkup(range, content, firstIndex, _characters.Count, itsFormatting));
+      _markups.Add(new InlineMarkup(range, content, firstIndex, _chars.Count, itsFormatting));
    }
 }

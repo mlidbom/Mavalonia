@@ -52,12 +52,12 @@ public class Editing_anywhere
       return (editor.Document.Text, TextsOf(editor.Rendered));
    }
 
-   static bool IsTextThatCanBeSplit(RenderedBlock block, int index) => block is Paragraph or Heading && index > 0 && index < block.Text.Length && !block.Text.Characters[index - 1].IsWhiteSpace && !block.Text.Characters[index].IsWhiteSpace && IsBetweenCharacters(block, index);
+   static bool IsTextThatCanBeSplit(RenderedBlock block, int index) => block is Paragraph or Heading && index > 0 && index < block.Text.Length && !block.Text.Chars[index - 1].IsWhiteSpace && !block.Text.Chars[index].IsWhiteSpace && IsBetweenCharacters(block, index);
 
    static bool IsBetweenCharacters(RenderedBlock block, int index) => index == block.Text.Length || block.Text.Boundaries.StartOfCharacterBefore(index + 1) == index || block.Text.Boundaries.StartOfCharacterBefore(block.Text.Boundaries.EndOfCharacterAfter(index)) == index;
 
    ///<summary>Markdown shows no space at the start of text.</summary>
-   static bool LeavesASpaceAtTheStart(RenderedBlock block, int index) => block is not CodeBlock && block.Text.Boundaries.StartOfCharacterBefore(index) == 0 && index < block.Text.Length && block.Text.Characters[index].IsWhiteSpace;
+   static bool LeavesASpaceAtTheStart(RenderedBlock block, int index) => block is not CodeBlock && block.Text.Boundaries.StartOfCharacterBefore(index) == 0 && index < block.Text.Length && block.Text.Chars[index].IsWhiteSpace;
 
    [XF] public void by_typing_a_letter_shows_that_letter_there_and_nothing_else_changes() =>
       Exceptions(it => it.Type("x"), (block, index) => block is ThematicBreak || !IsBetweenCharacters(block, index) ? null : [block.Text.Value.Insert(index, "x")]).Must().BeEmpty();

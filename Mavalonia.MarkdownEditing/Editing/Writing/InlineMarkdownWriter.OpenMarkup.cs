@@ -2,7 +2,7 @@ namespace Mavalonia.MarkdownEditing.Editing.Writing;
 
 partial class InlineMarkdownWriter
 {
-   ///<summary>Markup that has been opened, and is closed after the last character that it formats.</summary>
+   ///<summary>Markup that has been opened, and is closed after the last char that it formats.</summary>
    readonly record struct OpenMarkup(Markup Markup, string Opening, string Closing)
    {
       internal static OpenMarkup OfCode(Markup markup, string code)

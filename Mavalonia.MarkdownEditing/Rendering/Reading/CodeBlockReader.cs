@@ -65,13 +65,13 @@ class CodeBlockReader
 
    RenderedText TextOf(IReadOnlyList<SourceRange> lines)
    {
-      var characters = lines.SelectMany((line, index) => index == 0 ? CharactersOf(line) : CharactersOf(line).Prepend(LineBreakBetween(lines[index - 1], line)));
+      var chars = lines.SelectMany((line, index) => index == 0 ? CharsOf(line) : CharsOf(line).Prepend(LineBreakBetween(lines[index - 1], line)));
 
-      return new RenderedText([..characters], [], new SourceRange(lines[0].Start, lines[^1].End));
+      return new RenderedText([..chars], [], new SourceRange(lines[0].Start, lines[^1].End));
    }
 
-   IEnumerable<RenderedCharacter> CharactersOf(SourceRange line) =>
-      Enumerable.Range(line.Start, line.Length).Select(it => new RenderedCharacter(_markdown[it], new SourceRange(it, it + 1), Formatting));
+   IEnumerable<RenderedChar> CharsOf(SourceRange line) =>
+      Enumerable.Range(line.Start, line.Length).Select(it => new RenderedChar(_markdown[it], new SourceRange(it, it + 1), Formatting));
 
-   static RenderedCharacter LineBreakBetween(SourceRange line, SourceRange next) => new('\n', new SourceRange(line.End, next.Start), Formatting);
+   static RenderedChar LineBreakBetween(SourceRange line, SourceRange next) => new('\n', new SourceRange(line.End, next.Start), Formatting);
 }

@@ -55,9 +55,9 @@ class EmptyParagraphs
    Paragraph WithALineBreakAtItsEnd(Paragraph paragraph)
    {
       var text = paragraph.Text;
-      var lineBreak = new RenderedCharacter('\n', new SourceRange(text.Source.End, _markdown.Length), TextFormatting.None);
+      var lineBreak = new RenderedChar('\n', new SourceRange(text.Source.End, _markdown.Length), TextFormatting.None);
 
-      return new Paragraph(paragraph.Containers, new RenderedText([..text.Characters, lineBreak], text.Markups, text.Source with { End = _markdown.Length }));
+      return new Paragraph(paragraph.Containers, new RenderedText([..text.Chars, lineBreak], text.Markups, text.Source with { End = _markdown.Length }));
    }
 
    ///<summary>An empty paragraph on the line that starts at <paramref name="startOfLine"/>. It is inside those containers of the blocks around it whose prefixes are on the line.</summary>
