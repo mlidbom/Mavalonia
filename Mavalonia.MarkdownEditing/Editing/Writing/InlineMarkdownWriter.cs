@@ -4,7 +4,7 @@ using Mavalonia.MarkdownEditing.Rendering.Texts;
 namespace Mavalonia.MarkdownEditing.Editing.Writing;
 
 ///<summary>Writes a <see cref="FormattedText"/> as markdown.</summary>
-class InlineMarkdownWriter
+partial class InlineMarkdownWriter
 {
    static readonly TextFormats[] FormatsWithDelimiters = [TextFormats.Bold, TextFormats.Italic, TextFormats.Strikethrough];
 
@@ -32,7 +32,10 @@ class InlineMarkdownWriter
    ///<summary>Markup must start and end at a character that isn't white space: <c>**bold **</c> isn't bold.</summary>
    static IReadOnlyList<FormattedCharacter> WithFormattingOnWhiteSpaceOnlyBetweenCharactersThatHaveIt(IReadOnlyList<FormattedCharacter> characters)
    {
-      return [..characters.Select((it, index) => it is { IsWhiteSpace: true, IsCode: false } ? FormatsWithDelimiters.Aggregate(it, (character, format) => IsBetweenCharactersWith(format, index) ? character.With(format) : character.Without(format)) : it)];
+      return [..characters.Select((it, index) => it is { IsWhiteSpace: true, IsCode: false } ? FormattedAsTheCharactersAroundIt(it, index) : it)];
+
+      FormattedCharacter FormattedAsTheCharactersAroundIt(FormattedCharacter whiteSpace, int index) =>
+         FormatsWithDelimiters.Aggregate(whiteSpace, (it, format) => IsBetweenCharactersWith(format, index) ? it.With(format) : it.Without(format));
 
       bool IsBetweenCharactersWith(TextFormats format, int index) =>
          characters.Take(index).LastOrDefault(it => !it.IsWhiteSpace).Formatting.Has(format) && characters.Skip(index).FirstOrDefault(it => !it.IsWhiteSpace).Formatting.Has(format);
@@ -65,18 +68,17 @@ class InlineMarkdownWriter
 
    void OpenWhatFormatsFrom(int index)
    {
-      var toOpen = MarkupOf(_characters[index]).Where(it => _open.All(open => open.Markup != it)).ToList();
-      if(toOpen.Count == 0) return;
+      if(ToOpenAt(index).Count > 0) CloseCode(); // Nothing can be opened inside code.
 
-      var openCode = _open.FindIndex(it => it.Markup.Format == TextFormats.Code);
-      if(openCode >= 0)
-      {
-         CloseAllFrom(openCode); // Nothing can be opened inside code.
-         OpenWhatFormatsFrom(index);
-         return;
-      }
+      foreach(var markup in ToOpenAt(index).OrderBy(it => it.IsCode).ThenByDescending(it => LengthOf(it, index)).ThenByDescending(it => it.Link is not null)) Open(markup, index);
+   }
 
-      foreach(var markup in toOpen.OrderBy(it => it.Format == TextFormats.Code).ThenByDescending(it => LengthOf(it, index)).ThenByDescending(it => it.Link is not null)) Open(markup, index);
+   IReadOnlyList<Markup> ToOpenAt(int index) => [..Markup.Of(_characters[index]).Where(it => _open.All(open => open.Markup != it))];
+
+   void CloseCode()
+   {
+      var openCode = _open.FindIndex(it => it.Markup.IsCode);
+      if(openCode >= 0) CloseAllFrom(openCode);
    }
 
    void Open(Markup markup, int index)
@@ -87,35 +89,13 @@ class InlineMarkdownWriter
          { Format: TextFormats.Bold } => new OpenMarkup(markup, "**", "**"),
          { Format: TextFormats.Italic } => new OpenMarkup(markup, _italicDelimiter, _italicDelimiter),
          { Format: TextFormats.Strikethrough } => new OpenMarkup(markup, "~~", "~~"),
-         _ => OpenCode(markup, new string([.._characters.Skip(index).Take(LengthOf(markup, index)).Select(it => it.Value)]))
+         _ => OpenMarkup.OfCode(markup, new string([.._characters.Skip(index).Take(LengthOf(markup, index)).Select(it => it.Value)]))
       };
 
       _markdown.Append(open.Opening);
       _open.Add(open);
    }
 
-   static OpenMarkup OpenCode(Markup markup, string code)
-   {
-      var fence = new string('`', LengthOfTheLongestRunOfBackticks() + 1);
-      var padding = code.StartsWith('`') || code.EndsWith('`') ? " " : "";
-      return new OpenMarkup(markup, fence + padding, padding + fence);
-
-      int LengthOfTheLongestRunOfBackticks() => code.Split([..code.Where(it => it != '`').Distinct()]).Max(it => it.Length);
-   }
-
    ///<summary>How many characters from <paramref name="index"/> that <paramref name="markup"/> formats.</summary>
    int LengthOf(Markup markup, int index) => _characters.Skip(index).TakeWhile(markup.Formats).Count();
-
-   static IEnumerable<Markup> MarkupOf(FormattedCharacter character) =>
-      [
-         ..FormatsWithDelimiters.Append(TextFormats.Code).Where(it => character.Formatting.Has(it)).Select(it => new Markup(it, null)),
-         ..character.Formatting.Link is {} link ? [new Markup(TextFormats.None, link)] : Array.Empty<Markup>()
-      ];
-
-   readonly record struct Markup(TextFormats Format, Link? Link)
-   {
-      internal bool Formats(FormattedCharacter character) => Link is null ? character.Formatting.Has(Format) : character.Formatting.Link == Link;
-   }
-
-   readonly record struct OpenMarkup(Markup Markup, string Opening, string Closing);
 }
