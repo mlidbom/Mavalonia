@@ -9,26 +9,24 @@ namespace Mavalonia.MarkdownEditing.Editing.Edits.Nesting;
 ///<summary>Makes a list item an item of a list inside the item before it.</summary>
 class IndentingAListItem
 {
-   readonly RenderedMarkdown _rendered;
-   readonly RenderedPosition _position;
+   readonly Caret _caret;
    readonly ListItem _item;
    readonly ListItem _itemBefore;
 
-   IndentingAListItem(RenderedMarkdown rendered, RenderedPosition position, ListItem item, ListItem itemBefore)
+   IndentingAListItem(Caret caret, ListItem item, ListItem itemBefore)
    {
-      _rendered = rendered;
-      _position = position;
+      _caret = caret;
       _item = item;
       _itemBefore = itemBefore;
    }
 
-   ///<summary>Indents the list item that <paramref name="position"/> is in. Null when it isn't in a list item that has another before it.</summary>
-   internal static IndentingAListItem? At(RenderedMarkdown rendered, RenderedPosition position)
+   ///<summary>Indents the list item that <paramref name="caret"/> is in. Null when it isn't in a list item that has another before it.</summary>
+   internal static IndentingAListItem? At(Caret caret)
    {
-      if(position.Block.Containers.Innermost is not ListItem item) return null;
-      if(rendered.BlockBefore(FirstBlockOf(item, rendered)) is not {} blockBefore) return null;
+      if(caret.Block.Containers.Innermost is not ListItem item) return null;
+      if(caret.Rendered.BlockBefore(FirstBlockOf(item, caret.Rendered)) is not {} blockBefore) return null;
 
-      return ItemAround(blockBefore, ofTheSameListAs: position.Block) is {} itemBefore ? new IndentingAListItem(rendered, position, item, itemBefore) : null;
+      return ItemAround(blockBefore, ofTheSameListAs: caret.Block) is {} itemBefore ? new IndentingAListItem(caret, item, itemBefore) : null;
    }
 
    static RenderedBlock FirstBlockOf(ListItem item, RenderedMarkdown rendered) => rendered.Blocks.First(it => it.IsInside(item));
@@ -40,30 +38,31 @@ class IndentingAListItem
       return isInTheSameContainers ? blockBefore.Containers.OutermostFirst.ElementAtOrDefault(depthOfTheList) as ListItem : null;
    }
 
-   RenderedBlock Block => _position.Block;
-   RenderedBlock FirstBlock => FirstBlockOf(_item, _rendered);
-   RenderedBlock LastBlock => _rendered.Blocks.Last(it => it.IsInside(_item));
-   RenderedBlock BlockBefore => _rendered.BlockBefore(FirstBlock)!;
+   RenderedMarkdown Rendered => _caret.Rendered;
+   RenderedBlock Block => _caret.Block;
+   RenderedBlock FirstBlock => FirstBlockOf(_item, Rendered);
+   RenderedBlock LastBlock => Rendered.Blocks.Last(it => it.IsInside(_item));
+   RenderedBlock BlockBefore => Rendered.BlockBefore(FirstBlock)!;
    BlockContainers ContainersOfTheList => Block.Containers.WithoutTheInnermost;
 
    ///<summary>Without a blank line between them, the item may become a part of the text before it.</summary>
    internal SourceChange Change()
    {
-      var onTheNextLine = WithTheLineBreakBefore(_rendered.Source.LineBreak);
+      var onTheNextLine = WithTheLineBreakBefore(Rendered.Source.LineBreak);
       if(IsInsideTheItemBefore(onTheNextLine)) return onTheNextLine;
 
-      var afterABlankLine = WithTheLineBreakBefore(new LineBreaksInside(_rendered, ContainersOfTheList).BlankLine + _rendered.Source.LineBreak);
+      var afterABlankLine = WithTheLineBreakBefore(new LineBreaksInside(Rendered, ContainersOfTheList).BlankLine + Rendered.Source.LineBreak);
       return IsInsideTheItemBefore(afterABlankLine) ? afterABlankLine : onTheNextLine;
    }
 
    bool IsInsideTheItemBefore(SourceChange change) =>
-      _rendered.NumberOf(Block) is var number && number < change.After.Blocks.Count && change.After.Blocks[number].Containers.Count == Block.Containers.Count + 1;
+      Rendered.NumberOf(Block) is var number && number < change.After.Blocks.Count && change.After.Blocks[number].Containers.Count == Block.Containers.Count + 1;
 
    SourceChange WithTheLineBreakBefore(string lineBreak) =>
-      SourceChange.Replace(_rendered, new SourceRange(BlockBefore.Source.End, LastBlock.Source.End), lineBreak + FirstLine() + OtherLines())
-                  .WithTheCaretAt(_rendered.NumbersOf(_position));
+      SourceChange.Replace(Rendered, new SourceRange(BlockBefore.Source.End, LastBlock.Source.End), lineBreak + FirstLine() + OtherLines())
+                  .WithTheCaretAt(Rendered.NumbersOf(_caret.Position));
 
-   string FirstLine() => ContainersOfTheList.PrefixOfTheirLines + _itemBefore.PrefixOfItsOtherLines + NewItem().PrefixOfItsFirstLine + _rendered.Source[FirstBlock.Source.Start..EndOfLineAt(FirstBlock.Source.Start)];
+   string FirstLine() => ContainersOfTheList.PrefixOfTheirLines + _itemBefore.PrefixOfItsOtherLines + NewItem().PrefixOfItsFirstLine + Rendered.Source[FirstBlock.Source.Start..EndOfLineAt(FirstBlock.Source.Start)];
 
    ///<summary>The next item of the list that is inside the item before already, or the first item of a new one.</summary>
    ListItem NewItem()
@@ -76,18 +75,18 @@ class IndentingAListItem
    string OtherLines()
    {
       var lines = "";
-      for(var startOfLine = StartOfLineAfter(FirstBlock.Source.Start); startOfLine < LastBlock.Source.End; startOfLine = StartOfLineAfter(startOfLine)) lines += _rendered.Source.LineBreak + IndentedLineAt(startOfLine);
+      for(var startOfLine = StartOfLineAfter(FirstBlock.Source.Start); startOfLine < LastBlock.Source.End; startOfLine = StartOfLineAfter(startOfLine)) lines += Rendered.Source.LineBreak + IndentedLineAt(startOfLine);
 
       return lines;
    }
 
    string IndentedLineAt(int startOfLine)
    {
-      var endOfPrefix = ContainersOfTheList.EndOfTheirPrefixes(_rendered.Source, startOfLine);
-      var line = _rendered.Source[endOfPrefix..EndOfLineAt(startOfLine)];
-      return _rendered.Source[startOfLine..endOfPrefix] + (line.Length == 0 ? "" : _itemBefore.PrefixOfItsOtherLines + line);
+      var endOfPrefix = ContainersOfTheList.EndOfTheirPrefixes(Rendered.Source, startOfLine);
+      var line = Rendered.Source[endOfPrefix..EndOfLineAt(startOfLine)];
+      return Rendered.Source[startOfLine..endOfPrefix] + (line.Length == 0 ? "" : _itemBefore.PrefixOfItsOtherLines + line);
    }
 
-   int StartOfLineAfter(int offset) => _rendered.Source.StartOfLineAfter(offset) ?? LastBlock.Source.End;
-   int EndOfLineAt(int offset) => Math.Min(LastBlock.Source.End, _rendered.Source.EndOfLineAt(offset));
+   int StartOfLineAfter(int offset) => Rendered.Source.StartOfLineAfter(offset) ?? LastBlock.Source.End;
+   int EndOfLineAt(int offset) => Math.Min(LastBlock.Source.End, Rendered.Source.EndOfLineAt(offset));
 }

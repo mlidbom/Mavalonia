@@ -8,32 +8,32 @@ namespace Mavalonia.MarkdownEditing.Editing.Edits.NewBlocks;
 ///<summary>Starts a new line of code, or, from an empty line at the end of the code, a paragraph after it.</summary>
 class StartingANewLineOfCode
 {
-   readonly RenderedMarkdown _rendered;
-   readonly RenderedPosition _position;
+   readonly Caret _caret;
    readonly CodeBlock _code;
 
-   internal StartingANewLineOfCode(RenderedMarkdown rendered, RenderedPosition position, CodeBlock code)
+   internal StartingANewLineOfCode(Caret caret, CodeBlock code)
    {
-      _rendered = rendered;
-      _position = position;
+      _caret = caret;
       _code = code;
    }
 
-   internal SourceChange Change() => IsAtAnEmptyLineAtTheEnd ? LeaveTheCode() : SourceChange.Insert(_rendered, _position.Offset, LineBreaks.NewLine);
+   RenderedMarkdown Rendered => _caret.Rendered;
 
-   LineBreaksInside LineBreaks => new(_rendered, _code.Containers);
+   internal SourceChange Change() => IsAtAnEmptyLineAtTheEnd ? LeaveTheCode() : SourceChange.Insert(Rendered, _caret.Position.Offset, LineBreaks.NewLine);
 
-   bool IsAtAnEmptyLineAtTheEnd => _position.IsAtTheEndOfItsBlock && _code.Text.Value.EndsWith('\n');
+   LineBreaksInside LineBreaks => new(Rendered, _code.Containers);
+
+   bool IsAtAnEmptyLineAtTheEnd => _caret.IsAtTheEndOfItsBlock && _code.Text.Value.EndsWith('\n');
 
    SourceChange LeaveTheCode()
    {
       var endOfCodeWithoutTheEmptyLine = _code.Text.Chars[^1].Source.Start;
-      return new GoingToAnEmptyParagraphAfter(_rendered, _code).AddAfterReplacing(new SourceRange(endOfCodeWithoutTheEmptyLine, _code.Source.End), by: EndOfTheBlock());
+      return new GoingToAnEmptyParagraphAfter(Rendered, _code).AddAfterReplacing(new SourceRange(endOfCodeWithoutTheEmptyLine, _code.Source.End), by: EndOfTheBlock());
    }
 
    string EndOfTheBlock()
    {
-      var afterTheCode = _rendered.Source[_code.Text.Source.End.._code.Source.End];
+      var afterTheCode = Rendered.Source[_code.Text.Source.End.._code.Source.End];
       return string.IsNullOrWhiteSpace(afterTheCode) ? LineBreaks.NewLine + CodeBlock.Fence : afterTheCode;
    }
 }

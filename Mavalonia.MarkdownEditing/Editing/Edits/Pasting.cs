@@ -8,26 +8,20 @@ namespace Mavalonia.MarkdownEditing.Editing.Edits;
 ///<summary>Pastes markdown where the caret is.</summary>
 class Pasting
 {
-   readonly RenderedMarkdown _rendered;
-   readonly RenderedPosition _position;
-   readonly int _offset;
+   readonly Caret _caret;
 
-   internal Pasting(RenderedMarkdown rendered, int offset)
-   {
-      _rendered = rendered;
-      _offset = offset;
-      _position = rendered.PositionAt(offset);
-   }
+   internal Pasting(Caret caret) => _caret = caret;
 
-   RenderedBlock Block => _position.Block;
-   LineBreaksInside LineBreaks => new(_rendered, Block.Containers);
+   RenderedMarkdown Rendered => _caret.Rendered;
+   RenderedBlock Block => _caret.Block;
+   LineBreaksInside LineBreaks => new(Rendered, Block.Containers);
 
    internal SourceChange Of(string markdown) => Block switch
    {
-      CodeBlock => new Typing(_rendered, _offset, Block.Text.FormattingAt(_offset)).Of(InTheLinesOfTheBlock(markdown)),
-      TableCell => new Typing(_rendered, _offset, Block.Text.FormattingAt(_offset)).Of(OnOneLine(markdown)),
-      _ when IsTextOfOneParagraph(markdown) => SourceChange.Insert(_rendered, _offset, InTheLinesOfTheBlock(markdown)),
-      { Text.IsEmpty: true } and Paragraph => SourceChange.Insert(_rendered, _offset, InTheLinesOfTheBlock(markdown) + SeparatorFromNext),
+      CodeBlock => new Typing(_caret, _caret.Formatting).Of(InTheLinesOfTheBlock(markdown)),
+      TableCell => new Typing(_caret, _caret.Formatting).Of(OnOneLine(markdown)),
+      _ when IsTextOfOneParagraph(markdown) => SourceChange.Insert(Rendered, _caret.Offset, InTheLinesOfTheBlock(markdown)),
+      { Text.IsEmpty: true } and Paragraph => SourceChange.Insert(Rendered, _caret.Offset, InTheLinesOfTheBlock(markdown) + SeparatorFromNext),
       _ => BetweenTheTextBeforeAndAfter(markdown)
    };
 
@@ -42,13 +36,13 @@ class Pasting
    ///<summary>The markdown has blocks of its own, so the text before and after the caret become blocks of theirs.</summary>
    SourceChange BetweenTheTextBeforeAndAfter(string markdown)
    {
-      var end = Block.Text.EndOfSourceUpTo(_position.Index);
-      var textBefore = _position.IsAtTheStartOfItsBlock ? "" : LineBreaks.BetweenParagraphs;
-      var textAfter = _position.IsAtTheEndOfItsBlock ? SeparatorFromNext : LineBreaks.BetweenParagraphs;
+      var end = Block.Text.EndOfSourceUpTo(_caret.Index);
+      var textBefore = _caret.IsAtTheStartOfItsBlock ? "" : LineBreaks.BetweenParagraphs;
+      var textAfter = _caret.IsAtTheEndOfItsBlock ? SeparatorFromNext : LineBreaks.BetweenParagraphs;
       var pasted = textBefore + InTheLinesOfTheBlock(markdown.Trim('\r', '\n'));
 
-      return SourceChange.Replace(_rendered, new SourceRange(end, Block.Text.StartOfSourceFrom(_position.Index)), pasted + textAfter).WithTheCaretAt(end + pasted.Length);
+      return SourceChange.Replace(Rendered, new SourceRange(end, Block.Text.StartOfSourceFrom(_caret.Index)), pasted + textAfter).WithTheCaretAt(end + pasted.Length);
    }
 
-   string SeparatorFromNext => _rendered.IsFollowedByABlockOnTheNextLine(Block) ? LineBreaks.BlankLine : "";
+   string SeparatorFromNext => Rendered.IsFollowedByABlockOnTheNextLine(Block) ? LineBreaks.BlankLine : "";
 }

@@ -15,23 +15,18 @@ partial class Typing
 {
    const string CharactersOfMarkup = @"\`*_~[]()<>#+-.!|&:=";
 
-   readonly RenderedMarkdown _rendered;
-   readonly int _offset;
-   readonly RenderedPosition _position;
+   readonly Caret _caret;
    readonly TextFormatting _formatting;
 
-   ///<param name="rendered">What is typed in.</param>
-   ///<param name="offset">Where the caret is.</param>
-   ///<param name="formatting">The formatting that the text gets.</param>
-   internal Typing(RenderedMarkdown rendered, int offset, TextFormatting formatting)
+   ///<param name="caret">Where the text is typed.</param>
+   ///<param name="formatting">The formatting that it gets.</param>
+   internal Typing(Caret caret, TextFormatting formatting)
    {
-      _rendered = rendered;
-      _offset = offset;
-      _position = rendered.PositionAt(offset);
+      _caret = caret;
       _formatting = formatting;
    }
 
-   internal SourceChange Of(string text) => _position.Block switch
+   internal SourceChange Of(string text) => _caret.Block switch
    {
       CodeBlock code => OfCode(code, text),
       ThematicBreak or SourceBlock => Insert(text),
@@ -39,9 +34,9 @@ partial class Typing
       _ => OfACodeFence(text) ?? OfOrdinaryText(text)
    };
 
-   SourceChange Insert(string text) => SourceChange.Insert(_rendered, _offset, text);
+   SourceChange Insert(string text) => SourceChange.Insert(_caret.Rendered, _caret.Offset, text);
 
-   SourceChange OfCode(CodeBlock block, string code) => new CodeReplacement(_rendered, block, SourceRange.EmptyAt(_offset), code).Change();
+   SourceChange OfCode(CodeBlock block, string code) => new CodeReplacement(_caret.Rendered, block, SourceRange.EmptyAt(_caret.Offset), code).Change();
 
    SourceChange OfTheTextOfACell(string text)
    {
@@ -54,10 +49,10 @@ partial class Typing
    ///<summary>The third backtick of a code fence. The fence that ends the code comes with it: without that, all the rest of the document would be code.</summary>
    SourceChange? OfACodeFence(string text)
    {
-      if(text != "`" || TextOfTheLineBeforeTheCaret != "``" || !_position.IsAtTheEndOfItsBlock) return null;
+      if(text != "`" || _caret.TextBeforeItOnItsLine != "``" || !_caret.IsAtTheEndOfItsBlock) return null;
 
-      var newLine = new LineBreaksInside(_rendered, _position.Block.Containers).NewLine;
-      return Insert(text + newLine + newLine + CodeBlock.Fence).WithTheCaretAt(_offset + text.Length + newLine.Length);
+      var newLine = new LineBreaksInside(_caret.Rendered, _caret.Block.Containers).NewLine;
+      return Insert(text + newLine + newLine + CodeBlock.Fence).WithTheCaretAt(_caret.Offset + text.Length + newLine.Length);
    }
 
    SourceChange OfOrdinaryText(string text)
@@ -65,17 +60,13 @@ partial class Typing
       var replacement = ReplacementWith(FormattedText.Typed(text, _formatting));
       var inserted = Insert(text);
 
-      var isMarkup = MayBeMarkup(text) && IsFormattedAsWhereTheCaretIs && !replacement.LooksRight(inserted);
+      var isMarkup = MayBeMarkup(text) && _formatting == _caret.Formatting && !replacement.LooksRight(inserted);
       return isMarkup ? inserted : replacement.ThatLooksRight(tryFirst: inserted) ?? inserted;
    }
 
-   TextReplacement ReplacementWith(FormattedText text) => new(RenderedRange.EmptyAt(_rendered, _position), text);
+   TextReplacement ReplacementWith(FormattedText text) => new(_caret.EmptyRange, text);
 
-   bool IsFormattedAsWhereTheCaretIs => _formatting == _position.Block.Text.FormattingAt(_offset);
-
-   bool MayBeMarkup(string text) => text.Any(it => CharactersOfMarkup.Contains(it, StringComparison.Ordinal)) || (text == " " && MarkerOfABlock().IsMatch(TextOfTheLineBeforeTheCaret));
-
-   string TextOfTheLineBeforeTheCaret => _position.Block.Text.Value[.._position.Index].Split('\n')[^1];
+   bool MayBeMarkup(string text) => text.Any(it => CharactersOfMarkup.Contains(it, StringComparison.Ordinal)) || (text == " " && MarkerOfABlock().IsMatch(_caret.TextBeforeItOnItsLine));
 
    ///<summary>What becomes a heading or a list item when a space follows it.</summary>
    [GeneratedRegex(@"^\s*([-*+]|\d{1,9}[.)]|#{1,6})$")]

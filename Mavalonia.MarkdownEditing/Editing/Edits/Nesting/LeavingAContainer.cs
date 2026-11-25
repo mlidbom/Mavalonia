@@ -1,30 +1,24 @@
 using Mavalonia.MarkdownEditing.Editing.Changes;
-using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Containers;
 
 namespace Mavalonia.MarkdownEditing.Editing.Edits.Nesting;
 
-///<summary>Takes a block out of the innermost container it is inside.</summary>
+///<summary>Takes the block that the caret is in out of the innermost container it is inside.</summary>
 class LeavingAContainer
 {
-   readonly RenderedMarkdown _rendered;
-   readonly RenderedPosition _position;
+   readonly Caret _caret;
 
-   internal LeavingAContainer(RenderedMarkdown rendered, RenderedPosition position)
-   {
-      _rendered = rendered;
-      _position = position;
-   }
+   internal LeavingAContainer(Caret caret) => _caret = caret;
 
    internal SourceChange Change() =>
-      new BlockMove(_rendered, _position.Block, _position.Block.Containers.Innermost is ListItem item ? ContainersAfterLeaving(item) : ContainersAround)
-        .Change().WithTheCaretAt(_rendered.NumbersOf(_position));
+      new BlockMove(_caret.Rendered, _caret.Block, _caret.Block.Containers.Innermost is ListItem item ? ContainersAfterLeaving(item) : ContainersAround)
+        .Change().WithTheCaretAt(_caret.Rendered.NumbersOf(_caret.Position));
 
    ///<summary>The first block takes the item out of its list. Any other leaves the item behind, and becomes the next item of the list.</summary>
-   BlockContainers ContainersAfterLeaving(ListItem item) => _rendered.IsTheFirstBlockInside(item, _position.Block) ? ContainersAfterLeavingTheList : ContainersAround.Inside(item.NewItemAfter());
+   BlockContainers ContainersAfterLeaving(ListItem item) => _caret.Rendered.IsTheFirstBlockInside(item, _caret.Block) ? ContainersAfterLeavingTheList : ContainersAround.Inside(item.NewItemAfter());
 
    ///<summary>Out of a list inside an item of another list, the item becomes one of the other list.</summary>
    BlockContainers ContainersAfterLeavingTheList => ContainersAround.Innermost is ListItem itemAroundTheList ? ContainersAround.WithoutTheInnermost.Inside(itemAroundTheList.NewItemAfter()) : ContainersAround;
 
-   BlockContainers ContainersAround => _position.Block.Containers.WithoutTheInnermost;
+   BlockContainers ContainersAround => _caret.Block.Containers.WithoutTheInnermost;
 }

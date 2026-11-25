@@ -9,34 +9,30 @@ namespace Mavalonia.MarkdownEditing.Editing.Edits.NewBlocks;
 ///<summary>Starts a new block where the caret is: what the Enter key usually does.</summary>
 class StartingANewBlock
 {
-   readonly RenderedMarkdown _rendered;
-   readonly RenderedPosition _position;
+   readonly Caret _caret;
 
-   internal StartingANewBlock(RenderedMarkdown rendered, RenderedPosition position)
-   {
-      _rendered = rendered;
-      _position = position;
-   }
+   internal StartingANewBlock(Caret caret) => _caret = caret;
 
-   RenderedBlock Block => _position.Block;
+   RenderedMarkdown Rendered => _caret.Rendered;
+   RenderedBlock Block => _caret.Block;
 
    internal SourceChange Change() => Block switch
    {
-      CodeBlock code => new StartingANewLineOfCode(_rendered, _position, code).Change(),
+      CodeBlock code => new StartingANewLineOfCode(_caret, code).Change(),
       TableCell cell => GoToTheCellBelow(cell),
-      ThematicBreak or SourceBlock => new GoingToAnEmptyParagraphAfter(_rendered, Block).Change(),
-      Heading { Text.IsEmpty: true } heading => SourceChange.Remove(_rendered, heading.Marks),
-      Heading when _position.IsAtTheStartOfItsBlock => InsertAnEmptyParagraphBefore(),
-      { Text.IsEmpty: true, Containers.Innermost: not null } => new LeavingAContainer(_rendered, _position).Change(),
-      _ => new SplittingABlock(_rendered, _position).Change()
+      ThematicBreak or SourceBlock => new GoingToAnEmptyParagraphAfter(Rendered, Block).Change(),
+      Heading { Text.IsEmpty: true } heading => SourceChange.Remove(Rendered, heading.Marks),
+      Heading when _caret.IsAtTheStartOfItsBlock => InsertAnEmptyParagraphBefore(),
+      { Text.IsEmpty: true, Containers.Innermost: not null } => new LeavingAContainer(_caret).Change(),
+      _ => new SplittingABlock(_caret).Change()
    };
 
    SourceChange GoToTheCellBelow(TableCell cell) =>
       cell.Table.CellBelow(cell) is {} below
-         ? SourceChange.OnlyMoveTheCaretTo(_rendered, RenderedPosition.AtTheEndOf(below))
-         : new GoingToAnEmptyParagraphAfter(_rendered, cell.Table.LastCell).Change();
+         ? SourceChange.OnlyMoveTheCaretTo(Rendered, RenderedPosition.AtTheEndOf(below))
+         : new GoingToAnEmptyParagraphAfter(Rendered, cell.Table.LastCell).Change();
 
    SourceChange InsertAnEmptyParagraphBefore() =>
-      SourceChange.Insert(_rendered, Block.Source.Start, new LineBreaksInside(_rendered, Block.Containers).BetweenParagraphs)
-                  .WithTheCaretAt(PositionByNumbers.AtTheStartOf(_rendered.NumberOf(Block) + 1));
+      SourceChange.Insert(Rendered, Block.Source.Start, new LineBreaksInside(Rendered, Block.Containers).BetweenParagraphs)
+                  .WithTheCaretAt(PositionByNumbers.AtTheStartOf(Rendered.NumberOf(Block) + 1));
 }

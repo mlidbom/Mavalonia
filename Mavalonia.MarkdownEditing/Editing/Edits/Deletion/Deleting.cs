@@ -10,44 +10,41 @@ namespace Mavalonia.MarkdownEditing.Editing.Edits.Deletion;
 ///<summary>Deletes what is before or after the caret.</summary>
 class Deleting
 {
-   readonly RenderedMarkdown _rendered;
-   readonly RenderedPosition _position;
+   readonly Caret _caret;
 
-   internal Deleting(RenderedMarkdown rendered, RenderedPosition position)
-   {
-      _rendered = rendered;
-      _position = position;
-   }
+   internal Deleting(Caret caret) => _caret = caret;
 
-   RenderedBlock Block => _position.Block;
+   RenderedMarkdown Rendered => _caret.Rendered;
+   RenderedPosition Position => _caret.Position;
+   RenderedBlock Block => _caret.Block;
    TextBoundaries Boundaries => Block.Text.Boundaries;
 
-   internal SourceChange TheCharacterBefore() => _position.IsAtTheStartOfItsBlock ? WhatIsBeforeTheBlock() : TheTextFrom(Boundaries.StartOfCharacterBefore(_position.Index));
-   internal SourceChange TheWordBefore() => _position.IsAtTheStartOfItsBlock ? WhatIsBeforeTheBlock() : TheTextFrom(Boundaries.StartOfWordBefore(_position.Index));
-   internal SourceChange TheCharacterAfter() => _position.IsAtTheEndOfItsBlock ? WhatIsAfterTheBlock() : TheTextUpTo(Boundaries.EndOfCharacterAfter(_position.Index));
-   internal SourceChange TheWordAfter() => _position.IsAtTheEndOfItsBlock ? WhatIsAfterTheBlock() : TheTextUpTo(Boundaries.EndOfWordAfter(_position.Index));
+   internal SourceChange TheCharacterBefore() => Position.IsAtTheStartOfItsBlock ? WhatIsBeforeTheBlock() : TheTextFrom(Boundaries.StartOfCharacterBefore(Position.Index));
+   internal SourceChange TheWordBefore() => Position.IsAtTheStartOfItsBlock ? WhatIsBeforeTheBlock() : TheTextFrom(Boundaries.StartOfWordBefore(Position.Index));
+   internal SourceChange TheCharacterAfter() => Position.IsAtTheEndOfItsBlock ? WhatIsAfterTheBlock() : TheTextUpTo(Boundaries.EndOfCharacterAfter(Position.Index));
+   internal SourceChange TheWordAfter() => Position.IsAtTheEndOfItsBlock ? WhatIsAfterTheBlock() : TheTextUpTo(Boundaries.EndOfWordAfter(Position.Index));
 
-   SourceChange TheTextFrom(int start) => TextBetween(_position with { Index = start }, _position);
-   SourceChange TheTextUpTo(int end) => TextBetween(_position, _position with { Index = end });
-   SourceChange TextBetween(RenderedPosition start, RenderedPosition end) => new DeletingText(new RenderedRange(_rendered, start, end)).Change();
+   SourceChange TheTextFrom(int start) => TextBetween(Position with { Index = start }, Position);
+   SourceChange TheTextUpTo(int end) => TextBetween(Position, Position with { Index = end });
+   SourceChange TextBetween(RenderedPosition start, RenderedPosition end) => new DeletingText(new RenderedRange(Rendered, start, end)).Change();
 
    SourceChange WhatIsBeforeTheBlock() => Block switch
    {
-      Heading heading => SourceChange.Remove(_rendered, heading.Marks),
-      CodeBlock { Text.IsEmpty: true } code => SourceChange.Remove(_rendered, code.Source),
+      Heading heading => SourceChange.Remove(Rendered, heading.Marks),
+      CodeBlock { Text.IsEmpty: true } code => SourceChange.Remove(Rendered, code.Source),
       TableCell cell => GoToTheCellBefore(cell),
       CodeBlock or SourceBlock => GoToTheEndOfTheBlockBefore(),
-      _ when Block.Containers.Innermost is {} container && _rendered.IsTheFirstBlockInside(container, Block) => new LeavingAContainer(_rendered, _position).Change(),
-      _ => _rendered.BlockBefore(Block) is {} previous ? Join(previous, Block) : Nothing()
+      _ when Block.Containers.Innermost is {} container && Rendered.IsTheFirstBlockInside(container, Block) => new LeavingAContainer(_caret).Change(),
+      _ => Rendered.BlockBefore(Block) is {} previous ? Join(previous, Block) : Nothing()
    };
 
-   SourceChange WhatIsAfterTheBlock() => _rendered.BlockAfter(Block) is {} next ? Join(Block, next) : Nothing();
+   SourceChange WhatIsAfterTheBlock() => Rendered.BlockAfter(Block) is {} next ? Join(Block, next) : Nothing();
 
-   SourceChange Nothing() => SourceChange.OnlyMoveTheCaretTo(_rendered, _position);
+   SourceChange Nothing() => SourceChange.OnlyMoveTheCaretTo(Rendered, Position);
 
    SourceChange GoToTheCellBefore(TableCell cell) => cell == cell.Table.FirstCell ? Nothing() : GoToTheEndOfTheBlockBefore();
 
-   SourceChange GoToTheEndOfTheBlockBefore() => _rendered.BlockBefore(Block) is {} previous ? SourceChange.OnlyMoveTheCaretTo(_rendered, RenderedPosition.AtTheEndOf(previous)) : Nothing();
+   SourceChange GoToTheEndOfTheBlockBefore() => Rendered.BlockBefore(Block) is {} previous ? SourceChange.OnlyMoveTheCaretTo(Rendered, RenderedPosition.AtTheEndOf(previous)) : Nothing();
 
    SourceChange Join(RenderedBlock first, RenderedBlock second)
    {
@@ -59,29 +56,29 @@ class Deleting
       return JoinTheTextsOf(first, second);
    }
 
-   SourceChange Remove(RenderedBlock block) => new RemovingBlocks(RenderedRange.OfAll(_rendered, block, block)).Change().WithTheCaretAt(NumbersOfTheStartOf(block));
+   SourceChange Remove(RenderedBlock block) => new RemovingBlocks(RenderedRange.OfAll(Rendered, block, block)).Change().WithTheCaretAt(NumbersOfTheStartOf(block));
 
    SourceChange RemoveTheEmptyParagraphAfter(RenderedBlock block, RenderedBlock paragraph) =>
-      SourceChange.Remove(_rendered, new SourceRange(block.Source.End, paragraph.Source.End)).WithTheCaretAt(RenderedPosition.AtTheEndOf(block).Offset);
+      SourceChange.Remove(Rendered, new SourceRange(block.Source.End, paragraph.Source.End)).WithTheCaretAt(RenderedPosition.AtTheEndOf(block).Offset);
 
    ///<summary>Null when the paragraph can't be removed without changing how what is left looks.</summary>
    SourceChange? RemoveTheEmptyParagraphBefore(RenderedBlock block, RenderedBlock paragraph)
    {
-      var removal = SourceChange.Remove(_rendered, new SourceRange(_rendered.Source.StartOfLineAt(paragraph.Source.Start), _rendered.Source.StartOfLineAt(block.Source.Start)));
+      var removal = SourceChange.Remove(Rendered, new SourceRange(Rendered.Source.StartOfLineAt(paragraph.Source.Start), Rendered.Source.StartOfLineAt(block.Source.Start)));
 
-      return ExpectedLooks.OfReplacing(_rendered, paragraph, paragraph).AreThoseOf(removal.After) ? removal.WithTheCaretAt(NumbersOfTheStartOf(paragraph)) : null;
+      return ExpectedLooks.OfReplacing(Rendered, paragraph, paragraph).AreThoseOf(removal.After) ? removal.WithTheCaretAt(NumbersOfTheStartOf(paragraph)) : null;
    }
 
-   PositionByNumbers NumbersOfTheStartOf(RenderedBlock block) => _rendered.NumbersOf(RenderedPosition.AtTheStartOf(block));
+   PositionByNumbers NumbersOfTheStartOf(RenderedBlock block) => Rendered.NumbersOf(RenderedPosition.AtTheStartOf(block));
 
    static bool CanHaveTextJoined(RenderedBlock block) => block is Paragraph or Heading;
 
    SourceChange JoinTheTextsOf(RenderedBlock first, RenderedBlock second)
    {
       var endOfFirst = RenderedPosition.AtTheEndOf(first);
-      return TextBetween(endOfFirst, RenderedPosition.AtTheStartOf(second)).WithTheCaretAt(_rendered.NumbersOf(endOfFirst));
+      return TextBetween(endOfFirst, RenderedPosition.AtTheStartOf(second)).WithTheCaretAt(Rendered.NumbersOf(endOfFirst));
    }
 
    SourceChange GoAcrossTheBorderBetween(RenderedBlock first, RenderedBlock second) =>
-      SourceChange.OnlyMoveTheCaretTo(_rendered, Block == first ? RenderedPosition.AtTheStartOf(second) : RenderedPosition.AtTheEndOf(first));
+      SourceChange.OnlyMoveTheCaretTo(Rendered, Block == first ? RenderedPosition.AtTheStartOf(second) : RenderedPosition.AtTheEndOf(first));
 }

@@ -48,16 +48,14 @@ public sealed class RenderedEditor : IDisposable
       }
    }
 
-   public RenderedPosition CaretPosition => Rendered.PositionAt(Selection.Caret);
+   Caret Caret => new(Rendered, Selection.Caret);
+   public RenderedPosition CaretPosition => Caret.Position;
    internal RenderedRange Selected => new(Rendered, Rendered.PositionAt(Selection.Start), Rendered.PositionAt(Selection.End));
 
    ///<summary>The formatting that text typed now gets.</summary>
    TextFormatting FormattingToType => _formattingToType ?? FormattingOfTheSelection;
 
-   TextFormatting FormattingOfTheSelection => Selection.IsEmpty ? FormattingAtTheCaret : FirstSelectedChar?.Formatting ?? TextFormatting.None;
-
-   ///<summary>The formatting that the markup around the caret gives.</summary>
-   TextFormatting FormattingAtTheCaret => CaretPosition.Block.Text.FormattingAt(Selection.Caret);
+   TextFormatting FormattingOfTheSelection => Selection.IsEmpty ? Caret.Formatting : FirstSelectedChar?.Formatting ?? TextFormatting.None;
 
    RenderedChar? FirstSelectedChar => Selected.Start is { IsAtTheEndOfItsBlock: false } start ? start.Block.Text.Chars[start.Index] : null;
 
@@ -96,31 +94,31 @@ public sealed class RenderedEditor : IDisposable
       _undoSteps.AsPartOfTyping(() =>
       {
          DeleteTheSelection();
-         Make(new Typing(Rendered, Selection.Caret, formatting).Of(text));
+         Make(new Typing(Caret, formatting).Of(text));
       });
 
-      _formattingToType = formatting != FormattingAtTheCaret && IsShownAsTyped() ? formatting : null;
+      _formattingToType = formatting != Caret.Formatting && IsShownAsTyped() ? formatting : null;
 
-      bool IsShownAsTyped() => CaretPosition is { Index: > 0 } caret && caret.Index >= text.Length && caret.Block.Text.Value[(caret.Index - text.Length)..caret.Index] == text;
+      bool IsShownAsTyped() => Caret is { Index: > 0 } caret && caret.Index >= text.Length && caret.Block.Text.Value[(caret.Index - text.Length)..caret.Index] == text;
    }
 
    ///<summary>Starts a new block, such as a paragraph or a list item, where the caret is.</summary>
-   public void StartNewBlock() => Edit(() => new StartingANewBlock(Rendered, CaretPosition).Change());
+   public void StartNewBlock() => Edit(() => new StartingANewBlock(Caret).Change());
 
    ///<summary>Breaks the line inside the block.</summary>
-   public void BreakLine() => Edit(() => new BreakingTheLine(Rendered, Selection.Caret).Change());
+   public void BreakLine() => Edit(() => new BreakingTheLine(Caret).Change());
 
    ///<summary>Whether the caret is in a list item that can be made an item of a list inside the one before it.</summary>
-   public bool CanIndent => IndentingAListItem.At(Rendered, CaretPosition) is not null;
+   public bool CanIndent => IndentingAListItem.At(Caret) is not null;
 
    ///<summary>Makes the list item that the caret is in an item of a list inside the one before it.</summary>
-   public void Indent() => AsOneUndo(() => Make(IndentingAListItem.At(Rendered, CaretPosition)!.Change()));
+   public void Indent() => AsOneUndo(() => Make(IndentingAListItem.At(Caret)!.Change()));
 
    ///<summary>Whether the caret is in a list item that can be taken out of its list.</summary>
-   public bool CanOutdent => CaretPosition.Block is Paragraph or Heading && CaretPosition.Block.Containers.Innermost is ListItem;
+   public bool CanOutdent => Caret.Block is Paragraph or Heading && Caret.Block.Containers.Innermost is ListItem;
 
    ///<summary>Takes the list item that the caret is in out of its list, into the list that that is in, if any.</summary>
-   public void Outdent() => AsOneUndo(() => Make(new LeavingAContainer(Rendered, CaretPosition).Change()));
+   public void Outdent() => AsOneUndo(() => Make(new LeavingAContainer(Caret).Change()));
 
    public void DeleteCharacterBefore() => DeleteTheSelectionOr(it => it.TheCharacterBefore());
    public void DeleteCharacterAfter() => DeleteTheSelectionOr(it => it.TheCharacterAfter());
@@ -128,7 +126,7 @@ public sealed class RenderedEditor : IDisposable
    public void DeleteWordAfter() => DeleteTheSelectionOr(it => it.TheWordAfter());
 
    ///<summary>Puts markdown, which may be of several blocks, in place of the selection.</summary>
-   public void Paste(string markdown) => Edit(() => new Pasting(Rendered, Selection.Caret).Of(markdown));
+   public void Paste(string markdown) => Edit(() => new Pasting(Caret).Of(markdown));
 
    ///<summary>Formats the selected text, or takes the format away when all of it has it. With nothing selected, it's the text typed next that gets or loses the format.</summary>
    public void Toggle(TextFormats format)
@@ -164,7 +162,7 @@ public sealed class RenderedEditor : IDisposable
    void DeleteTheSelectionOr(Func<Deleting, SourceChange> delete)
    {
       if(Selection.IsEmpty)
-         Edit(() => delete(new Deleting(Rendered, CaretPosition)));
+         Edit(() => delete(new Deleting(Caret)));
       else
          AsOneUndo(DeleteTheSelection);
    }

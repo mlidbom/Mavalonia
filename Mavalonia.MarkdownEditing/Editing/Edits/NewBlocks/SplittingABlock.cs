@@ -16,13 +16,13 @@ class SplittingABlock
    readonly int _endOfFirst;
    readonly int _startOfSecond;
 
-   internal SplittingABlock(RenderedMarkdown rendered, RenderedPosition position)
+   internal SplittingABlock(Caret caret)
    {
-      _rendered = rendered;
-      _block = position.Block;
-      _text = FormattedText.Of(rendered, _block);
-      _endOfFirst = _block.Text.SkipLineBreaksBefore(position.Index);
-      _startOfSecond = _block.Text.SkipWhiteSpaceAfter(position.Index);
+      _rendered = caret.Rendered;
+      _block = caret.Block;
+      _text = FormattedText.Of(_rendered, _block);
+      _endOfFirst = _block.Text.SkipLineBreaksBefore(caret.Index);
+      _startOfSecond = _block.Text.SkipWhiteSpaceAfter(caret.Index);
    }
 
    ///<summary>The least change that looks right, or, when none does, the least there is.</summary>
