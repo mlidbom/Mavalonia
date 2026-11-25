@@ -54,10 +54,10 @@ public class Editing_anywhere
 
    static bool IsTextThatCanBeSplit(RenderedBlock block, int index) => block is Paragraph or Heading && index > 0 && index < block.Text.Length && !block.Text.Characters[index - 1].IsWhiteSpace && !block.Text.Characters[index].IsWhiteSpace && IsBetweenCharacters(block, index);
 
-   static bool IsBetweenCharacters(RenderedBlock block, int index) => index == block.Text.Length || block.Text.StartOfCharacterBefore(index + 1) == index || block.Text.StartOfCharacterBefore(block.Text.EndOfCharacterAfter(index)) == index;
+   static bool IsBetweenCharacters(RenderedBlock block, int index) => index == block.Text.Length || block.Text.Boundaries.StartOfCharacterBefore(index + 1) == index || block.Text.Boundaries.StartOfCharacterBefore(block.Text.Boundaries.EndOfCharacterAfter(index)) == index;
 
    ///<summary>Markdown shows no space at the start of text.</summary>
-   static bool LeavesASpaceAtTheStart(RenderedBlock block, int index) => block is not CodeBlock && block.Text.StartOfCharacterBefore(index) == 0 && index < block.Text.Length && block.Text.Characters[index].IsWhiteSpace;
+   static bool LeavesASpaceAtTheStart(RenderedBlock block, int index) => block is not CodeBlock && block.Text.Boundaries.StartOfCharacterBefore(index) == 0 && index < block.Text.Length && block.Text.Characters[index].IsWhiteSpace;
 
    [XF] public void by_typing_a_letter_shows_that_letter_there_and_nothing_else_changes() =>
       Exceptions(it => it.Type("x"), (block, index) => block is ThematicBreak || !IsBetweenCharacters(block, index) ? null : [block.Text.Value.Insert(index, "x")]).Must().BeEmpty();
@@ -66,7 +66,7 @@ public class Editing_anywhere
       Exceptions(it => it.Type(" "), (block, index) => index == 0 || index == block.Text.Length || !char.IsLetter(block.Text.Value[index - 1]) || !char.IsLetter(block.Text.Value[index]) || !IsBetweenCharacters(block, index) ? null : [block.Text.Value.Insert(index, " ")]).Must().BeEmpty();
 
    [XF] public void by_deleting_the_character_before_the_caret_takes_that_character_away_and_nothing_else_changes() =>
-      Exceptions(it => it.DeleteCharacterBefore(), (block, index) => index == 0 || !IsBetweenCharacters(block, index) || LeavesASpaceAtTheStart(block, index) ? null : [block.Text.Value.Remove(block.Text.StartOfCharacterBefore(index), index - block.Text.StartOfCharacterBefore(index))]).Must().BeEmpty();
+      Exceptions(it => it.DeleteCharacterBefore(), (block, index) => index == 0 || !IsBetweenCharacters(block, index) || LeavesASpaceAtTheStart(block, index) ? null : [block.Text.Value.Remove(block.Text.Boundaries.StartOfCharacterBefore(index), index - block.Text.Boundaries.StartOfCharacterBefore(index))]).Must().BeEmpty();
 
    [XF] public void by_starting_a_new_block_inside_text_makes_two_blocks_of_it_and_nothing_else_changes() =>
       Exceptions(it => it.StartNewBlock(), (block, index) => IsTextThatCanBeSplit(block, index) ? [block.Text.Value[..index], block.Text.Value[index..]] : null).Must().BeEmpty();

@@ -62,7 +62,7 @@ class TextLayouts : IDisposable
                             _appearance.Foreground,
                             textWrapping: TextWrapping.Wrap,
                             maxWidth: width,
-                            textStyleOverrides: [..StretchesOfTheSameFormatting(block.Text).Select(it => new ValueSpan<TextRunProperties>(it.Start, it.Length, PropertiesOf(it.Formatting)))]);
+                            textStyleOverrides: [..block.Text.StretchesOfTheSameFormatting.Select(it => new ValueSpan<TextRunProperties>(it.Start, it.Length, PropertiesOf(it.Formatting)))]);
 
       TextRunProperties PropertiesOf(TextFormatting formatting)
       {
@@ -86,17 +86,6 @@ class TextLayouts : IDisposable
       (null, true) => TextDecorations.Strikethrough,
       (null, false) => null
    };
-
-   static IEnumerable<(int Start, int Length, TextFormatting Formatting)> StretchesOfTheSameFormatting(RenderedText text)
-   {
-      for(var start = 0; start < text.Length;)
-      {
-         var formatting = text.Characters[start].Formatting;
-         var length = text.Characters.Skip(start).TakeWhile(it => it.Formatting == formatting).Count();
-         yield return (start, length, formatting);
-         start += length;
-      }
-   }
 
    ///<summary>All that decides how a text is laid out.</summary>
    // ReSharper disable NotAccessedPositionalProperty.Local : they are what makes two equal.

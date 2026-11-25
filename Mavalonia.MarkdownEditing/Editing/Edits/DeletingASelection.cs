@@ -29,7 +29,7 @@ class DeletingASelection
 
    bool CanBecomeOneBlock => _from.Block is Paragraph or Heading && _to.Block is Paragraph or Heading;
 
-   bool AreAllOfOneTable => _from is { Block: TableCell first, IsAtTheStartOfItsBlock: true } && _to is { Block: TableCell last, IsAtTheEndOfItsBlock: true } && first.Table == last.Table && first == first.Table.Cells[0] && last == last.Table.Cells[^1];
+   bool AreAllOfOneTable => _from is { Block: TableCell first, IsAtTheStartOfItsBlock: true } && _to is { Block: TableCell last, IsAtTheEndOfItsBlock: true } && first.Table == last.Table && first == first.Table.FirstCell && last == last.Table.LastCell;
 
    int StartOfWhatIsRemoved => _rendered.BlockBefore(_from.Block) is {} previous ? RenderedPosition.AtTheEndOf(previous).Offset : 0;
 
@@ -42,7 +42,7 @@ class DeletingASelection
          var block = _rendered.Blocks[number];
          if(IsAllSelected(block))
          {
-            var firstToRemove = block is TableCell cell ? cell.Table.Cells[0] : block;
+            var firstToRemove = block is TableCell cell ? cell.Table.FirstCell : block;
             yield return Removal(number: _rendered.NumberOf(firstToRemove), numberOfTheLast: number);
             number = _rendered.NumberOf(firstToRemove);
          }
@@ -54,7 +54,7 @@ class DeletingASelection
    ///<summary>Whether there is selected text on both sides of the block, or of the table that it is a cell of, so that it goes away as a whole.</summary>
    bool IsAllSelected(RenderedBlock block)
    {
-      var (firstOfIt, lastOfIt) = block is TableCell cell ? (cell.Table.Cells[0], cell.Table.Cells[^1]) : (block, block);
+      var (firstOfIt, lastOfIt) = block is TableCell cell ? (cell.Table.FirstCell, cell.Table.LastCell) : (block, block);
       var (numberOfFirst, numberOfLast) = (_rendered.NumberOf(firstOfIt), _rendered.NumberOf(lastOfIt));
       var (from, to) = (_rendered.NumberOf(_from.Block), _rendered.NumberOf(_to.Block));
 

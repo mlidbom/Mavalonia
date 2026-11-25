@@ -48,5 +48,5 @@ class Pasting
       return SourceChange.Replace(_rendered, new SourceRange(end, Block.Text.StartOfSourceFrom(_position.Index)), pasted + textAfter).WithTheCaretAt(end + pasted.Length);
    }
 
-   string SeparatorFromNext => _rendered.BlockAfter(Block) is {} next && _rendered.Source.StartOfLineAfter(Block.Source.End) == _rendered.Source.StartOfLineAt(next.Source.Start) ? Separator.BlankLine : "";
+   string SeparatorFromNext => _rendered.IsFollowedByABlockOnTheNextLine(Block) ? Separator.BlankLine : "";
 }

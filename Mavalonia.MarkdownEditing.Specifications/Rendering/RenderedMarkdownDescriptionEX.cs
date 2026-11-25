@@ -44,21 +44,15 @@ static class RenderedMarkdownDescriptionEX
    extension(RenderedText @this)
    {
       ///<summary>The text with each stretch that is formatted in brackets, such as <c>a [Bold: b] c</c>.</summary>
-      internal string DescribedWithFormatting
-      {
-         get
-         {
-            var description = "";
-            for(var index = 0; index < @this.Length;)
-            {
-               var formatting = @this.Characters[index].Formatting;
-               var stretch = new string([..@this.Characters.Skip(index).TakeWhile(it => it.Formatting == formatting).Select(it => it.Value)]);
-               description += formatting == TextFormatting.None ? stretch : $"[{formatting.Described}: {stretch}]";
-               index += stretch.Length;
-            }
+      internal string DescribedWithFormatting => string.Concat(@this.StretchesOfTheSameFormatting.Select(it => it.DescribedIn(@this)));
+   }
 
-            return description;
-         }
+   extension(StretchOfText @this)
+   {
+      string DescribedIn(RenderedText text)
+      {
+         var characters = text.Value.Substring(@this.Start, @this.Length);
+         return @this.Formatting == TextFormatting.None ? characters : $"[{@this.Formatting.Described}: {characters}]";
       }
    }
 

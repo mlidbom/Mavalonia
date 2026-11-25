@@ -26,7 +26,7 @@ class LeavingAContainer
    internal SourceChange Change()
    {
       var (start, textBefore) = Previous is null ? (_rendered.Source.StartOfLineAt(Block.Source.Start), "") : (Previous.Source.End, SeparatorFrom(Previous));
-      var text = textBefore + PrefixOfTheFirstLine() + TextOfTheBlock();
+      var text = textBefore + _containers.PrefixOfALine(isTheFirstOf: IsEntered) + TextOfTheBlock();
 
       var (end, textAfter) = Next is null || BecomesAListItem ? (Block.Text.Source.End, "") : (_rendered.Source.StartOfLineAt(Next.Source.Start), SeparatorFrom(Next));
 
@@ -38,16 +38,14 @@ class LeavingAContainer
       var without = Block.Containers.WithoutTheInnermost;
       if(Block.Containers.Innermost is not ListItem item) return without;
 
-      if(!_rendered.IsTheFirstIn(item, Block)) return without.Inside(item.NewItemAfter());
+      if(!_rendered.IsTheFirstBlockInside(item, Block)) return without.Inside(item.NewItemAfter());
       return without.Innermost is ListItem itemOfTheOuterList ? without.WithoutTheInnermost.Inside(itemOfTheOuterList.NewItemAfter()) : without;
    }
 
    ///<summary>Without a blank line between them, blocks could become one.</summary>
    string SeparatorFrom(RenderedBlock other) => BecomesAListItem ? _rendered.Source.LineBreak : new Separator(_rendered, _containers.SharedWith(other.Containers)).BlankLine + _rendered.Source.LineBreak;
 
-   string PrefixOfTheFirstLine() => string.Concat(_containers.OutermostFirst.Select(it => IsEntered(it) ? it.PrefixOfItsFirstLine : it.PrefixOfItsOtherLines));
-
-   bool IsEntered(BlockContainer container) => Previous is null || !Previous.Containers.OutermostFirst.Contains(container);
+   bool IsEntered(BlockContainer container) => Previous?.IsInside(container) != true;
 
    string TextOfTheBlock()
    {

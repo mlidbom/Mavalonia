@@ -13,6 +13,9 @@ public class Table
    ///<summary>The cells, row by row.</summary>
    public IReadOnlyList<TableCell> Cells => _cells;
 
+   public TableCell FirstCell => _cells[0];
+   internal TableCell LastCell => _cells[^1];
+
    public int ColumnCount => _cells.Max(it => it.Column) + 1;
 
    internal void Add(TableCell cell) => _cells.Add(cell);

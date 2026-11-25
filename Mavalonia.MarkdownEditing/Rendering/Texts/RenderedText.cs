@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace Mavalonia.MarkdownEditing.Rendering.Texts;
 
 ///<summary>The text that is shown of a block, each character knowing the markdown it stands for.</summary>
@@ -28,6 +26,24 @@ public class RenderedText
    public int Length => Characters.Count;
    public bool IsEmpty => Length == 0;
 
+   ///<summary>Where the characters and words that a person sees in the text start and end.</summary>
+   public TextBoundaries Boundaries => new(Value);
+
+   ///<summary>The whole text, as stretches that are as long as they can be.</summary>
+   public IEnumerable<StretchOfText> StretchesOfTheSameFormatting
+   {
+      get
+      {
+         for(var start = 0; start < Length;)
+         {
+            var formatting = Characters[start].Formatting;
+            var length = Characters.Skip(start).TakeWhile(it => it.Formatting == formatting).Count();
+            yield return new StretchOfText(start, length, formatting);
+            start += length;
+         }
+      }
+   }
+
    ///<summary>Whether the source of each character is after that of the one before it, and within that of the text.</summary>
    internal bool IsOfCharactersInOrder =>
       Source.Start <= Source.End
@@ -47,46 +63,6 @@ public class RenderedText
       Markups.Where(it => it.Content.Touches(offset))
              .Select(it => it.Formatting)
              .Aggregate(TextFormatting.None, (all, it) => new TextFormatting(all.Formats | it.Formats, it.Link ?? all.Link));
-
-   ///<summary>The index of the first <see cref="char"/> of the character before <paramref name="index"/>. A person sees an emoji as one character, however many chars it is.</summary>
-   public int StartOfCharacterBefore(int index) => StringInfo.ParseCombiningCharacters(Value[..index]).LastOrDefault();
-
-   ///<summary>The index after the last <see cref="char"/> of the character at <paramref name="index"/>.</summary>
-   public int EndOfCharacterAfter(int index) => index + StringInfo.GetNextTextElementLength(Value.AsSpan(index));
-
-   ///<summary>The index that the word starts at that is before <paramref name="index"/>, or, where there is no word, the punctuation.</summary>
-   public int StartOfWordBefore(int index)
-   {
-      var end = SkipWhiteSpaceBefore(index);
-      var start = end;
-      while(start > 0 && KindOf(start - 1) == KindOf(end - 1)) start--;
-      return start;
-   }
-
-   ///<summary>The index after the white space after the word that is at <paramref name="index"/>, or, where there is no word, the punctuation.</summary>
-   internal int EndOfWordAfter(int index) => SkipWhiteSpaceAfter(EndOfWordWithoutSpacesAfter(index));
-
-   ///<summary>The index after the word that is at <paramref name="index"/>, or, where there is no word, the punctuation or the white space.</summary>
-   public int EndOfWordWithoutSpacesAfter(int index)
-   {
-      var end = index;
-      while(end < Length && KindOf(end) == KindOf(index)) end++;
-      return end;
-   }
-
-   KindOfCharacter KindOf(int index) => Value[index] switch
-   {
-      var it when char.IsWhiteSpace(it) => KindOfCharacter.WhiteSpace,
-      var it when char.IsLetterOrDigit(it) || char.IsSurrogate(it) || it == '_' => KindOfCharacter.OfAWord,
-      _ => KindOfCharacter.Punctuation
-   };
-
-   enum KindOfCharacter
-   {
-      WhiteSpace = 1,
-      OfAWord = 2,
-      Punctuation = 3
-   }
 
    internal int SkipWhiteSpaceBefore(int index)
    {

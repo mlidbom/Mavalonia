@@ -25,16 +25,14 @@ class StartingANewBlock
       CodeBlock code => new StartingANewLineOfCode(_rendered, _position, code).Change(),
       TableCell cell => GoToTheCellBelow(cell),
       ThematicBreak or SourceBlock => new EmptyParagraphAfter(_rendered, Block).Change(),
-      Heading { Text.IsEmpty: true } heading => RemoveMarksOf(heading),
+      Heading { Text.IsEmpty: true } heading => SourceChange.Remove(_rendered, heading.Marks),
       Heading when _position.IsAtTheStartOfItsBlock => InsertAnEmptyParagraphBefore(),
       { Text.IsEmpty: true, Containers.Innermost: not null } => new LeavingAContainer(_rendered, _position).Change(),
       _ => Split()
    };
 
    SourceChange GoToTheCellBelow(TableCell cell) =>
-      cell.Table.CellBelow(cell) is {} below ? SourceChange.OnlyMoveTheCaretTo(_rendered, RenderedPosition.AtTheEndOf(below)) : new EmptyParagraphAfter(_rendered, cell.Table.Cells[^1]).Change();
-
-   SourceChange RemoveMarksOf(Heading heading) => SourceChange.Remove(_rendered, new SourceRange(heading.Source.Start, heading.Text.Source.Start));
+      cell.Table.CellBelow(cell) is {} below ? SourceChange.OnlyMoveTheCaretTo(_rendered, RenderedPosition.AtTheEndOf(below)) : new EmptyParagraphAfter(_rendered, cell.Table.LastCell).Change();
 
    SourceChange InsertAnEmptyParagraphBefore() =>
       SourceChange.Insert(_rendered, Block.Source.Start, new Separator(_rendered, Block.Containers).OfParagraphs).WithTheCaretIn(_rendered.NumberOf(Block) + 1, 0);
@@ -72,7 +70,7 @@ class StartingANewBlock
    SourceChange WithTheCaretInTheSecond(SourceChange change) =>
       _rendered.NumberOf(Block) + 1 is var number && number < change.After.Blocks.Count ? change.WithTheCaretIn(number, 0) : change;
 
-   ListItem? ItemToFollow => Block.Containers.Innermost as ListItem is {} item && _rendered.IsTheFirstIn(item, Block) ? item : null;
+   ListItem? ItemToFollow => Block.Containers.Innermost as ListItem is {} item && _rendered.IsTheFirstBlockInside(item, Block) ? item : null;
 
    BlockContainers ContainersOfTheSecond() => ItemToFollow is {} item ? Block.Containers.WithoutTheInnermost.Inside(item.NewItemAfter()) : Block.Containers;
 

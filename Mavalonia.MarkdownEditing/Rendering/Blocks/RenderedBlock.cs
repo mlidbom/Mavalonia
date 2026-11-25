@@ -21,6 +21,8 @@ public abstract class RenderedBlock
    ///<summary>The whole of the block in the markdown: its own markup included, but not what its containers put before it on its first line.</summary>
    internal SourceRange Source { get; }
 
+   public bool IsInside(BlockContainer container) => Containers.OutermostFirst.Contains(container);
+
    ///<summary>Whether a paragraph typed on the line right after the block would be a block of its own.</summary>
    internal virtual bool EndsWithItsLastLine => true;
 

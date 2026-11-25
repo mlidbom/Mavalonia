@@ -36,7 +36,7 @@ static class MarkdownTextEX
       }
 
       ///<summary>Whether <paramref name="offset"/> is between the two characters of a line break of Windows.</summary>
-      internal bool IsInsideALineBreak(int offset) => offset > 0 && offset < @this.Length && @this[offset - 1] == '\r' && @this[offset] == '\n';
+      bool IsInsideALineBreak(int offset) => offset > 0 && offset < @this.Length && @this[offset - 1] == '\r' && @this[offset] == '\n';
 
       ///<summary>The offset of the first character from <paramref name="offset"/> that isn't a space or a tab.</summary>
       internal int SkipSpaces(int offset)

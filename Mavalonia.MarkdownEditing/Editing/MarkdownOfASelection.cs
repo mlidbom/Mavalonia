@@ -44,7 +44,7 @@ class MarkdownOfASelection
    (string Markdown, int Offset) StartOf(RenderedPosition position, BlockContainers shared)
    {
       var block = position.Block;
-      var prefix = string.Concat(block.Containers.OutermostFirst.Skip(shared.Count).Select(it => _rendered.IsTheFirstIn(it, block) ? it.PrefixOfItsFirstLine : it.PrefixOfItsOtherLines));
+      var prefix = block.Containers.WithoutTheOutermost(shared.Count).PrefixOfALine(isTheFirstOf: it => _rendered.IsTheFirstBlockInside(it, block));
 
       return position.IsAtTheStartOfItsBlock || IsCopiedAsAWhole(block)
                 ? (prefix, block.Source.Start)

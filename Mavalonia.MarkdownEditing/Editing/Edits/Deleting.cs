@@ -21,10 +21,10 @@ class Deleting
    RenderedBlock Block => _position.Block;
    RenderedText Text => Block.Text;
 
-   internal SourceChange TheCharacterBefore() => _position.IsAtTheStartOfItsBlock ? WhatIsBeforeTheBlock() : TextBetween(Text.StartOfCharacterBefore(_position.Index), _position.Index);
-   internal SourceChange TheWordBefore() => _position.IsAtTheStartOfItsBlock ? WhatIsBeforeTheBlock() : TextBetween(Text.StartOfWordBefore(_position.Index), _position.Index);
-   internal SourceChange TheCharacterAfter() => _position.IsAtTheEndOfItsBlock ? WhatIsAfterTheBlock() : TextBetween(_position.Index, Text.EndOfCharacterAfter(_position.Index));
-   internal SourceChange TheWordAfter() => _position.IsAtTheEndOfItsBlock ? WhatIsAfterTheBlock() : TextBetween(_position.Index, Text.EndOfWordAfter(_position.Index));
+   internal SourceChange TheCharacterBefore() => _position.IsAtTheStartOfItsBlock ? WhatIsBeforeTheBlock() : TextBetween(Text.Boundaries.StartOfCharacterBefore(_position.Index), _position.Index);
+   internal SourceChange TheWordBefore() => _position.IsAtTheStartOfItsBlock ? WhatIsBeforeTheBlock() : TextBetween(Text.Boundaries.StartOfWordBefore(_position.Index), _position.Index);
+   internal SourceChange TheCharacterAfter() => _position.IsAtTheEndOfItsBlock ? WhatIsAfterTheBlock() : TextBetween(_position.Index, Text.Boundaries.EndOfCharacterAfter(_position.Index));
+   internal SourceChange TheWordAfter() => _position.IsAtTheEndOfItsBlock ? WhatIsAfterTheBlock() : TextBetween(_position.Index, Text.Boundaries.EndOfWordAfter(_position.Index));
 
    SourceChange TextBetween(int start, int end)
    {
@@ -36,11 +36,11 @@ class Deleting
 
    SourceChange WhatIsBeforeTheBlock() => Block switch
    {
-      Heading heading => SourceChange.Remove(_rendered, new SourceRange(heading.Source.Start, heading.Text.Source.Start)),
+      Heading heading => SourceChange.Remove(_rendered, heading.Marks),
       CodeBlock { Text.IsEmpty: true } code => SourceChange.Remove(_rendered, code.Source),
       TableCell cell => GoToTheCellBefore(cell),
       CodeBlock or SourceBlock => GoToTheEndOfTheBlockBefore(),
-      _ when Block.Containers.Innermost is {} container && _rendered.IsTheFirstIn(container, Block) => new LeavingAContainer(_rendered, _position).Change(),
+      _ when Block.Containers.Innermost is {} container && _rendered.IsTheFirstBlockInside(container, Block) => new LeavingAContainer(_rendered, _position).Change(),
       _ => _rendered.BlockBefore(Block) is {} previous ? Join(previous, Block) : Nothing()
    };
 
@@ -48,7 +48,7 @@ class Deleting
 
    SourceChange Nothing() => SourceChange.OnlyMoveTheCaretTo(_rendered, _position);
 
-   SourceChange GoToTheCellBefore(TableCell cell) => cell == cell.Table.Cells[0] ? Nothing() : GoToTheEndOfTheBlockBefore();
+   SourceChange GoToTheCellBefore(TableCell cell) => cell == cell.Table.FirstCell ? Nothing() : GoToTheEndOfTheBlockBefore();
 
    SourceChange GoToTheEndOfTheBlockBefore() => _rendered.BlockBefore(Block) is {} previous ? SourceChange.OnlyMoveTheCaretTo(_rendered, RenderedPosition.AtTheEndOf(previous)) : Nothing();
 

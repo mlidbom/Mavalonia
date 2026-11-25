@@ -30,9 +30,9 @@ class PointerInput
 
    static void SelectTheWordAt(RenderedPosition position, RenderedEditor editor)
    {
-      var text = position.Block.Text;
-      var end = position.IsAtTheEndOfItsBlock ? position.Index : text.EndOfWordWithoutSpacesAfter(position.Index);
-      var start = text.StartOfWordBefore(end);
+      var boundaries = position.Block.Text.Boundaries;
+      var end = position.IsAtTheEndOfItsBlock ? position.Index : boundaries.EndOfWordWithoutSpacesAfter(position.Index);
+      var start = boundaries.StartOfWordBefore(end);
 
       Select(editor, position with { Index = start }, position with { Index = end });
    }

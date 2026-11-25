@@ -16,6 +16,7 @@ public class BlockContainers
 
    BlockContainers Outermost(int count) => new([..OutermostFirst.Take(count)]);
    internal BlockContainers WithoutTheInnermost => Outermost(Count - 1);
+   internal BlockContainers WithoutTheOutermost(int count) => new([..OutermostFirst.Skip(count)]);
 
    ///<summary>The containers that <paramref name="others"/> has too.</summary>
    internal BlockContainers SharedWith(BlockContainers others) => Outermost(OutermostFirst.Zip(others.OutermostFirst).TakeWhile(it => it.First == it.Second).Count());
@@ -23,10 +24,13 @@ public class BlockContainers
    internal bool LookLike(BlockContainers others) => Count == others.Count && OutermostFirst.Zip(others.OutermostFirst).All(it => it.First.LooksLike(it.Second));
 
    ///<summary>What precedes the text on a line inside the containers, other than the first line of any of them.</summary>
-   internal string PrefixOfTheirLines => string.Concat(OutermostFirst.Select(it => it.PrefixOfItsOtherLines));
+   internal string PrefixOfTheirLines => PrefixOfALine(isTheFirstOf: _ => false);
 
    ///<summary>What precedes the text on a line that is the first of the innermost container, and not of the others.</summary>
-   internal string PrefixOfTheFirstLineOfTheInnermost => Innermost is null ? "" : WithoutTheInnermost.PrefixOfTheirLines + Innermost.PrefixOfItsFirstLine;
+   internal string PrefixOfTheFirstLineOfTheInnermost => PrefixOfALine(isTheFirstOf: it => it == Innermost);
+
+   ///<summary>What precedes the text on a line that is the first line of some of the containers, and not of the others.</summary>
+   internal string PrefixOfALine(Func<BlockContainer, bool> isTheFirstOf) => string.Concat(OutermostFirst.Select(it => isTheFirstOf(it) ? it.PrefixOfItsFirstLine : it.PrefixOfItsOtherLines));
 
    ///<summary>The outermost of the containers: those whose prefixes are on the line that starts at <paramref name="startOfLine"/>.</summary>
    internal BlockContainers OfTheLineAt(string markdown, int startOfLine) => ReadPrefixes(markdown, startOfLine).Containers;

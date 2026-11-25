@@ -10,5 +10,8 @@ public class Heading : RenderedBlock
    ///<summary>1 for the most prominent heading, 6 for the least.</summary>
    public int Level { get; }
 
+   ///<summary>The number signs that make it a heading, with the spaces between them and its text.</summary>
+   internal SourceRange Marks => new(Source.Start, Text.Source.Start);
+
    internal override bool IsTheSameKindAs(RenderedBlock other) => other is Heading heading && heading.Level == Level;
 }

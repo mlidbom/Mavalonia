@@ -21,6 +21,9 @@ public class RenderedMarkdown
    ///<summary>The blocks from the first to the last. There is always at least one: an empty markdown text is rendered as an empty paragraph.</summary>
    public IReadOnlyList<RenderedBlock> Blocks { get; }
 
+   public RenderedPosition Start => RenderedPosition.AtTheStartOf(Blocks[0]);
+   public RenderedPosition End => RenderedPosition.AtTheEndOf(Blocks[^1]);
+
    ///<summary>The position that a caret at <paramref name="offset"/> is shown at: where nothing is shown of the markdown there, the nearest before it.</summary>
    public RenderedPosition PositionAt(int offset)
    {
@@ -41,8 +44,8 @@ public class RenderedMarkdown
    ///<summary>The position in block number <paramref name="blockNumber"/> before its character number <paramref name="index"/>, or the nearest there is.</summary>
    internal RenderedPosition PositionNearestTo(int blockNumber, int index)
    {
-      if(blockNumber < 0) return RenderedPosition.AtTheStartOf(Blocks[0]);
-      if(blockNumber >= Blocks.Count) return RenderedPosition.AtTheEndOf(Blocks[^1]);
+      if(blockNumber < 0) return Start;
+      if(blockNumber >= Blocks.Count) return End;
 
       return new RenderedPosition(Blocks[blockNumber], Math.Min(index, Blocks[blockNumber].Text.Length));
    }
@@ -51,7 +54,10 @@ public class RenderedMarkdown
    internal RenderedBlock? BlockAfter(RenderedBlock block) => NumberOf(block) + 1 is var number && number < Blocks.Count ? Blocks[number] : null;
 
    ///<summary>Whether <paramref name="block"/> is the first of the blocks inside <paramref name="container"/>.</summary>
-   internal bool IsTheFirstIn(BlockContainer container, RenderedBlock block) => BlockBefore(block) is not {} previous || !previous.Containers.OutermostFirst.Contains(container);
+   internal bool IsTheFirstBlockInside(BlockContainer container, RenderedBlock block) => BlockBefore(block)?.IsInside(container) != true;
+
+   ///<summary>Whether there is no line between <paramref name="block"/> and the block after it.</summary>
+   internal bool IsFollowedByABlockOnTheNextLine(RenderedBlock block) => BlockAfter(block) is {} next && Source.StartOfLineAfter(block.Source.End) == Source.StartOfLineAt(next.Source.Start);
 
    internal int NumberOf(RenderedBlock block) => Enumerable.Range(0, Blocks.Count).First(it => Blocks[it] == block);
 }

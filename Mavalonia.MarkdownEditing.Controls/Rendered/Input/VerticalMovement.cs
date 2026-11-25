@@ -15,10 +15,10 @@ class VerticalMovement
    internal VerticalMovement(RenderedMarkdownView view) => _view = view;
 
    internal void Up(RenderedEditor editor, bool extendSelection) =>
-      Move(editor, extendSelection, _view.Layout.LineAbove(editor.CaretPosition, XOf(editor))?.PositionNearestTo(XOf(editor)) ?? RenderedPosition.AtTheStartOf(editor.Rendered.Blocks[0]));
+      Move(editor, extendSelection, _view.Layout.LineAbove(editor.CaretPosition, XOf(editor))?.PositionNearestTo(XOf(editor)) ?? editor.Rendered.Start);
 
    internal void Down(RenderedEditor editor, bool extendSelection) =>
-      Move(editor, extendSelection, _view.Layout.LineBelow(editor.CaretPosition, XOf(editor))?.PositionNearestTo(XOf(editor)) ?? RenderedPosition.AtTheEndOf(editor.Rendered.Blocks[^1]));
+      Move(editor, extendSelection, _view.Layout.LineBelow(editor.CaretPosition, XOf(editor))?.PositionNearestTo(XOf(editor)) ?? editor.Rendered.End);
 
    double XOf(RenderedEditor editor)
    {

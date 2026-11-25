@@ -23,8 +23,8 @@ class IndentingAListItem
 
    RenderedBlock? BlockBefore(ListItem item) => _rendered.BlockBefore(FirstBlockOf(item));
 
-   RenderedBlock FirstBlockOf(ListItem item) => _rendered.Blocks.First(it => it.Containers.OutermostFirst.Contains(item));
-   RenderedBlock LastBlockOf(ListItem item) => _rendered.Blocks.Last(it => it.Containers.OutermostFirst.Contains(item));
+   RenderedBlock FirstBlockOf(ListItem item) => _rendered.Blocks.First(it => it.IsInside(item));
+   RenderedBlock LastBlockOf(ListItem item) => _rendered.Blocks.Last(it => it.IsInside(item));
 
    BlockContainers Outer => Block.Containers.WithoutTheInnermost;
 

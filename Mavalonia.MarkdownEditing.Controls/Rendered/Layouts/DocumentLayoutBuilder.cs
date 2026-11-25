@@ -62,14 +62,14 @@ class DocumentLayoutBuilder
 
    void LayOut(Table table, RenderedBlock? previous)
    {
-      var bottomOfPrevious = LeaveSpaceBetween(previous, table.Cells[0]);
-      var left = _area.Left + IndentationInside(table.Cells[0].Containers.OutermostFirst);
+      var bottomOfPrevious = LeaveSpaceBetween(previous, table.FirstCell);
+      var left = _area.Left + IndentationInside(table.FirstCell.Containers.OutermostFirst);
       var top = _top;
       var tableLayout = new TableLayout(table, _appearance, _texts, new Point(left, top), _area.Right - left);
 
       _blocks.AddRange(tableLayout.Cells);
       _top = tableLayout.Bottom;
-      Decorate(table.Cells[0], previous, bottomOfPrevious, topOfText: top);
+      Decorate(table.FirstCell, previous, bottomOfPrevious, topOfText: top);
    }
 
    ///<summary>Returns where the previous block ends.</summary>
@@ -80,7 +80,7 @@ class DocumentLayoutBuilder
       return bottomOfPrevious;
    }
 
-   static bool AreItemsOfTheSameList(RenderedBlock previous, RenderedBlock block) => previous.Containers.OutermostFirst.OfType<ListItem>().Any() && block.Containers.Innermost is ListItem item && !previous.Containers.OutermostFirst.Contains(item);
+   static bool AreItemsOfTheSameList(RenderedBlock previous, RenderedBlock block) => previous.Containers.OutermostFirst.OfType<ListItem>().Any() && block.Containers.Innermost is ListItem item && !previous.IsInside(item);
 
    double IndentationInside(IEnumerable<BlockContainer> containers) => containers.Sum(it => _appearance.Scaled(it is Quote ? 16 : 24));
 
@@ -89,7 +89,7 @@ class DocumentLayoutBuilder
       foreach(var (depth, container) in block.Containers.OutermostFirst.Index())
       {
          var left = _area.Left + IndentationInside(block.Containers.OutermostFirst.Take(depth));
-         var isFirst = previous is null || !previous.Containers.OutermostFirst.Contains(container);
+         var isFirst = previous?.IsInside(container) != true;
 
          switch(container)
          {

@@ -85,7 +85,7 @@ public sealed class RenderedEditor : IDisposable
    public void SelectAll()
    {
       StopTyping();
-      Selection = new TextSelection(RenderedPosition.AtTheStartOf(Rendered.Blocks[0]).Offset, RenderedPosition.AtTheEndOf(Rendered.Blocks[^1]).Offset);
+      Selection = new TextSelection(Rendered.Start.Offset, Rendered.End.Offset);
    }
 
    public void Type(string text)

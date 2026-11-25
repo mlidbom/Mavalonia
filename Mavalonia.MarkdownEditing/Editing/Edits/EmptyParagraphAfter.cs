@@ -23,11 +23,9 @@ class EmptyParagraphAfter
       var separator = new Separator(_rendered, _block.Containers);
       var textUpToTheParagraph = textBefore + separator.OfParagraphs;
 
-      return SourceChange.Replace(_rendered, endOfBlock, textUpToTheParagraph + (IsFollowedByABlockOnTheNextLine ? separator.BlankLine : ""))
+      return SourceChange.Replace(_rendered, endOfBlock, textUpToTheParagraph + (_rendered.IsFollowedByABlockOnTheNextLine(_block) ? separator.BlankLine : ""))
                          .WithTheCaretAt(endOfBlock.Start + textUpToTheParagraph.Length);
    }
 
    RenderedBlock? Next => _rendered.BlockAfter(_block);
-
-   bool IsFollowedByABlockOnTheNextLine => Next is not null && _rendered.Source.StartOfLineAfter(_block.Source.End) == _rendered.Source.StartOfLineAt(Next.Source.Start);
 }
