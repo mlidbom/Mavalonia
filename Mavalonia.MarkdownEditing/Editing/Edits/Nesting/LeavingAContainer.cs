@@ -6,7 +6,8 @@ using Mavalonia.MarkdownEditing.Rendering.Containers;
 
 namespace Mavalonia.MarkdownEditing.Editing.Edits.Nesting;
 
-///<summary>Takes a block out of the innermost container it is inside. Out of an item of a list inside another list, it becomes an item of the other list.</summary>
+///<summary>Takes a block out of the innermost container it is inside.<br/>
+/// Out of an item of a list inside another list, it becomes an item of the other list. A block that isn't the first in its list item becomes the next item of the same list.</summary>
 class LeavingAContainer
 {
    readonly RenderedMarkdown _rendered;

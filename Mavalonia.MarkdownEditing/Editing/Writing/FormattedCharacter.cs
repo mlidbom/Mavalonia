@@ -23,6 +23,8 @@ readonly record struct FormattedCharacter(char Value, TextFormatting Formatting,
 
    internal FormattedCharacter Without(TextFormats format) => this with { Formatting = Formatting.Without(format), Markdown = IsCode && format == TextFormats.Code ? Escaped : Markdown };
 
+   internal FormattedCharacter WrittenEscaped => this with { Markdown = Escaped };
+
    ///<summary>The character escaped, so that it isn't taken for markup.</summary>
    string Escaped => SpecialCharacters.Contains(Value, StringComparison.Ordinal) ? @"\" + Value : Value.ToString();
 }

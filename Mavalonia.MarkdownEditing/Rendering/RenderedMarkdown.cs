@@ -25,7 +25,7 @@ public class RenderedMarkdown
    public RenderedPosition End => RenderedPosition.AtTheEndOf(Blocks[^1]);
 
    ///<summary>The position that a caret at <paramref name="offset"/> is shown at: where nothing is shown of the markdown there, the nearest before it.</summary>
-   public RenderedPosition PositionAt(int offset)
+   internal RenderedPosition PositionAt(int offset)
    {
       var block = Blocks.LastOrDefault(it => it.Text.Source.Start <= offset) ?? Blocks[0];
       return new RenderedPosition(block, block.Text.IndexAt(offset));

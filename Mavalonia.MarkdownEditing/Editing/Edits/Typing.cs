@@ -45,7 +45,7 @@ partial class Typing
 
    SourceChange OfTheTextOfACell(string text)
    {
-      var written = FormattedText.Typed(text, _formatting).Select(it => it.Value == '|' ? it with { Markdown = @"\|" } : it);
+      var written = FormattedText.Typed(text, _formatting).Select(it => it.Value == '|' ? it.WrittenEscaped : it);
       var inserted = Insert(written.MarkdownWithoutFormatting);
 
       return ReplacementWith(written).ThatLooksRight(tryFirst: inserted) ?? inserted;
@@ -57,7 +57,7 @@ partial class Typing
       if(text != "`" || TextOfTheLineBeforeTheCaret != "``" || !_position.IsAtTheEndOfItsBlock) return null;
 
       var newLine = new LineBreaksInside(_rendered, _position.Block.Containers).NewLine;
-      return Insert("`" + newLine + newLine + "```").WithTheCaretAt(_offset + 1 + newLine.Length);
+      return Insert(text + newLine + newLine + CodeBlock.Fence).WithTheCaretAt(_offset + text.Length + newLine.Length);
    }
 
    SourceChange OfOrdinaryText(string text)

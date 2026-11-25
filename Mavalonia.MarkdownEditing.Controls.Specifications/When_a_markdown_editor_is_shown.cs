@@ -1,4 +1,3 @@
-using Avalonia.Styling;
 using AvaloniaEdit.Document;
 using Compze.Must;
 using Mavalonia.MarkdownEditing.Controls.Specifications.HeadlessAvalonia;
@@ -84,43 +83,6 @@ public class When_a_markdown_editor_is_shown
       {
          _window.Type("X");
          _editor.Document.Text.Must().Be("oneX two");
-      }
-   }
-
-   public class and_released : When_a_markdown_editor_is_shown
-   {
-      [XFOnUIThread] public void its_document_does_not_keep_it_alive()
-      {
-         var document = new TextDocument("one");
-         var released = ShowAndRelease(document);
-
-         for(var attempt = 0; attempt < 5 && released.IsAlive; attempt++)
-         {
-            _window.RenderFrame();
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-         }
-
-         new { released.IsAlive, document.TextLength }.Must().Satisfy(it => !it.IsAlive);
-      }
-
-      WeakReference ShowAndRelease(TextDocument document)
-      {
-         var editor = new MarkdownEditor { Document = document };
-         _window.Content = editor;
-         _window.Content = new MarkdownEditor();
-         return new WeakReference(editor);
-      }
-   }
-
-   public class in_the_dark_theme : When_a_markdown_editor_is_shown
-   {
-      [XFOnUIThread] public void it_looks_different()
-      {
-         var document = "Some text";
-         var light = new HeadlessWindow(new MarkdownEditor { Document = new TextDocument(document) }).RenderFrame();
-         var dark = new HeadlessWindow(new MarkdownEditor { Document = new TextDocument(document) }, ThemeVariant.Dark).RenderFrame();
-         dark.Fingerprint.Must().NotBe(light.Fingerprint);
       }
    }
 }

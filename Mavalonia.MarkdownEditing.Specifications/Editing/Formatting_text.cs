@@ -21,7 +21,7 @@ public class Formatting_text
    [XF] public void makes_code_of_what_is_selected() => Code("a ⟦b⟧ c").Must().Be("a ⟦`b⟧` c");
    [XF] public void makes_code_of_what_has_backticks_with_more_backticks_around_it() => Code("⟦a\\`b⟧").Must().Be("⟦``a`b⟧``");
    [XF] public void escapes_what_would_be_markup_in_what_is_no_longer_code() => Code("`⟦*a*⟧`").Must().Be("⟦\\*a\\*⟧");
-   [XF] public void makes_bold_in_each_of_several_paragraphs() => Bold("a⟦b\n\nc⟧d").Must().Be("a**⟦b**\n\n**c⟧**d".Replace("**⟦", "⟦**"));
+   [XF] public void makes_bold_in_each_of_several_paragraphs() => Bold("a⟦b\n\nc⟧d").Must().Be("a⟦**b**\n\n**c⟧**d");
    [XF] public void makes_bold_in_a_cell() => Bold("| ⟦A⟧ |\n|---|").Must().Be("| ⟦**A⟧** |\n|---|");
    [XF] public void leaves_code_blocks_alone() => Bold("```\n⟦a⟧\n```").Must().Be("```\n⟦a⟧\n```");
    [XF] public void is_undone_as_one() => Of("a⟦b\n\nc⟧d", it => it.Toggle(TextFormats.Bold), it => it.Undo()).Must().Satisfy(it => it.Replace("‸", "") == "ab\n\ncd");

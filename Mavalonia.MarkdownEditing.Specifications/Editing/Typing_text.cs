@@ -14,14 +14,14 @@ public class Typing_text
    [XF] public void replaces_what_is_selected() => Of("a⟦bc⟧d", Type("x")).Must().Be("ax‸d");
    [XF] public void replaces_what_is_selected_in_the_format_it_has() => Of("a **⟦bold⟧** b", Type("x")).Must().Be("a **x‸** b");
    [XF] public void replaces_what_is_selected_across_paragraphs() => Of("a⟦b\n\nc⟧d", Type("x")).Must().Be("ax‸d");
-   [XF] public void works_in_an_empty_document() => Of("‸", Type("x")).Must().Be("x‸");
+   [XF] public void in_an_empty_document_makes_it_all_of_the_document() => Of("‸", Type("x")).Must().Be("x‸");
 
    [XF] public void inside_bold_text_continues_the_bold_text() => Of("**bo‸ld**", Type("X")).Must().Be("**boX‸ld**");
    [XF] public void at_the_end_of_bold_text_continues_the_bold_text() => Of("**bold‸** b", Type("X")).Must().Be("**boldX‸** b");
    [XF] public void after_the_markup_that_ends_bold_text_does_not_continue_it() => Of("**bold**‸", Type("X")).Must().Be("**bold**X‸");
    [XF] public void at_the_end_of_bold_text_continues_it_over_a_space() => Of("**bold‸** b", Type(" and more")).Must().Be("**bold and more‸** b");
    [XF] public void that_is_a_space_at_the_end_of_bold_text_keeps_the_text_bold() => Of("**bold‸**", Type(" ")).Must().Be("**bold** ‸");
-   [XF] public void that_is_a_space_at_the_start_of_italic_text_keeps_the_text_italic() => Of("a *‸b*", Type(" ")).Must().Be("a *‸b*".Replace("*‸b*", " ‸*b*"));
+   [XF] public void that_is_a_space_at_the_start_of_italic_text_keeps_the_text_italic() => Of("a *‸b*", Type(" ")).Must().Be("a  ‸*b*");
    [XF] public void inside_a_link_changes_its_label() => Of("[la‸bel](https://example.org)", Type("X")).Must().Be("[laX‸bel](https://example.org)");
    [XF] public void inside_code_is_not_taken_for_markup() => Of("`a‸b`", Type("**")).Must().Be("`a**‸b`");
 

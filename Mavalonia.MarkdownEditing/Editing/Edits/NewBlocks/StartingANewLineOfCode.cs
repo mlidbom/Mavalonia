@@ -8,8 +8,6 @@ namespace Mavalonia.MarkdownEditing.Editing.Edits.NewBlocks;
 ///<summary>Starts a new line of code, or, from an empty line at the end of the code, a paragraph after it.</summary>
 class StartingANewLineOfCode
 {
-   const string Fence = "```";
-
    readonly RenderedMarkdown _rendered;
    readonly RenderedPosition _position;
    readonly CodeBlock _code;
@@ -36,6 +34,6 @@ class StartingANewLineOfCode
    string EndOfTheBlock()
    {
       var afterTheCode = _rendered.Source[_code.Text.Source.End.._code.Source.End];
-      return string.IsNullOrWhiteSpace(afterTheCode) ? LineBreaks.NewLine + Fence : afterTheCode;
+      return string.IsNullOrWhiteSpace(afterTheCode) ? LineBreaks.NewLine + CodeBlock.Fence : afterTheCode;
    }
 }

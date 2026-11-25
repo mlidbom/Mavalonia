@@ -36,6 +36,7 @@ public class Looking_at_documents
 
    [XFOnUIThread] public void shows_a_message_that_quotes_another() => Show(Message).SaveForInspectionAs("A message that quotes another");
    [XFOnUIThread] public void shows_a_message_that_quotes_another_in_the_dark_theme() => Show(Message, ThemeVariant.Dark).SaveForInspectionAs("A message that quotes another, dark");
+   [XFOnUIThread] public void shows_text_differently_in_the_dark_theme() => Show("Some text", ThemeVariant.Dark).Fingerprint.Must().NotBe(Show("Some text").Fingerprint);
    [XFOnUIThread] public void shows_the_source_of_a_message() => Show(Message, showsSource: true).SaveForInspectionAs("The source of a message");
 
    [XFOnUIThread] public void shows_every_construct() => Show(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "SampleDocuments", "Every construct.md"))).SaveForInspectionAs("Every construct");

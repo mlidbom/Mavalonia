@@ -6,6 +6,9 @@ namespace Mavalonia.MarkdownEditing.Rendering.Blocks;
 ///<summary>A block of code, between two fences such as <c>```</c>.</summary>
 public class CodeBlock : RenderedBlock
 {
+   ///<summary>The fence that we write. A person may write another.</summary>
+   internal const string Fence = "```";
+
    internal CodeBlock(BlockContainers containers, RenderedText text, SourceRange source, string language, bool hasNoLine) : base(containers, text, source)
    {
       Language = language;
