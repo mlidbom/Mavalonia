@@ -32,7 +32,7 @@ partial class Typing
       CodeBlock code => OfCode(code, text),
       ThematicBreak or SourceBlock => Insert(text),
       TableCell => OfTheTextOfACell(text),
-      _ => OfACodeFence(text) ?? OfOrdinaryText(text)
+      _ => OfACodeFence(text) ?? OfAParenthesisAfterANumber(text) ?? OfOrdinaryText(text)
    };
 
    SourceChange Insert(string text) => SourceChange.Insert(_caret.Rendered, _caret.Offset, text);
@@ -56,6 +56,12 @@ partial class Typing
       return Insert(text + newLine + newLine + CodeBlock.Fence).WithTheCaretAt(_caret.Offset + text.Length + newLine.Length);
    }
 
+   ///<summary>In markdown, both 1) and 1. at the start of a line make a numbered list of it once a space follows. People mean that only by 1. so the parenthesis is written as text.</summary>
+   SourceChange? OfAParenthesisAfterANumber(string text) =>
+      text == ")" && _caret.Block is Paragraph && Number().IsMatch(_caret.TextBeforeItOnItsLine)
+         ? ReplacementWith(FormattedText.Typed(text, _formatting).WithPunctuationEscaped).ThatLooksRight()
+         : null;
+
    SourceChange OfOrdinaryText(string text)
    {
       var typed = FormattedText.Typed(text, _formatting);
@@ -76,6 +82,9 @@ partial class Typing
    bool MayBeMarkup(string text) => text.Any(it => CharactersOfMarkup.Contains(it, StringComparison.Ordinal)) || (text == " " && MarkerOfABlock().IsMatch(_caret.TextBeforeItOnItsLine));
 
    ///<summary>What becomes a heading or a list item when a space follows it.</summary>
-   [GeneratedRegex(@"^\s*([-*+]|\d{1,9}[.)]|#{1,6})$")]
+   [GeneratedRegex(@"^\s*([-*+]|\d{1,9}\.|#{1,6})$")]
    private static partial Regex MarkerOfABlock();
+
+   [GeneratedRegex(@"^\s*\d{1,9}$")]
+   private static partial Regex Number();
 }
