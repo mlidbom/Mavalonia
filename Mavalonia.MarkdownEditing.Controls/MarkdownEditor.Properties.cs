@@ -7,6 +7,7 @@ namespace Mavalonia.MarkdownEditing.Controls;
 
 partial class MarkdownEditor
 {
+   ///<summary>The modifier key of commands on the platform. <see cref="Avalonia.Input.Platform.PlatformHotkeyConfiguration.CommandModifiers"/> says it too, but only of a control in a window, and a default value is the same for every control.</summary>
    static readonly KeyModifiers ControlOrCommand = OperatingSystem.IsMacOS() ? KeyModifiers.Meta : KeyModifiers.Control;
 
    public static readonly StyledProperty<TextDocument> DocumentProperty = AvaloniaProperty.Register<MarkdownEditor, TextDocument>(nameof(Document));
