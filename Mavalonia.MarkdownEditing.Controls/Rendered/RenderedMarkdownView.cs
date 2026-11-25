@@ -27,12 +27,16 @@ public abstract partial class RenderedMarkdownView : Control
    ///<summary>The part of the view that was drawn last. Scrolling inside it needs nothing to be drawn anew.</summary>
    Rect _drawn;
 
+   bool _isGettingTheFocus;
+
    static RenderedMarkdownView()
    {
       FocusableProperty.OverrideDefaultValue<RenderedMarkdownView>(true);
       ClipToBoundsProperty.OverrideDefaultValue<RenderedMarkdownView>(true);
       AffectsMeasure<RenderedMarkdownView>(PropertiesThatTheLayoutDependsOn);
       AffectsRender<RenderedMarkdownView>([..PropertiesThatTheLayoutDependsOn, ColoursCodeProperty]);
+      GotFocusEvent.AddClassHandler<RenderedMarkdownView>((view, _) => view._isGettingTheFocus = true);
+      GotFocusEvent.AddClassHandler<TopLevel>((_, focus) => HasGotTheFocus(focus.Source), handledEventsToo: true); // The last that is told, after what scrolls.
       RequestBringIntoViewEvent.AddClassHandler<RenderedMarkdownView>((view, request) => view.StayWhereItIsWhenItGetsTheFocus(request));
    }
 
@@ -132,7 +136,12 @@ public abstract partial class RenderedMarkdownView : Control
    ///<summary>A view that gets the focus is to be brought into view as a whole. What is higher than the place it's in would be scrolled to its start by that.</summary>
    void StayWhereItIsWhenItGetsTheFocus(RequestBringIntoViewEventArgs request)
    {
-      if(ReferenceEquals(request.TargetObject, this) && request.TargetRect == new Rect(Bounds.Size)) request.Handled = true;
+      if(_isGettingTheFocus) request.Handled = true;
+   }
+
+   static void HasGotTheFocus(object? focused)
+   {
+      if(focused is RenderedMarkdownView view) view._isGettingTheFocus = false;
    }
 
    protected override AutomationPeer OnCreateAutomationPeer() => new RenderedMarkdownAutomationPeer(this);
