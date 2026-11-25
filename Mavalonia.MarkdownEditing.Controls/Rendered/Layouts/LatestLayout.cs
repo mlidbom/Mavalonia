@@ -28,10 +28,10 @@ class LatestLayout
    internal bool LooksOtherwiseThan(MarkdownAppearance appearance) => _appearance is not null && _appearance != appearance;
 
    ///<summary>To be done when some texts look otherwise than when they were laid out. The layouts of the others are used again.</summary>
-   internal void LayOutAgain() => _layout = null;
+   internal void ForgetAllButTheTexts() => _layout = null;
 
    ///<summary>To be done when the appearance or the padding changes.</summary>
-   internal void Forget()
+   internal void ForgetAll()
    {
       _texts?.Dispose();
       _texts = null;

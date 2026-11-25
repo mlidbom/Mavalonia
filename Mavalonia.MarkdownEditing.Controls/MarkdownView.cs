@@ -25,11 +25,11 @@ public class MarkdownView : RenderedMarkdownView
    public static readonly StyledProperty<Func<string, Task<IImage?>>?> LoadImageProperty = AvaloniaProperty.Register<MarkdownView, Func<string, Task<IImage?>>?>(nameof(LoadImage));
    public static readonly RoutedEvent<LinkClickedEventArgs> LinkClickedEvent = RoutedEvent.Register<MarkdownView, LinkClickedEventArgs>(nameof(LinkClicked), RoutingStrategies.Bubble);
 
-   ///<summary>The images that have been asked for, by where they are. Null for one that isn't loaded, or that there isn't.</summary>
-   readonly Dictionary<string, IImage?> _images = [];
-
    readonly ReadingKeys _keys;
    readonly MarkdownToRead _read = new("", MarkdownDialect.ForReading);
+
+   ///<summary>Null when none are loaded.</summary>
+   LoadedImages? _images;
 
    ///<summary>Null until the pointer is over code for the first time.</summary>
    CopyCodeButton? _copyCode;
@@ -104,28 +104,11 @@ public class MarkdownView : RenderedMarkdownView
 
    void LoadAllImagesAnew()
    {
-      _images.Clear();
-      ShowAnImageThatHasBecomeKnown();
+      _images = LoadImage is {} load ? new LoadedImages(load, whenLoaded: ShowOtherImages) : null;
+      ShowOtherImages();
    }
 
-   private protected override IImage? ImageOf(InlineImage image)
-   {
-      if(LoadImage is null) return null;
-      if(!_images.TryGetValue(image.Source, out var loaded)) Load(image.Source, LoadImage);
-
-      return loaded;
-   }
-
-   // ReSharper disable once AsyncVoidMethod An exception in it surfaces where all of the application's do.
-   async void Load(string source, Func<string, Task<IImage?>> load)
-   {
-      _images[source] = null;
-      await Task.Yield(); // It's asked for while what is shown is being laid out.
-      if(await load(source) is not {} image || load != LoadImage) return;
-
-      _images[source] = image;
-      ShowAnImageThatHasBecomeKnown();
-   }
+   private protected override IImage? ImageOf(InlineImage image) => _images?.Of(image);
 
    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
    {

@@ -71,7 +71,7 @@ public abstract partial class RenderedMarkdownView : Control
 
    void LayOutAnew()
    {
-      _latestLayout.Forget();
+      _latestLayout.ForgetAll();
       InvalidateMeasure();
       InvalidateVisual();
    }
@@ -82,9 +82,10 @@ public abstract partial class RenderedMarkdownView : Control
       if(((ILogical)this).IsAttachedToLogicalTree && _latestLayout.LooksOtherwiseThan(Appearance)) LayOutAnew();
    }
 
-   private protected void ShowAnImageThatHasBecomeKnown()
+   ///<summary>To be done when there are other images to show than before.</summary>
+   private protected void ShowOtherImages()
    {
-      _latestLayout.LayOutAgain();
+      _latestLayout.ForgetAllButTheTexts();
       InvalidateMeasure();
       InvalidateVisual();
    }
@@ -97,7 +98,7 @@ public abstract partial class RenderedMarkdownView : Control
    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
    {
       base.OnPropertyChanged(change);
-      if(PropertiesThatTheLayoutDependsOn.Contains(change.Property)) _latestLayout.Forget();
+      if(PropertiesThatTheLayoutDependsOn.Contains(change.Property)) _latestLayout.ForgetAll();
    }
 
    protected override Size MeasureOverride(Size availableSize)
