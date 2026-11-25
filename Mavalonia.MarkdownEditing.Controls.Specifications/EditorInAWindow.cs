@@ -4,43 +4,28 @@ using Avalonia.VisualTree;
 using AvaloniaEdit.Document;
 using Mavalonia.MarkdownEditing.Controls.Rendered;
 using Mavalonia.MarkdownEditing.Controls.Specifications.HeadlessAvalonia;
-using Mavalonia.MarkdownEditing.Editing;
+using Mavalonia.MarkdownEditing.Specifications;
 
 namespace Mavalonia.MarkdownEditing.Controls.Specifications;
 
-///<summary>A <see cref="MarkdownEditor"/> that a person is writing in. Its markdown is said with <c>‸</c> for the caret, or <c>⟦</c> and <c>⟧</c> for the start and end of what is selected.</summary>
+///<summary>A <see cref="MarkdownEditor"/> that a person is writing in. What it edits is said as <see cref="MarkdownWithSelection"/>.</summary>
 class EditorInAWindow
 {
-   //refactor: Editing, in Mavalonia.MarkdownEditing.Specifications, reads and writes the same notation for the caret and the selection. One type that both projects compile should do it.
-
-   const string Caret = "‸";
-   const string StartOfSelection = "⟦";
-   const string EndOfSelection = "⟧";
-
    internal EditorInAWindow(string markdown)
    {
-      var withoutSelection = markdown.Replace(Caret, "").Replace(StartOfSelection, "").Replace(EndOfSelection, "");
-      Editor = new MarkdownEditor { Document = new TextDocument(withoutSelection), Padding = new Thickness(10) };
+      var parsed = MarkdownWithSelection.Parse(markdown);
+      Editor = new MarkdownEditor { Document = new TextDocument(parsed.Markdown), Padding = new Thickness(10) };
       Window = new HeadlessWindow(Editor);
-      Editor.Selection = markdown.Contains(StartOfSelection, StringComparison.Ordinal)
-                            ? new TextSelection(markdown.IndexOf(StartOfSelection, StringComparison.Ordinal), markdown.IndexOf(EndOfSelection, StringComparison.Ordinal) - 1)
-                            : TextSelection.CaretAt(markdown.IndexOf(Caret, StringComparison.Ordinal));
+      Editor.Selection = parsed.Selection;
       Editor.FocusTheView();
    }
 
    internal MarkdownEditor Editor { get; }
    internal HeadlessWindow Window { get; }
 
-   RenderedMarkdownView RenderedView => Editor.GetVisualDescendants().OfType<RenderedMarkdownView>().Single();
+   internal RenderedMarkdownView RenderedView => Editor.GetVisualDescendants().OfType<RenderedMarkdownView>().Single();
 
-   internal string Markdown
-   {
-      get
-      {
-         var selection = Editor.Selection;
-         return selection.IsEmpty ? Editor.Document.Text.Insert(selection.Caret, Caret) : Editor.Document.Text.Insert(selection.End, EndOfSelection).Insert(selection.Start, StartOfSelection);
-      }
-   }
+   internal string Markdown => new MarkdownWithSelection(Editor.Document.Text, Editor.Selection).ToString();
 
    internal EditorInAWindow Type(string text)
    {
