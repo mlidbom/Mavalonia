@@ -55,6 +55,14 @@ class HeadlessWindow
       DoWhatIsPending();
    }
 
+   public void DragWithTheRightButton(Point from, Point to)
+   {
+      _window.MouseDown(from, MouseButton.Right);
+      _window.MouseMove(to, RawInputModifiers.RightMouseButton);
+      _window.MouseUp(to, MouseButton.Right);
+      DoWhatIsPending();
+   }
+
    public void MoveThePointerTo(Point point)
    {
       _window.MouseMove(point);

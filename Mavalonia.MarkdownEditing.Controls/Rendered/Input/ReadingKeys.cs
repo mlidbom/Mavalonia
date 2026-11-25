@@ -25,10 +25,8 @@ class ReadingKeys
    Action? ActionOf(KeyEventArgs e)
    {
       if(_view.Hotkeys.SelectAll.Any(it => it.Matches(e))) return _view.SelectAll;
-      if(!_view.IsAnythingSelected) return null;
-
-      if(_view.Hotkeys.Copy.Any(it => it.Matches(e))) return () => ClipboardInput.Use(_view.CopySelection());
-      if(e is { Key: Key.Escape, KeyModifiers: KeyModifiers.None }) return _view.SelectNothing;
+      if(_view.IsAnythingSelected && _view.Hotkeys.Copy.Any(it => it.Matches(e))) return () => ClipboardInput.Use(_view.CopySelection());
+      if(_view.IsAnythingSelected && e is { Key: Key.Escape, KeyModifiers: KeyModifiers.None }) return _view.SelectNothing;
       return e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? ExtensionOfTheSelection(e) : null;
    }
 
@@ -36,6 +34,7 @@ class ReadingKeys
       _movement.ActionOf(e, _view.Selectable!) is {} move
          ? () =>
          {
+            _view.SelectingStarts();
             move();
             _view.BringTheCaretIntoView();
          }

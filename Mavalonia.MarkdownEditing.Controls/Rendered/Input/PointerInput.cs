@@ -16,7 +16,10 @@ class PointerInput
    ///<summary>Goes on selecting, and scrolling, while the pointer is held still outside of what is seen.</summary>
    readonly DispatcherTimer _selecting = new() { Interval = TimeSpan.FromMilliseconds(30) };
 
-   ///<summary>Null when no button is pressed, or when it has become more than a click.</summary>
+   ///<summary>Whether the button that selects is pressed.</summary>
+   bool _isPressed;
+
+   ///<summary>Null when the button isn't pressed, or when it has become more than a click.</summary>
    Point? _pressedAt;
 
    Point _latestInTheWindow;
@@ -35,6 +38,7 @@ class PointerInput
       _view.Focus(NavigationMethod.Pointer);
       e.Pointer.Capture(_view);
       _view.SelectingStarts();
+      _isPressed = true;
       _pressedAt = e.GetPosition(_view);
 
       var position = _view.Layout.PositionNearestTo(e.GetPosition(_view));
@@ -48,7 +52,7 @@ class PointerInput
 
    internal void Move(PointerEventArgs e)
    {
-      if(!ReferenceEquals(e.Pointer.Captured, _view)) _view.PointAt(e.GetPosition(_view));
+      if(!_isPressed) _view.PointAt(e.GetPosition(_view));
       else if(!IsNoMoreThanAClick(e.GetPosition(_view))) SelectUpTo(e);
    }
 
@@ -85,6 +89,7 @@ class PointerInput
 
    internal void EndSelecting()
    {
+      _isPressed = false;
       _pressedAt = null;
       _selecting.Stop();
    }

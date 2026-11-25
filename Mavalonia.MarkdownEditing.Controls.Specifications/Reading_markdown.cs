@@ -63,6 +63,15 @@ public class Reading_markdown
       [XFOnUIThread] public void ends_with_Escape() => new ViewInAWindow("one two").Select("one", to: "one").Press(PhysicalKey.Escape).View.IsAnythingSelected.Must().BeFalse();
       [XFOnUIThread] public void ends_with_a_click() => Clicked(new ViewInAWindow("one two").Select("one", to: "one"), "two").View.IsAnythingSelected.Must().BeFalse();
 
+      [XFOnUIThread] public void with_Shift_and_arrows_goes_on_to_the_other_side_of_where_it_started() => new ViewInAWindow("one two").Select("t", to: "t").Press(PhysicalKey.ArrowLeft, Shift, times: 3).View.SelectedMarkdown.Must().Be("e ");
+
+      [XFOnUIThread] public void is_not_changed_by_dragging_with_the_right_button()
+      {
+         var view = new ViewInAWindow("one two three").Select("one", to: "one");
+         view.Window.DragWithTheRightButton(view.CenterOf("one"), view.CenterOf("three"));
+         view.View.SelectedMarkdown.Must().Be("one");
+      }
+
       [XFOnUIThread] public void in_a_view_ends_the_selection_in_another_of_the_window()
       {
          var (one, other) = (new MarkdownView { Markdown = "one" }, new MarkdownView { Markdown = "other" });

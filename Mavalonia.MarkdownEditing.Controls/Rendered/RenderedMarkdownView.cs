@@ -145,7 +145,7 @@ public abstract partial class RenderedMarkdownView : Control
    ///<summary>The view has been clicked at <paramref name="point"/>, with nothing selected by that.</summary>
    internal virtual void ClickAt(Point point) {}
 
-   ///<summary>The pointer is at <paramref name="point"/>, with no button pressed.</summary>
+   ///<summary>The pointer is at <paramref name="point"/>, and isn't selecting.</summary>
    internal virtual void PointAt(Point point) {}
 
    ///<summary>A person has started to select in the view.</summary>
