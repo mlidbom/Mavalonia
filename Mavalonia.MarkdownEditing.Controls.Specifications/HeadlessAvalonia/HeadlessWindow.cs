@@ -40,6 +40,19 @@ class HeadlessWindow
       DoWhatIsPending();
    }
 
+   ///<summary>Presses the button, and doesn't release it.</summary>
+   public void PressTheButton(Point point)
+   {
+      _window.MouseDown(point, MouseButton.Left);
+      DoWhatIsPending();
+   }
+
+   public void ReleaseTheButton(Point point)
+   {
+      _window.MouseUp(point, MouseButton.Left);
+      DoWhatIsPending();
+   }
+
    public void Drag(Point from, Point to, RawInputModifiers modifiers = RawInputModifiers.None)
    {
       DragAndHold(from, to, modifiers);

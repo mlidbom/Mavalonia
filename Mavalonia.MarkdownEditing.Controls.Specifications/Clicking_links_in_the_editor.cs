@@ -239,6 +239,22 @@ public class Clicking_links_in_the_editor
          _isLeftToTheWindowToOpen.Must().SequenceEqual([false]);
       }
 
+      [XFOnUIThread] public void tells_where_the_link_leads_when_the_markdown_after_it_changes_while_the_button_is_pressed()
+      {
+         _editor.Window.PressTheButton(_link);
+         _editor.Editor.Document.Insert(_editor.Editor.Document.TextLength, " more");
+         _editor.Window.ReleaseTheButton(_link);
+         _clicked.Must().SequenceEqual(["https://b.invalid/c"]);
+      }
+
+      [XFOnUIThread] public void tells_nothing_when_another_link_has_taken_its_place_by_the_time_the_button_is_released()
+      {
+         _editor.Window.PressTheButton(_link);
+         _editor.Editor.Document.Text = "https://x.invalid/y text";
+         _editor.Window.ReleaseTheButton(_link);
+         _clicked.Must().BeEmpty();
+      }
+
       [XFOnUIThread] public void twice_tells_it_once()
       {
          _editor.Window.Click(_link);

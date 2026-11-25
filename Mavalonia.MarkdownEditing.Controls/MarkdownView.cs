@@ -180,10 +180,5 @@ public class MarkdownView : RenderedMarkdownView
       _copyCode?.Hide();
    }
 
-   internal override void ClickAt(Point point, KeyModifiers modifiers)
-   {
-      if(Layout.TargetAt(point) is {} target) RaiseEvent(new LinkClickedEventArgs(target, modifiers));
-   }
-
    internal override void SelectingStarts() => SelectionOfAWindow.IsNowIn(this);
 }

@@ -20,6 +20,9 @@ class PointerInput
    ///<summary>Null when the button isn't pressed, or when it has become more than a click.</summary>
    Point? _pressedAt;
 
+   ///<summary>Where the link or the image that the button is pressed on leads. Null when it isn't pressed on one.</summary>
+   string? _targetPressedOn;
+
    Point _latestInTheWindow;
 
    internal PointerInput(RenderedMarkdownView view)
@@ -53,14 +56,17 @@ class PointerInput
 
    void StartSelecting(SelectableMarkdown selectable, PointerPressedEventArgs e)
    {
+      var point = e.GetPosition(_view);
+
       e.Handled = true;
       _view.Focus(NavigationMethod.Pointer);
       e.Pointer.Capture(_view);
       _view.SelectingStarts();
       _isPressed = true;
-      _pressedAt = e.GetPosition(_view);
+      _pressedAt = point;
+      _targetPressedOn = _view.Layout.TargetAt(point);
 
-      var position = _view.Layout.PositionNearestTo(e.GetPosition(_view));
+      var position = _view.Layout.PositionNearestTo(point);
       switch(e.ClickCount)
       {
          case 2: selectable.SelectTheWordAt(position); break;
@@ -98,18 +104,25 @@ class PointerInput
 
    internal void Release(PointerReleasedEventArgs e)
    {
-      var isAClick = e.InitialPressMouseButton == MouseButton.Left && _pressedAt is not null && _view.Shown?.Selection.IsEmpty == true;
-      var point = e.GetPosition(_view);
+      var clicked = TargetClickedBy(e);
 
       e.Pointer.Capture(null);
       EndSelecting();
-      if(isAClick) _view.ClickAt(point, e.KeyModifiers);
+      if(clicked is not null) _view.RaiseEvent(new LinkClickedEventArgs(clicked, e.KeyModifiers));
+   }
+
+   ///<summary>A link, or an image, is clicked when the button is pressed and released on it, with nothing selected by that.</summary>
+   string? TargetClickedBy(PointerReleasedEventArgs e)
+   {
+      var isAClick = e.InitialPressMouseButton == MouseButton.Left && _pressedAt is not null && _view.Shown?.Selection.IsEmpty == true;
+      return isAClick && _view.Layout.TargetAt(e.GetPosition(_view)) == _targetPressedOn ? _targetPressedOn : null;
    }
 
    internal void EndSelecting()
    {
       _isPressed = false;
       _pressedAt = null;
+      _targetPressedOn = null;
       _selecting.Stop();
    }
 }

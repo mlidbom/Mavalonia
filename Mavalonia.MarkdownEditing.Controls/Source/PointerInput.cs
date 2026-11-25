@@ -13,8 +13,8 @@ class PointerInput
    readonly MarkdownEditor _editor;
    readonly TextEditor _view;
 
-   ///<summary>Null when what has been pressed doesn't start a click on a link.</summary>
-   Point? _pressedAt;
+   ///<summary>Where the button has been pressed on a link, and where that leads. Null when what has been pressed doesn't start a click on a link.</summary>
+   (Point At, string Target)? _pressedOnALink;
 
    internal PointerInput(MarkdownEditor editor, TextEditor view)
    {
@@ -30,7 +30,7 @@ class PointerInput
       var pressed = e.Properties.PointerUpdateKind;
       var selectsMore = e.ClickCount > 1 || e.KeyModifiers.HasFlag(KeyModifiers.Shift);
 
-      _pressedAt = pressed == PointerUpdateKind.LeftButtonPressed && !selectsMore ? e.GetPosition(_view) : null;
+      _pressedOnALink = pressed == PointerUpdateKind.LeftButtonPressed && !selectsMore && TargetOfTheLinkAt(e) is {} target ? (e.GetPosition(_view), target) : null;
       if(pressed == PointerUpdateKind.RightButtonPressed) PutTheCaretWhereAMenuIsFor(e);
    }
 
@@ -46,11 +46,15 @@ class PointerInput
 
    void Release(object? sender, PointerReleasedEventArgs e)
    {
-      var isAClick = _pressedAt is {} pressedAt && e.GetPosition(_view).IsWithinAClickOf(pressedAt);
+      var clicked = TargetClickedBy(e);
 
-      _pressedAt = null;
-      if(isAClick && TargetOfTheLinkAt(e) is {} target) _editor.RaiseEvent(new LinkClickedEventArgs(target, e.KeyModifiers));
+      _pressedOnALink = null;
+      if(clicked is not null) _editor.RaiseEvent(new LinkClickedEventArgs(clicked, e.KeyModifiers));
    }
+
+   ///<summary>A link is clicked when the button is pressed and released on it, without moving the pointer more than in a click.</summary>
+   string? TargetClickedBy(PointerReleasedEventArgs e) =>
+      _pressedOnALink is var (pressedAt, target) && e.GetPosition(_view).IsWithinAClickOf(pressedAt) && TargetOfTheLinkAt(e) == target ? target : null;
 
    ///<summary>A link is one that the markdown has, or else a URL. None is beside the text, also not beside a row that the line wraps after.</summary>
    string? TargetOfTheLinkAt(PointerEventArgs e)

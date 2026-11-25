@@ -84,11 +84,6 @@ public partial class RenderedEditorView : RenderedMarkdownView
    ///<summary>A link is text to put the caret in, unless the keys are pressed that links are followed with in any editor.</summary>
    internal override void PointAt(Point point, KeyModifiers modifiers) => Cursor = modifiers == Hotkeys.CommandModifiers && Layout.TargetAt(point) is not null ? Cursors.OfALink : Cursors.OfText;
 
-   internal override void ClickAt(Point point, KeyModifiers modifiers)
-   {
-      if(Layout.TargetAt(point) is {} target) RaiseEvent(new LinkClickedEventArgs(target, modifiers));
-   }
-
    protected override void OnTextInput(TextInputEventArgs e) => _keyboard.Type(e);
    protected override void OnKeyDown(KeyEventArgs e) => _keyboard.Press(e);
 

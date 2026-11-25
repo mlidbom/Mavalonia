@@ -180,9 +180,6 @@ public abstract partial class RenderedMarkdownView : Control
       _pointer.EndSelecting();
    }
 
-   ///<summary>The view has been clicked at <paramref name="point"/>, with nothing selected by that.</summary>
-   internal virtual void ClickAt(Point point, KeyModifiers modifiers) {}
-
    ///<summary>The pointer is at <paramref name="point"/>, and isn't selecting.</summary>
    internal virtual void PointAt(Point point, KeyModifiers modifiers) {}
 
