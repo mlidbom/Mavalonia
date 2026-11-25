@@ -120,8 +120,11 @@ class MarkdownReader
       }
    }
 
+   ///<summary>Markdig leaves the tabs after the last cells of rows in a paragraph of its own. No other paragraph is only white space, unless that is written as entities.</summary>
    void ReadParagraph(ParagraphBlock paragraph, BlockContainers containers)
    {
-      if(new TextReader(_markdown, containers).Read(paragraph.Inline) is {} text) _blocks.Add(new Paragraph(containers, text));
+      if(new TextReader(_markdown, containers).Read(paragraph.Inline) is {} text && !text.Chars.All(IsWrittenAsSpaceOrTab)) _blocks.Add(new Paragraph(containers, text));
    }
+
+   bool IsWrittenAsSpaceOrTab(RenderedChar it) => it.Source.Length == 1 && _markdown[it.Source.Start] is ' ' or '\t';
 }
