@@ -3,6 +3,9 @@
       <OutputType>Exe</OutputType>
    </PropertyGroup>
    <ItemGroup>
+      <Content Include="CommonMark\*.json" CopyToOutputDirectory="PreserveNewest" />
+   </ItemGroup>
+   <ItemGroup>
       <PackageReference Include="Compze.Must" />
       <PackageReference Include="Compze.xUnitBDD" />
       <PackageReference Include="xunit.v3" />

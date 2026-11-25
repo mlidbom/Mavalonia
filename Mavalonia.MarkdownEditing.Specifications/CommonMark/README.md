@@ -1,0 +1,1 @@
+`CommonMark-0.31.2-examples.json` is https://spec.commonmark.org/0.31.2/spec.json: the examples of the CommonMark specification, © John MacFarlane, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
