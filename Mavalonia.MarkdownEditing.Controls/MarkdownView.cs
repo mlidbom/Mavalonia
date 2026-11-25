@@ -182,7 +182,7 @@ public class MarkdownView : RenderedMarkdownView
 
    internal override void ClickAt(Point point, KeyModifiers modifiers)
    {
-      if(Layout.TargetAt(point) is {} target) RaiseEvent(new LinkClickedEventArgs(target));
+      if(Layout.TargetAt(point) is {} target) RaiseEvent(new LinkClickedEventArgs(target, modifiers));
    }
 
    internal override void SelectingStarts() => SelectionOfAWindow.IsNowIn(this);

@@ -14,11 +14,16 @@ public class Clicking_links_in_the_editor
    const RawInputModifiers Ctrl = RawInputModifiers.Control;
 
    readonly List<string> _clicked = [];
+   readonly List<KeyModifiers> _modifiers = [];
 
    EditorInAWindow Editor(string markdown, bool inTheSource = false)
    {
       var editor = new EditorInAWindow(markdown) { Editor = { ShowsSource = inTheSource } };
-      editor.Editor.LinkClicked += (_, click) => _clicked.Add(click.Target);
+      editor.Editor.LinkClicked += (_, click) =>
+      {
+         _clicked.Add(click.Target);
+         _modifiers.Add(click.KeyModifiers);
+      };
       editor.Editor.FocusTheView();
       return editor;
    }
@@ -34,33 +39,64 @@ public class Clicking_links_in_the_editor
          _link = _editor.PointInTheText(30);
       }
 
+      [XFOnUIThread] public void tells_where_the_link_leads()
+      {
+         _editor.Window.Click(_link);
+         _clicked.Must().SequenceEqual(["https://b.c"]);
+      }
+
+      [XFOnUIThread] public void puts_the_caret_in_the_link()
+      {
+         _editor.Window.Click(_link);
+         _editor.Markdown.Must().Satisfy(it => it.IndexOf('‸') < it.IndexOf(']'));
+      }
+
+      [XFOnUIThread] public void tells_that_no_modifier_keys_are_pressed()
+      {
+         _editor.Window.Click(_link);
+         _modifiers.Must().SequenceEqual([KeyModifiers.None]);
+      }
+
       [XFOnUIThread] public void with_Ctrl_tells_where_the_link_leads()
       {
          _editor.Window.Click(_link, Ctrl);
          _clicked.Must().SequenceEqual(["https://b.c"]);
       }
 
-      [XFOnUIThread] public void without_Ctrl_tells_nothing_and_puts_the_caret_in_the_link()
+      [XFOnUIThread] public void with_Ctrl_tells_that_it_is_pressed()
+      {
+         _editor.Window.Click(_link, Ctrl);
+         _modifiers.Must().SequenceEqual([KeyModifiers.Control]);
+      }
+
+      [XFOnUIThread] public void twice_tells_it_once_and_selects_the_word()
       {
          _editor.Window.Click(_link);
-         new { _clicked, _editor.Markdown }.Must().Satisfy(it => it._clicked.Count == 0 && it.Markdown.IndexOf('‸') < it.Markdown.IndexOf(']'));
+         _editor.Window.Click(_link);
+         new { _clicked, _editor.Markdown }.Must().Satisfy(it => it._clicked.Count == 1 && it.Markdown.Contains("[a ⟦long⟧", StringComparison.Ordinal));
       }
 
-      [XFOnUIThread] public void with_Ctrl_beside_the_link_tells_nothing()
+      [XFOnUIThread] public void beside_the_link_tells_nothing()
       {
-         _editor.Window.Click(_editor.PointInTheText(300), Ctrl);
+         _editor.Window.Click(_editor.PointInTheText(300));
          _clicked.Must().BeEmpty();
       }
 
-      [XFOnUIThread] public void with_Ctrl_and_the_right_button_tells_nothing()
+      [XFOnUIThread] public void with_the_right_button_tells_nothing()
       {
-         _editor.Window.RightClick(_link, Ctrl);
+         _editor.Window.RightClick(_link);
          _clicked.Must().BeEmpty();
       }
 
-      [XFOnUIThread] public void with_Ctrl_to_drag_over_the_link_tells_nothing()
+      [XFOnUIThread] public void with_Shift_tells_nothing()
       {
-         _editor.Window.Drag(_link, _link + new Vector(30, 0), Ctrl);
+         _editor.Window.Click(_link, RawInputModifiers.Shift);
+         _clicked.Must().BeEmpty();
+      }
+
+      [XFOnUIThread] public void and_dragging_tells_nothing()
+      {
+         _editor.Window.Drag(_link, _link + new Vector(30, 0));
          _clicked.Must().BeEmpty();
       }
 
@@ -80,7 +116,7 @@ public class Clicking_links_in_the_editor
       {
          var told = new List<string>();
          ((Interactive)_editor.Editor.Parent!).AddHandler(MarkdownView.LinkClickedEvent, (_, click) => told.Add(click.Target));
-         _editor.Window.Click(_link, Ctrl);
+         _editor.Window.Click(_link);
          told.Must().SequenceEqual(["https://b.c"]);
       }
    }
@@ -99,10 +135,34 @@ public class Clicking_links_in_the_editor
          ((Interactive)_editor.Editor.Parent!).AddHandler(VisualLineLinkText.OpenUriEvent, (_, open) => _isLeftToTheWindowToOpen.Add(!open.Handled), handledEventsToo: true);
       }
 
+      [XFOnUIThread] public void tells_where_the_link_leads()
+      {
+         _editor.Window.Click(_link);
+         _clicked.Must().SequenceEqual(["https://b.invalid/c"]);
+      }
+
+      [XFOnUIThread] public void puts_the_caret_in_the_link()
+      {
+         _editor.Window.Click(_link);
+         _editor.Markdown.Must().Satisfy(it => it.IndexOf('‸') < it.IndexOf(' '));
+      }
+
+      [XFOnUIThread] public void tells_that_no_modifier_keys_are_pressed()
+      {
+         _editor.Window.Click(_link);
+         _modifiers.Must().SequenceEqual([KeyModifiers.None]);
+      }
+
       [XFOnUIThread] public void with_Ctrl_tells_where_the_link_leads()
       {
          _editor.Window.Click(_link, Ctrl);
          _clicked.Must().SequenceEqual(["https://b.invalid/c"]);
+      }
+
+      [XFOnUIThread] public void with_Ctrl_tells_that_it_is_pressed()
+      {
+         _editor.Window.Click(_link, Ctrl);
+         _modifiers.Must().SequenceEqual([KeyModifiers.Control]);
       }
 
       [XFOnUIThread] public void with_Ctrl_does_not_leave_it_to_the_window_to_open_the_link()
@@ -111,15 +171,46 @@ public class Clicking_links_in_the_editor
          _isLeftToTheWindowToOpen.Must().SequenceEqual([false]);
       }
 
-      [XFOnUIThread] public void without_Ctrl_tells_nothing()
+      [XFOnUIThread] public void twice_tells_it_once()
       {
          _editor.Window.Click(_link);
+         _editor.Window.Click(_link);
+         _clicked.Must().HaveCount(1);
+      }
+
+      [XFOnUIThread] public void beside_the_link_tells_nothing()
+      {
+         _editor.Window.Click(_link + new Vector(500, 0));
+         _clicked.Must().BeEmpty();
+      }
+
+      [XFOnUIThread] public void below_the_text_tells_nothing()
+      {
+         _editor.Window.Click(_link + new Vector(0, 300));
+         _clicked.Must().BeEmpty();
+      }
+
+      [XFOnUIThread] public void with_the_right_button_tells_nothing()
+      {
+         _editor.Window.RightClick(_link);
          _clicked.Must().BeEmpty();
       }
 
       [XFOnUIThread] public void with_Ctrl_and_the_right_button_tells_nothing()
       {
          _editor.Window.RightClick(_link, Ctrl);
+         _clicked.Must().BeEmpty();
+      }
+
+      [XFOnUIThread] public void with_Shift_tells_nothing()
+      {
+         _editor.Window.Click(_link, RawInputModifiers.Shift);
+         _clicked.Must().BeEmpty();
+      }
+
+      [XFOnUIThread] public void and_dragging_tells_nothing()
+      {
+         _editor.Window.Drag(_link, _link + new Vector(30, 0));
          _clicked.Must().BeEmpty();
       }
    }

@@ -43,6 +43,16 @@ It shows what GitHub does: tables, task lists, alerts, bare URLs, strikethrough.
 
 **How many to show at a time:** 100 messages of 700 characters take 0.4 s to show and 15 MB; LiveMarkdown takes 1.5 s and 44 MB for the same. 15,000 would take half a minute and well over a gigabyte, so keep drawing the latest 100 and more on scrolling up, as Cloyd does. `Mavalonia.MarkdownEditing.Controls.Measurements` measures it.
 
+## Links
+
+`Target` is what the markdown says, whatever the protocol: `file:`, `vscode:`, one of the application's own, or a path such as `src/x.cs:12`. Nothing is left out, `javascript:` neither, so check it before opening it.
+
+| | Links, with any protocol | Text that is a link by itself |
+| --- | --- | --- |
+| `MarkdownView` | `[label](target)`, `[label][reference]`, `<protocol:...>` | `http:`, `https:`, `ftp:`, `mailto:`, `tel:`, `www.` |
+| `MarkdownEditor`, rendered | The same | Nothing |
+| `MarkdownEditor`, source | None | `http:`, `https:`, `ftp:`, `www.`, email addresses |
+
 ## Menus
 
 A right-click, or the menu key, opens a small menu: in `MarkdownView` copy, copy link where it's opened at one, and select all; in `MarkdownEditor` cut, copy, paste, paste as text, paste as quote and select all. The right button puts the caret where it's pressed, unless it's pressed in what is selected.
@@ -83,7 +93,7 @@ A `MenuFlyout` without items in it when it first opens stays empty, also when it
 - **Keys that are Avalonia's,** for the whole application: those to copy, cut, paste, undo, redo and select all are those of `PlatformHotkeyConfiguration`, as are the modifier keys for moving and deleting by word and for going to the start or end. Other keys, such as the arrows, are fixed. In the source view, the keys that aren't named here are AvaloniaEdit's own.
 - **A key it doesn't use goes on to the application,** such as Ctrl+Enter to send. To have one that it does use, handle it in the tunnel phase.
 - **What the keys and the menu do is public,** for buttons and menus of the application: `Cut()`, `Copy()`, `Paste()`, `PasteText()`, `PasteAsQuote()`, `SelectAll()` and `ToggleFormat(TextFormats)`. They do it in the view that is shown.
-- **`LinkClicked`** is the same event as that of `MarkdownView`, so one handler on what both are in is enough. Ctrl+click raises it, in both views, and the editor itself opens nothing. A plain click puts the caret in the link. In the rendered view, links are those that markdown has, and a bare URL is text. In the source view, they are the URLs, wherever they are.
+- **`LinkClicked`** is the same event as that of `MarkdownView`, so one handler on what both are in is enough. A click raises it, in both views, and the editor itself opens nothing. The click puts the caret in the link too, so an application may want to open only what is clicked with Ctrl: see the event's `KeyModifiers`. In the rendered view, links are those that markdown has, and a bare URL is text. In the source view, they are the URLs, wherever they are.
 - **`Quote(markdown)`** adds a quote where the caret is and puts the caret after it. It works while the control isn't shown.
 - **Pasting images** is the application's. The editor takes Ctrl+V also when there's only an image on the clipboard, and then inserts nothing: handle the key before it does, in the tunnel phase.
 - **An exception while using the clipboard,** such as when another program holds it, surfaces on the dispatcher as any other does.

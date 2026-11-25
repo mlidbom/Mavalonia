@@ -9,9 +9,6 @@ namespace Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 ///<summary>What a person does with the pointer in a <see cref="RenderedMarkdownView"/>.</summary>
 class PointerInput
 {
-   ///<summary>How far the pointer may move while a button is pressed without that being more than a click.</summary>
-   const double FarthestInAClick = 4;
-
    readonly RenderedMarkdownView _view;
 
    ///<summary>Goes on selecting, and scrolling, while the pointer is held still outside of what is seen.</summary>
@@ -78,7 +75,7 @@ class PointerInput
       else if(!IsNoMoreThanAClick(e.GetPosition(_view))) SelectUpTo(e);
    }
 
-   bool IsNoMoreThanAClick(Point point) => _pressedAt is {} pressed && Point.Distance(pressed, point) < FarthestInAClick;
+   bool IsNoMoreThanAClick(Point point) => _pressedAt is {} pressed && point.IsWithinAClickOf(pressed);
 
    void SelectUpTo(PointerEventArgs e)
    {

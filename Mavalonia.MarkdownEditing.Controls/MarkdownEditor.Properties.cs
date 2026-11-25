@@ -32,8 +32,11 @@ partial class MarkdownEditor
    ///<summary>What is shown while the document is empty.</summary>
    public string? Watermark { get => GetValue(WatermarkProperty); set => SetValue(WatermarkProperty, value); }
 
-   ///<summary>A person has clicked a link with Ctrl pressed, or with Command on a Mac. The editor itself opens nothing.</summary>
-   ///<remarks>In the rendered view, links are those that markdown has. In the source view, they are the URLs, wherever they are.</remarks>
+   ///<summary>A person has clicked a link. The editor itself opens nothing.</summary>
+   ///<remarks>
+   /// A click puts the caret in the link too, to edit it. So an application may want to open only what is clicked with Ctrl pressed: see <see cref="LinkClickedEventArgs.KeyModifiers"/>.<br/>
+   /// In the rendered view, links are those that markdown has. In the source view, they are the URLs, wherever they are.
+   /// </remarks>
    public event EventHandler<LinkClickedEventArgs>? LinkClicked { add => AddHandler(LinkClickedEvent, value); remove => RemoveHandler(LinkClickedEvent, value); }
 
    ///<summary>The keys that start a new block, such as a paragraph or a list item, in the rendered view. Null for none.</summary>
