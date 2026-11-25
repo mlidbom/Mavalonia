@@ -54,6 +54,7 @@ class TableReader
    int StartOfLine(int lineNumber)
    {
       var startOfLine = _startOfHeader;
+      //bug: throws when there are too few lines, as in the markdown "*[|", "]()-|-", on a line each, of which Markdig says that the header is on the last line.
       for(var number = 0; number < lineNumber; number++) startOfLine = _markdown.StartOfLineAfter(startOfLine)!.Value;
       return startOfLine;
    }

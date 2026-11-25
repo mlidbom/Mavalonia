@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.VisualTree;
@@ -15,14 +14,15 @@ class KeyboardInput
 {
    readonly RenderedMarkdownView _view;
    readonly VerticalMovement _verticalMovement;
+   readonly ClipboardInput _clipboard;
 
    internal KeyboardInput(RenderedMarkdownView view)
    {
       _view = view;
       _verticalMovement = new VerticalMovement(view);
+      _clipboard = new ClipboardInput(view);
    }
 
-   TopLevel TopLevel => TopLevel.GetTopLevel(_view)!;
    PlatformHotkeyConfiguration Hotkeys => _view.GetPlatformSettings()!.HotkeyConfiguration;
 
    internal void Type(TextInputEventArgs e)
@@ -43,7 +43,7 @@ class KeyboardInput
       _view.BringTheCaretIntoView();
    }
 
-   Action? ActionOf(KeyEventArgs e, RenderedEditor editor) => EditOf(e, editor) ?? MovementOf(e, editor) ?? ClipboardActionOf(e, editor);
+   Action? ActionOf(KeyEventArgs e, RenderedEditor editor) => EditOf(e, editor) ?? MovementOf(e, editor) ?? SelectionOf(e, editor) ?? ClipboardActionOf(e, editor);
 
    Action? EditOf(KeyEventArgs e, RenderedEditor editor)
    {
@@ -103,7 +103,6 @@ class KeyboardInput
          (Key.End, _) when modifiers == Hotkeys.CommandModifiers => Move(CaretMovement.ToTheEnd),
          (Key.Up, KeyModifiers.None) => () => _verticalMovement.Up(editor, extendsSelection),
          (Key.Down, KeyModifiers.None) => () => _verticalMovement.Down(editor, extendsSelection),
-         (Key.A, _) when Is(Hotkeys.SelectAll, e) => editor.SelectAll,
          _ => null
       };
 
@@ -111,34 +110,14 @@ class KeyboardInput
       Action MoveTo(Func<LineLayout, RenderedPosition> positionOn) => () => editor.MoveTo(positionOn(_view.Layout.LineOf(editor.CaretPosition)), extendsSelection);
    }
 
+   Action? SelectionOf(KeyEventArgs e, RenderedEditor editor) => Is(Hotkeys.SelectAll, e) ? editor.SelectAll : null;
+
    Action? ClipboardActionOf(KeyEventArgs e, RenderedEditor editor)
    {
-      if(Is(Hotkeys.Copy, e)) return () => _ = Copy(editor);
-      if(Is(Hotkeys.Cut, e)) return () => _ = Cut(editor);
-      if(Is(Hotkeys.Paste, e)) return () => _ = Paste(editor);
+      if(Is(Hotkeys.Copy, e)) return () => _ = _clipboard.Copy(editor);
+      if(Is(Hotkeys.Cut, e)) return () => _ = _clipboard.Cut(editor);
+      if(Is(Hotkeys.Paste, e)) return () => _ = _clipboard.Paste(editor);
       return null;
-   }
-
-   async Task Copy(RenderedEditor editor)
-   {
-      if(editor.SelectedMarkdown is { Length: > 0 } markdown) await TopLevel.Clipboard!.SetTextAsync(markdown);
-   }
-
-   async Task Cut(RenderedEditor editor)
-   {
-      if(editor.Selection.IsEmpty) return;
-
-      var copying = Copy(editor);
-      editor.DeleteCharacterBefore();
-      await copying;
-   }
-
-   async Task Paste(RenderedEditor editor)
-   {
-      if(await TopLevel.Clipboard!.TryGetTextAsync() is not { Length: > 0 } text) return;
-
-      editor.Paste(text);
-      _view.BringTheCaretIntoView();
    }
 
    static bool Is(IEnumerable<KeyGesture> gestures, KeyEventArgs e) => gestures.Any(it => it.Matches(e));

@@ -17,7 +17,12 @@ class DocumentLayoutBuilder
    readonly Rect _area;
    readonly List<BlockLayout> _blocks = [];
    readonly List<ContainerDecoration> _decorations = [];
+
+   ///<summary>Where the next block starts.</summary>
    double _top;
+
+   RenderedBlock? _previous;
+   double _bottomOfPrevious;
 
    DocumentLayoutBuilder(RenderedMarkdown rendered, MarkdownAppearance appearance, TextLayouts texts, double width, Thickness padding)
    {
@@ -35,74 +40,82 @@ class DocumentLayoutBuilder
       return new DocumentLayout(rendered, builder._blocks, builder._decorations, new Size(width, builder._top + padding.Bottom));
    }
 
+   double SpaceBetweenBlocks => _appearance.Scaled(8);
+   double SpaceAboveAHeading => _appearance.Scaled(12);
+   double SpaceBetweenListItems => _appearance.Scaled(3);
+   double IndentationInAQuote => _appearance.Scaled(16);
+   double IndentationInAListItem => _appearance.Scaled(24);
+   double PaddingOfCode => _appearance.Scaled(8);
+   double NarrowestText => _appearance.Scaled(40);
+
    void LayOutBlocks()
    {
-      RenderedBlock? previous = null;
       foreach(var block in _rendered.Blocks)
       {
-         if(block is TableCell { Row: 0, Column: 0 } firstCell) LayOut(firstCell.Table, previous);
-         else if(block is not TableCell) LayOut(block, previous);
+         //bug: a table whose header has no cell is never laid out, so that DocumentLayout.LayoutOf throws for its cells, such as of the markdown "|", "-|", "|-", on a line each.
+         if(block is TableCell { Row: 0, Column: 0 } firstCell) LayOut(firstCell.Table);
+         else if(block is not TableCell) LayOut(block);
 
-         previous = block;
+         _previous = block;
       }
    }
 
-   void LayOut(RenderedBlock block, RenderedBlock? previous)
+   void LayOut(RenderedBlock block)
    {
-      var bottomOfPrevious = LeaveSpaceBetween(previous, block);
-      var padding = _appearance.Scaled(block is CodeBlock ? 8 : 0);
-      var left = _area.Left + IndentationInside(block.Containers.OutermostFirst);
-      var text = _texts.Of(block, Math.Max(_appearance.Scaled(40), _area.Right - left - 2 * padding));
-      var bounds = new Rect(left, _top, Math.Max(0, _area.Right - left), text.Height + 2 * padding);
+      LeaveSpaceBefore(block);
 
-      _blocks.Add(new BlockLayout(block, bounds, text, bounds.TopLeft + new Point(padding, padding), _appearance));
+      var left = LeftOf(block);
+      var padding = block is CodeBlock ? PaddingOfCode : 0;
+      var text = _texts.Of(block, Math.Max(NarrowestText, _area.Right - left - 2 * padding));
+      var bounds = new Rect(left, _top, Math.Max(0, _area.Right - left), text.Height + 2 * padding);
+      var originOfText = bounds.TopLeft + new Point(padding, padding);
+
+      _blocks.Add(new BlockLayout(block, bounds, text, originOfText, _appearance));
       _top = bounds.Bottom;
-      Decorate(block, previous, bottomOfPrevious, topOfText: bounds.Top + padding);
+      DecorateContainersOf(block, originOfText.Y);
    }
 
-   void LayOut(Table table, RenderedBlock? previous)
+   void LayOut(Table table)
    {
-      var bottomOfPrevious = LeaveSpaceBetween(previous, table.FirstCell);
-      var left = _area.Left + IndentationInside(table.FirstCell.Containers.OutermostFirst);
-      var top = _top;
-      var tableLayout = new TableLayout(table, _appearance, _texts, new Point(left, top), _area.Right - left);
+      LeaveSpaceBefore(table.FirstCell);
+
+      var topLeft = new Point(LeftOf(table.FirstCell), _top);
+      var tableLayout = new TableLayout(table, _appearance, _texts, topLeft, _area.Right - topLeft.X);
 
       _blocks.AddRange(tableLayout.Cells);
       _top = tableLayout.Bottom;
-      Decorate(table.FirstCell, previous, bottomOfPrevious, topOfText: top);
+      DecorateContainersOf(table.FirstCell, topLeft.Y);
    }
 
-   ///<summary>Returns where the previous block ends.</summary>
-   double LeaveSpaceBetween(RenderedBlock? previous, RenderedBlock block)
+   void LeaveSpaceBefore(RenderedBlock block)
    {
-      var bottomOfPrevious = _top;
-      if(previous is not null) _top += _appearance.Scaled(AreItemsOfTheSameList(previous, block) ? 3 : block is Heading ? 12 : 8);
-      return bottomOfPrevious;
+      _bottomOfPrevious = _top;
+      if(_previous is not null) _top += IsTheNextItemOfAList(block, _previous) ? SpaceBetweenListItems : block is Heading ? SpaceAboveAHeading : SpaceBetweenBlocks;
    }
 
-   static bool AreItemsOfTheSameList(RenderedBlock previous, RenderedBlock block) => previous.Containers.OutermostFirst.OfType<ListItem>().Any() && block.Containers.Innermost is ListItem item && !previous.IsInside(item);
+   static bool IsTheNextItemOfAList(RenderedBlock block, RenderedBlock previous) => previous.Containers.OutermostFirst.OfType<ListItem>().Any() && block.Containers.Innermost is ListItem item && !previous.IsInside(item);
 
-   double IndentationInside(IEnumerable<BlockContainer> containers) => containers.Sum(it => _appearance.Scaled(it is Quote ? 16 : 24));
+   double LeftOf(RenderedBlock block) => LeftInside(block.Containers.OutermostFirst);
 
-   void Decorate(RenderedBlock block, RenderedBlock? previous, double bottomOfPrevious, double topOfText)
+   double LeftInside(IEnumerable<BlockContainer> containers) => _area.Left + containers.Sum(it => it is Quote ? IndentationInAQuote : IndentationInAListItem);
+
+   void DecorateContainersOf(RenderedBlock block, double topOfText)
    {
       foreach(var (depth, container) in block.Containers.OutermostFirst.Index())
       {
-         var left = _area.Left + IndentationInside(block.Containers.OutermostFirst.Take(depth));
-         var isFirst = previous?.IsInside(container) != true;
+         var around = block.Containers.OutermostFirst.Take(depth).ToList();
+         var isTheFirstBlockInside = _previous?.IsInside(container) != true;
 
-         switch(container)
-         {
-            case Quote:
-               var top = isFirst ? topOfText : bottomOfPrevious;
-               _decorations.Add(new ContainerDecoration.QuoteBar(new Rect(left + _appearance.Scaled(2), top, _appearance.Scaled(3), _top - top), _appearance.LineBrush));
-               break;
-            case ListItem item when isFirst:
-               _decorations.Add(new ContainerDecoration.ListMarker(_texts.OfListMarker(MarkerOf(item, block.Containers.OutermostFirst.Take(depth))), new Point(left + _appearance.Scaled(19), topOfText)));
-               break;
-         }
+         if(container is Quote) AddQuoteBar(LeftInside(around), top: isTheFirstBlockInside ? topOfText : _bottomOfPrevious);
+         else if(container is ListItem item && isTheFirstBlockInside) AddMarkerOf(item, around, topOfText);
       }
    }
+
+   void AddQuoteBar(double left, double top) =>
+      _decorations.Add(new ContainerDecoration.QuoteBar(new Rect(left + _appearance.Scaled(2), top, _appearance.Scaled(3), _top - top), _appearance.LineBrush));
+
+   void AddMarkerOf(ListItem item, IReadOnlyList<BlockContainer> around, double topOfText) =>
+      _decorations.Add(new ContainerDecoration.ListMarker(_texts.OfListMarker(MarkerOf(item, around)), new Point(LeftInside(around) + _appearance.Scaled(19), topOfText)));
 
    static string MarkerOf(ListItem item, IEnumerable<BlockContainer> around) =>
       item.Number is {} number ? number.ToString(CultureInfo.CurrentCulture) + "." : Bullets[around.OfType<ListItem>().Count() % Bullets.Length];

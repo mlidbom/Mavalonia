@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using AvaloniaEdit.Document;
+using Mavalonia.MarkdownEditing.Controls.Source;
 using Mavalonia.MarkdownEditing.Editing;
 
 namespace Mavalonia.MarkdownEditing.Controls;
@@ -42,24 +43,11 @@ public partial class MarkdownEditor : UserControl
    ///<summary>What is selected in the view that is shown.</summary>
    public TextSelection Selection
    {
-      get => ShowsSource || _renderedEditor is null ? SelectionInTheSource : _renderedEditor.Selection;
+      get => ShowsSource || _renderedEditor is null ? SourceView.TextSelection : _renderedEditor.Selection;
       set
       {
-         SelectionInTheSource = value;
+         SourceView.TextSelection = value;
          _renderedEditor?.Select(value);
-      }
-   }
-
-   TextSelection SelectionInTheSource
-   {
-      get => SourceView.CaretOffset == SourceView.SelectionStart
-                ? new TextSelection(SourceView.SelectionStart + SourceView.SelectionLength, SourceView.CaretOffset)
-                : new TextSelection(SourceView.SelectionLength == 0 ? SourceView.CaretOffset : SourceView.SelectionStart, SourceView.CaretOffset);
-      set
-      {
-         SourceView.Select(value.Start, value.End - value.Start);
-         SourceView.CaretOffset = value.Caret;
-         if(!value.IsEmpty) SourceView.Select(value.Start, value.End - value.Start);
       }
    }
 
@@ -82,14 +70,14 @@ public partial class MarkdownEditor : UserControl
    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
    {
       base.OnAttachedToVisualTree(e);
-      if(_renderedEditor is null) EditAsRendered(Document, SelectionInTheSource);
+      if(_renderedEditor is null) EditAsRendered(Document, SourceView.TextSelection);
    }
 
    ///<summary>The document may outlive the control, and must not keep it alive.</summary>
    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
    {
       base.OnDetachedFromVisualTree(e);
-      SelectionInTheSource = Selection;
+      SourceView.TextSelection = Selection;
       StopEditingAsRendered();
    }
 
@@ -117,8 +105,8 @@ public partial class MarkdownEditor : UserControl
    {
       var hadFocus = IsKeyboardFocusWithin;
 
-      if(source && _renderedEditor is not null) SelectionInTheSource = _renderedEditor.Selection;
-      else _renderedEditor?.Select(SelectionInTheSource);
+      if(source && _renderedEditor is not null) SourceView.TextSelection = _renderedEditor.Selection;
+      else _renderedEditor?.Select(SourceView.TextSelection);
 
       SourceView.IsVisible = source;
       ScrollOfTheRenderedView.IsVisible = !source;

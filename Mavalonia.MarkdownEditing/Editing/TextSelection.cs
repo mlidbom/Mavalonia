@@ -1,3 +1,5 @@
+using Mavalonia.MarkdownEditing.Rendering;
+
 namespace Mavalonia.MarkdownEditing.Editing;
 
 ///<summary>What is selected of a markdown text.</summary>
@@ -10,4 +12,7 @@ public readonly record struct TextSelection(int Anchor, int Caret)
    public bool IsEmpty => Anchor == Caret;
    public int Start => Math.Min(Anchor, Caret);
    public int End => Math.Max(Anchor, Caret);
+
+   ///<summary>All of what is selected.</summary>
+   public SourceRange Range => new(Start, End);
 }

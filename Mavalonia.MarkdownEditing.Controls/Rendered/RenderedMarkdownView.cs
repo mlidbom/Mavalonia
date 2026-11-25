@@ -1,9 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Documents;
 using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.Media.Immutable;
 using Avalonia.Media.TextFormatting;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;
@@ -13,40 +11,25 @@ using Mavalonia.MarkdownEditing.Rendering;
 namespace Mavalonia.MarkdownEditing.Controls.Rendered;
 
 ///<summary>Shows a markdown document as it is rendered, and lets a person edit it there.</summary>
-public class RenderedMarkdownView : Control
+public partial class RenderedMarkdownView : Control
 {
-   public static readonly StyledProperty<FontFamily> FontFamilyProperty = TextElement.FontFamilyProperty.AddOwner<RenderedMarkdownView>();
-   public static readonly StyledProperty<double> FontSizeProperty = TextElement.FontSizeProperty.AddOwner<RenderedMarkdownView>();
-   public static readonly StyledProperty<IBrush?> ForegroundProperty = TextElement.ForegroundProperty.AddOwner<RenderedMarkdownView>();
-   public static readonly StyledProperty<FontFamily> MonospaceFontFamilyProperty = AvaloniaProperty.Register<RenderedMarkdownView, FontFamily>(nameof(MonospaceFontFamily), new FontFamily("Cascadia Mono, Consolas, Menlo, monospace"));
-   public static readonly StyledProperty<IBrush> FaintForegroundProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush>(nameof(FaintForeground), Brushes.Gray);
-   public static readonly StyledProperty<IBrush> LinkForegroundProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush>(nameof(LinkForeground), Brushes.RoyalBlue);
-   public static readonly StyledProperty<IBrush> CodeBackgroundProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush>(nameof(CodeBackground), new ImmutableSolidColorBrush(Colors.Gray, 0.15));
-   public static readonly StyledProperty<IBrush> LineBrushProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush>(nameof(LineBrush), new ImmutableSolidColorBrush(Colors.Gray, 0.5));
-   public static readonly StyledProperty<IBrush> SelectionBrushProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush>(nameof(SelectionBrush), new ImmutableSolidColorBrush(Colors.DodgerBlue, 0.4));
-   public static readonly StyledProperty<Thickness> PaddingProperty = Decorator.PaddingProperty.AddOwner<RenderedMarkdownView>();
-   public static readonly StyledProperty<string?> WatermarkProperty = AvaloniaProperty.Register<RenderedMarkdownView, string?>(nameof(Watermark));
-   public static readonly StyledProperty<KeyGesture?> StartNewBlockGestureProperty = MarkdownEditor.StartNewBlockGestureProperty.AddOwner<RenderedMarkdownView>();
-   public static readonly StyledProperty<KeyGesture?> BreakLineGestureProperty = MarkdownEditor.BreakLineGestureProperty.AddOwner<RenderedMarkdownView>();
+   const double WidthWhenAnyIsAvailable = 600;
 
-   static readonly AvaloniaProperty[] PropertiesThatTextIsLaidOutWith = [FontFamilyProperty, FontSizeProperty, ForegroundProperty, MonospaceFontFamilyProperty, FaintForegroundProperty, LinkForegroundProperty, CodeBackgroundProperty, LineBrushProperty, SelectionBrushProperty, PaddingProperty];
    static readonly RenderedMarkdown NothingRendered = RenderedMarkdown.Of("");
 
    readonly BlinkingCaret _blinkingCaret;
    readonly KeyboardInput _keyboard;
    readonly PointerInput _pointer;
    readonly InputMethodClient _inputMethod;
-
-   TextLayouts? _texts;
-   DocumentLayout? _layout;
+   readonly LatestLayout _latestLayout = new();
    Rect _viewport = new(0, 0, double.MaxValue, double.MaxValue);
 
    static RenderedMarkdownView()
    {
       FocusableProperty.OverrideDefaultValue<RenderedMarkdownView>(true);
       ClipToBoundsProperty.OverrideDefaultValue<RenderedMarkdownView>(true);
-      AffectsMeasure<RenderedMarkdownView>(PropertiesThatTextIsLaidOutWith);
-      AffectsRender<RenderedMarkdownView>([..PropertiesThatTextIsLaidOutWith, WatermarkProperty]);
+      AffectsMeasure<RenderedMarkdownView>(PropertiesThatTheLayoutDependsOn);
+      AffectsRender<RenderedMarkdownView>([..PropertiesThatTheLayoutDependsOn, WatermarkProperty]);
       TextInputMethodClientRequestedEvent.AddClassHandler<RenderedMarkdownView>((view, request) => request.Client = view._inputMethod);
    }
 
@@ -60,34 +43,6 @@ public class RenderedMarkdownView : Control
       EffectiveViewportChanged += (_, change) => ShowWhatIsIn(change.EffectiveViewport);
    }
 
-   public FontFamily FontFamily { get => GetValue(FontFamilyProperty); set => SetValue(FontFamilyProperty, value); }
-   public double FontSize { get => GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
-   public IBrush? Foreground { get => GetValue(ForegroundProperty); set => SetValue(ForegroundProperty, value); }
-
-   ///<summary>The font of code.</summary>
-   public FontFamily MonospaceFontFamily { get => GetValue(MonospaceFontFamilyProperty); set => SetValue(MonospaceFontFamilyProperty, value); }
-
-   ///<summary>What bullets, numbers, markdown shown as source and the <see cref="Watermark"/> are drawn with.</summary>
-   public IBrush FaintForeground { get => GetValue(FaintForegroundProperty); set => SetValue(FaintForegroundProperty, value); }
-
-   public IBrush LinkForeground { get => GetValue(LinkForegroundProperty); set => SetValue(LinkForegroundProperty, value); }
-   public IBrush CodeBackground { get => GetValue(CodeBackgroundProperty); set => SetValue(CodeBackgroundProperty, value); }
-
-   ///<summary>What the lines of tables, the bars of quotes and thematic breaks are drawn with.</summary>
-   public IBrush LineBrush { get => GetValue(LineBrushProperty); set => SetValue(LineBrushProperty, value); }
-
-   public IBrush SelectionBrush { get => GetValue(SelectionBrushProperty); set => SetValue(SelectionBrushProperty, value); }
-   public Thickness Padding { get => GetValue(PaddingProperty); set => SetValue(PaddingProperty, value); }
-
-   ///<summary>What is shown while the document is empty.</summary>
-   public string? Watermark { get => GetValue(WatermarkProperty); set => SetValue(WatermarkProperty, value); }
-
-   ///<inheritdoc cref="MarkdownEditor.StartNewBlockGesture"/>
-   public KeyGesture? StartNewBlockGesture { get => GetValue(StartNewBlockGestureProperty); set => SetValue(StartNewBlockGestureProperty, value); }
-
-   ///<inheritdoc cref="MarkdownEditor.BreakLineGesture"/>
-   public KeyGesture? BreakLineGesture { get => GetValue(BreakLineGestureProperty); set => SetValue(BreakLineGestureProperty, value); }
-
    ///<summary>Edits the document that is shown. Null while none is.</summary>
    public RenderedEditor? Editor
    {
@@ -97,52 +52,46 @@ public class RenderedMarkdownView : Control
          if(field is not null) field.Changed -= ShowTheChange;
          field = value;
          if(field is not null) field.Changed += ShowTheChange;
-         LayOutAnew();
+         InvalidateWhatIsShown();
       }
    }
 
    void ShowTheChange(object? sender, EventArgs e)
    {
-      LayOutAnew();
+      InvalidateWhatIsShown();
       if(IsFocused) _blinkingCaret.Show();
       _inputMethod.CaretHasMoved();
    }
 
-   void LayOutAnew()
+   RenderedMarkdown Rendered => Editor?.Rendered ?? NothingRendered;
+
+   void InvalidateWhatIsShown()
    {
-      if(_layout?.IsOf(Editor?.Rendered ?? NothingRendered, Bounds.Width) != true) InvalidateMeasure();
+      if(!_latestLayout.IsOf(Rendered, Bounds.Width)) InvalidateMeasure();
       InvalidateVisual();
    }
 
-   internal DocumentLayout Layout => _layout ?? LayOut(Bounds.Width);
-
-   DocumentLayout LayOut(double width)
+   internal DocumentLayout Layout
    {
-      var rendered = Editor?.Rendered ?? NothingRendered;
-      if(_layout?.IsOf(rendered, width) == true) return _layout;
-
-      _texts ??= new TextLayouts(Appearance);
-      return _layout = _texts.Use(() => DocumentLayoutBuilder.LayOut(rendered, Appearance, _texts, width, Padding));
+      get
+      {
+         //bug: from a change until the view is measured, this is the layout of what was rendered before the change. An input method asks for CaretRectangle
+         //   as soon as ShowTheChange tells it that the caret has moved, and DocumentLayout.LayoutOf then throws, since the caret's block isn't in that layout.
+         return _latestLayout.Layout ?? LayOut(Bounds.Width);
+      }
    }
 
-   MarkdownAppearance Appearance => new(FontFamily, MonospaceFontFamily, FontSize, Foreground ?? Brushes.Black, FaintForeground, LinkForeground, CodeBackground, LineBrush, SelectionBrush, CaretBrush: Foreground ?? Brushes.Black);
+   DocumentLayout LayOut(double width) => _latestLayout.LayOut(Rendered, Appearance, width, Padding);
 
    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
    {
       base.OnPropertyChanged(change);
-      if(PropertiesThatTextIsLaidOutWith.Contains(change.Property)) ForgetHowTextIsLaidOut();
-   }
-
-   void ForgetHowTextIsLaidOut()
-   {
-      _texts?.Dispose();
-      _texts = null;
-      _layout = null;
+      if(PropertiesThatTheLayoutDependsOn.Contains(change.Property)) _latestLayout.Forget();
    }
 
    protected override Size MeasureOverride(Size availableSize)
    {
-      var width = double.IsInfinity(availableSize.Width) ? 600 : availableSize.Width;
+      var width = double.IsInfinity(availableSize.Width) ? WidthWhenAnyIsAvailable : availableSize.Width;
       return LayOut(width).Size;
    }
 
@@ -164,7 +113,7 @@ public class RenderedMarkdownView : Control
       if(Editor is null) return;
 
       if(Watermark is not null && Editor.Document.TextLength == 0) DrawTheWatermark(context, Watermark);
-      Layout.Draw(context, Editor.Selection.IsEmpty ? null : new SourceRange(Editor.Selection.Start, Editor.Selection.End), _viewport);
+      Layout.Draw(context, Editor.Selection.IsEmpty ? null : Editor.Selection.Range, _viewport);
       if(IsFocused && _blinkingCaret.IsSeen) context.FillRectangle(Appearance.CaretBrush, CaretRectangle);
    }
 
