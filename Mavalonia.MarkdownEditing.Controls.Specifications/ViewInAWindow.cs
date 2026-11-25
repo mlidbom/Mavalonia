@@ -33,6 +33,13 @@ class ViewInAWindow
 
    internal Rect BoundsOf(string text) => View.BoundsOf(new PlainTextRange(View.PlainText.Value.IndexOf(text, StringComparison.Ordinal), text.Length)).First();
 
+   ///<summary>Where each occurrence of <paramref name="text"/> starts to be shown.</summary>
+   internal IReadOnlyList<Rect> BoundsOfEach(string text)
+   {
+      var shown = View.PlainText.Value;
+      return [..Enumerable.Range(0, shown.Length).Where(it => shown.AsSpan(it).StartsWith(text)).Select(it => View.BoundsOf(new PlainTextRange(it, text.Length)).First())];
+   }
+
    internal ViewInAWindow Select(string from, string to)
    {
       Window.Drag(StartOf(from), EndOf(to));

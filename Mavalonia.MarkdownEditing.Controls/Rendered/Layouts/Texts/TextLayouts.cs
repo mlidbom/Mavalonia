@@ -8,8 +8,8 @@ namespace Mavalonia.MarkdownEditing.Controls.Rendered.Layouts.Texts;
 partial class TextLayouts : IDisposable
 {
    readonly MarkdownAppearance _appearance;
-   Dictionary<Looks, LaidOutText> _used = [];
-   Dictionary<Looks, LaidOutText> _usedBefore = [];
+   Dictionary<Looks, LayoutsOfAText> _used = [];
+   Dictionary<Looks, LayoutsOfAText> _usedBefore = [];
    readonly Dictionary<string, TextLayout> _listMarkers = [];
 
    internal TextLayouts(MarkdownAppearance appearance) => _appearance = appearance;
@@ -30,9 +30,17 @@ partial class TextLayouts : IDisposable
    {
       var colours = block is CodeBlock code ? _appearance.ColoursOf(code) : null;
       var looks = Looks.Of(block, colours, _appearance);
-      if(!_used.TryGetValue(looks, out var text)) _used[looks] = text = _usedBefore.TryGetValue(looks, out var before) ? before : new LaidOutText(it => new RunsOfABlock(block, _appearance, colours, it), looks.DependsOnTheWidth);
+      if(!_used.TryGetValue(looks, out var text)) _used[looks] = text = UsedBefore(looks) ?? new LayoutsOfAText(it => new RunsOfABlock(block, _appearance, colours, it), looks.DependsOnTheWidth);
 
       return text.At(width);
+   }
+
+   LayoutsOfAText? UsedBefore(Looks looks)
+   {
+      if(!_usedBefore.TryGetValue(looks, out var text)) return null;
+
+      text.StartAnew();
+      return text;
    }
 
    internal TextLayout OfListMarker(string marker)
