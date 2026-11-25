@@ -1,8 +1,6 @@
 using Markdig;
 using Markdig.Extensions.EmphasisExtras;
-using Markdig.Helpers;
 using Markdig.Parsers;
-using Markdig.Renderers;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 
@@ -14,13 +12,15 @@ static class MarkdigParser
    ///<summary>Fewer than Markdig itself can write as HTML.</summary>
    const int DeepestInlines = 100;
 
-   static readonly MarkdownPipeline PipelineForEditing = PipelineBuilderFor(MarkdownDialect.ForEditing).Build();
-   static readonly MarkdownPipeline PipelineForReading = PipelineBuilderFor(MarkdownDialect.ForReading).Build();
+   static readonly MarkdownPipeline PipelineForEditing = PipelineWithoutTheMarkupThatPeopleTypeWithoutMeaningTo().Build();
+   static readonly MarkdownPipeline PipelineForReading = PipelineOfAllDialects().UseAutoLinks().UseTaskLists().UseAlertBlocks().Build();
+
+   internal static MarkdownPipeline PipelineFor(MarkdownDialect dialect) => dialect == MarkdownDialect.ForReading ? PipelineForReading : PipelineForEditing;
 
    ///<summary>Null when blocks or inlines are inside one another deeper than they can be read, which nobody writes: hundreds deep.</summary>
    internal static MarkdownDocument? Parse(string markdown, MarkdownDialect dialect)
    {
-      if(ParseUnlessBlocksAreTooDeep(markdown, dialect == MarkdownDialect.ForReading ? PipelineForReading : PipelineForEditing) is not {} document) return null;
+      if(ParseUnlessBlocksAreTooDeep(markdown, PipelineFor(dialect)) is not {} document) return null;
 
       var inlinesOfBlocks = document.Descendants<LeafBlock>().Select(it => it.Inline).OfType<ContainerInline>().ToList();
       foreach(var inlines in inlinesOfBlocks) inlines.TakeWhatFollowsDelimitersOutOfThem();
@@ -39,9 +39,6 @@ static class MarkdigParser
          return null;
       }
    }
-
-   internal static MarkdownPipelineBuilder PipelineBuilderFor(MarkdownDialect dialect, Action<HtmlRenderer, StringSlice>? writeTitleOfAnAlert = null) =>
-      dialect == MarkdownDialect.ForReading ? PipelineOfAllDialects().UseAutoLinks().UseTaskLists().UseAlertBlocks(writeTitleOfAnAlert) : PipelineWithoutTheMarkupThatPeopleTypeWithoutMeaningTo();
 
    static MarkdownPipelineBuilder PipelineOfAllDialects() => new MarkdownPipelineBuilder().UsePreciseSourceLocation()
                                                                                          .UsePipeTables()

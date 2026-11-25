@@ -76,7 +76,8 @@ class MarkdownReader
    {
       switch(block)
       {
-         case HtmlBlock { Type: HtmlBlockType.Comment } or LinkReferenceDefinitionGroup when IsForReading: break;
+         case HtmlBlock html when IsForReading && html.IsNothingButComments: break;
+         case LinkReferenceDefinitionGroup when IsForReading: break;
          case AlertBlock alert: ReadAlert(alert, place); break;
          case QuoteBlock quote: ReadQuote(quote, place); break;
          case ListBlock list: ReadList(list, place); break;

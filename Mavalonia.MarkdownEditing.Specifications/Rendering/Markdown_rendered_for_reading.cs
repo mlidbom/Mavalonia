@@ -28,6 +28,9 @@ public class Markdown_rendered_for_reading
    [XF] public void shows_an_image_without_a_description_as_the_word_image() => TextOf("![](d.png)").Must().Be("[image d.png: image]");
    [XF] public void shows_an_image_in_a_link_as_both() => TextOf("[![a](b.png)](c)").Must().Be("[link to c, image b.png: a]");
    [XF] public void hides_comments_and_definitions_of_links() => BlocksOf("[a][b]\n\n<!-- c -->\n\n[b]: d").Must().SequenceEqual(["paragraph \"a\""]);
+   [XF] public void hides_comments_inside_text() => TextOf("a <!-- b --> c").Must().Be("a  c");
+   [XF] public void hides_comments_one_after_the_other() => BlocksOf("<!-- a --> <!-- b -->\n\nc").Must().SequenceEqual(["paragraph \"c\""]);
+   [XF] public void shows_text_on_the_same_line_as_a_comment_with_it_as_source() => BlocksOf("<!-- a --> b").Must().SequenceEqual(["source \"<!-- a --> b\""]);
    [XF] public void shows_other_HTML_as_source() => BlocksOf("<div>\na\n</div>").Must().SequenceEqual(["source \"<div>\na\n</div>\""]);
 
    public class as_plain_text

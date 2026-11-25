@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Markdig.Extensions.TaskLists;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
@@ -8,7 +7,7 @@ using Mavalonia.MarkdownEditing.Rendering.Texts;
 namespace Mavalonia.MarkdownEditing.Rendering.Reading;
 
 ///<summary>Reads the text of one block.</summary>
-partial class TextReader
+class TextReader
 {
    const string DescriptionOfAnImageWithoutOne = "image";
 
@@ -74,7 +73,8 @@ partial class TextReader
          case LinkInline { IsImage: false, FirstChild: not null } link: ReadLink(link, formatting); break;
          case AutolinkInline link: ReadAutolink(link, formatting); break;
          case TaskList task: _text.Add(task.Checked ? '☑' : '☐', RangeOf(task), formatting); break;
-         case HtmlInline html when IsForReading && TagOfALineBreak().IsMatch(html.Tag): _text.Add('\n', RangeOf(html), formatting); break;
+         case HtmlInline { IsALineBreak: true } lineBreak when IsForReading: _text.Add('\n', RangeOf(lineBreak), formatting); break;
+         case HtmlInline { IsAComment: true } when IsForReading: break;
          case HtmlEntityInline entity: ReadEntity(entity, formatting); break;
          case LineBreakInline lineBreak: ReadLineBreak(lineBreak, formatting); break;
          case DelimiterInline delimiter: ReadCharactersAlong(RangeOf(delimiter), delimiter.ToLiteral(), formatting); break;
@@ -156,9 +156,6 @@ partial class TextReader
          _text.AddLineBreak(endOfLine, formatting);
       }
    }
-
-   [GeneratedRegex(@"^<br\s*/?>$", RegexOptions.IgnoreCase)]
-   private static partial Regex TagOfALineBreak();
 
    ///<summary>Finds each char of <paramref name="text"/> in the markdown in <paramref name="range"/>. What there is between them is the backslashes of escaped chars, and, in code of several lines, the line breaks, which code shows as spaces.</summary>
    void ReadCharactersAlong(SourceRange range, string text, TextFormatting formatting)
