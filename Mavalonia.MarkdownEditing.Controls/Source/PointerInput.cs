@@ -52,17 +52,20 @@ class PointerInput
       if(isAClick && TargetOfTheLinkAt(e) is {} target) _editor.RaiseEvent(new LinkClickedEventArgs(target, e.KeyModifiers));
    }
 
-   ///<summary>A link is one that the markdown has, or else a URL.</summary>
+   ///<summary>A link is one that the markdown has, or else a URL. None is beside the text, also not beside a row that the line wraps after.</summary>
    string? TargetOfTheLinkAt(PointerEventArgs e)
    {
       var textView = _view.TextArea.TextView;
       var point = e.GetPosition(textView) + textView.ScrollOffset;
       if(textView.GetVisualLineFromVisualTop(point.Y) is not {} line) return null;
 
-      var column = line.GetVisualColumnFloor(point);
-      if(column >= line.VisualLength) return null;
+      var pointedAt = line.GetTextViewPositionFloor(point, allowVirtualSpace: false);
+      if(IsBesideTheText(pointedAt)) return null;
 
+      var column = pointedAt.VisualColumn;
       return _editor.LinkWrittenAt(line.FirstDocumentLine.Offset + line.GetRelativeOffset(column))?.Target ?? UrlAt(column, line);
+
+      bool IsBesideTheText(TextViewPosition position) => position.IsAtEndOfLine || position.VisualColumn >= line.VisualLength;
    }
 
    static string? UrlAt(int column, VisualLine line) =>

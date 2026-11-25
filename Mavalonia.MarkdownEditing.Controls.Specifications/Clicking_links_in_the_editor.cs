@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media.TextFormatting;
 using Avalonia.VisualTree;
 using AvaloniaEdit;
 using AvaloniaEdit.Rendering;
@@ -154,6 +155,37 @@ public class Clicking_links_in_the_editor
          editor.Window.RenderFrame();
          editor.Window.Click(editor.Window.PointOf(editor.Editor.GetVisualDescendants().OfType<TextView>().Single(), new Point(3, 8)));
          _clicked.Must().SequenceEqual(["c"]);
+      }
+   }
+
+   public class In_the_source_view_of_a_line_that_wraps_before_a_URL : Clicking_links_in_the_editor
+   {
+      const string URL = "https://b.invalid/abcdefghijklmnopqrstuvwxyz";
+
+      readonly EditorInAWindow _editor;
+      readonly TextView _textView;
+      readonly TextLine _firstRow;
+
+      public In_the_source_view_of_a_line_that_wraps_before_a_URL()
+      {
+         _editor = Editor(string.Concat(Enumerable.Repeat("word ", 16)) + URL + "‸", inTheSource: true);
+         _editor.Window.RenderFrame();
+         _textView = _editor.Editor.GetVisualDescendants().OfType<TextView>().Single();
+         _firstRow = _textView.VisualLines.Single().TextLines[0];
+      }
+
+      void Click(Point inTheTextView) => _editor.Window.Click(_editor.Window.PointOf(_textView, inTheTextView));
+
+      [XFOnUIThread] public void at_the_start_of_the_next_row_tells_where_the_URL_leads()
+      {
+         Click(new Point(5, _firstRow.Height * 1.5));
+         _clicked.Must().SequenceEqual([URL]);
+      }
+
+      [XFOnUIThread] public void beside_the_end_of_its_first_row_tells_nothing()
+      {
+         Click(new Point(_firstRow.WidthIncludingTrailingWhitespace + 30, _firstRow.Height / 2));
+         _clicked.Must().BeEmpty();
       }
    }
 
