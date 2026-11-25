@@ -114,11 +114,17 @@ class KeyboardInput
 
    Action? ClipboardActionOf(KeyEventArgs e, RenderedEditor editor)
    {
-      if(Is(Hotkeys.Copy, e)) return () => _ = _clipboard.Copy(editor);
-      if(Is(Hotkeys.Cut, e)) return () => _ = _clipboard.Cut(editor);
-      if(Is(Hotkeys.Paste, e)) return () => _ = _clipboard.Paste(editor);
+      if(Is(Hotkeys.Copy, e)) return () => UseTheClipboard(_clipboard.Copy(editor));
+      if(Is(Hotkeys.Cut, e)) return () => UseTheClipboard(_clipboard.Cut(editor));
+      if(_view.PasteAsQuoteGesture?.Matches(e) == true) return () => UseTheClipboard(_clipboard.PasteAsQuote(editor));
+      if(_view.PasteTextGesture?.Matches(e) == true) return () => UseTheClipboard(_clipboard.PasteText(editor));
+      if(Is(Hotkeys.Paste, e)) return () => UseTheClipboard(_clipboard.Paste(editor));
       return null;
    }
+
+   ///<summary>Awaits <paramref name="use"/> of the clipboard, so that an exception in it surfaces where all of the application's do.</summary>
+   // ReSharper disable once AsyncVoidMethod
+   static async void UseTheClipboard(Task use) => await use;
 
    static bool Is(IEnumerable<KeyGesture> gestures, KeyEventArgs e) => gestures.Any(it => it.Matches(e));
 }

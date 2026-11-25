@@ -1,6 +1,5 @@
 using System.Globalization;
 using AngleSharp.Dom;
-using Mavalonia.MarkdownEditing.Editing.Writing;
 using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Html;

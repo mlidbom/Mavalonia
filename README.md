@@ -17,6 +17,8 @@ Controls for Avalonia®. The first is a WYSIWYG markdown editor for writing mess
 - **An edit says what is to be shown,** then finds the least change to the markdown that shows that, and verifies it by rendering the result (`TextReplacement`). Typing a space at the end of bold text must not stop it from being bold, though `**bold **` isn't.
 - **Some markup is turned off** since people type it without meaning to: headings made by underlining, and code made by indenting. Both are shown as ordinary text.
 - **Markup that isn't rendered is shown as source:** HTML, images, link definitions.
+- **Rich text is pasted as markdown** (`CopiedHtml`). What has no markdown that we render loses its looks and keeps its text, and text that looks like markup is escaped, as little as possible: what is written is verified by rendering it. What is copied from an editor of code is pasted as its text, since it may be markdown. Only the clipboard of Windows is read for rich text; elsewhere its text is pasted.
+- **The application can add a quote** (`MarkdownEditor.Quote`), and a person can paste one. The caret goes after it, to write what there is to say about it.
 - **The application decides the keys** that start a new block and that break the line, and gets every key that the editor doesn't use, such as one that sends the message.
 
 ## Working with it

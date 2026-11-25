@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using Mavalonia.MarkdownEditing.Editing;
+using Mavalonia.MarkdownEditing.Rendering.Blocks;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 
@@ -29,9 +30,19 @@ class ClipboardInput
 
    internal async Task Paste(RenderedEditor editor)
    {
-      if(await Clipboard.TryGetTextAsync() is not { Length: > 0 } text) return;
+      var content = await ClipboardContent.ReadFrom(Clipboard);
+      Insert(editor.CaretPosition.Block is CodeBlock ? content.Text : content.Markdown, editor.Paste);
+   }
 
-      editor.Paste(text);
+   internal async Task PasteText(RenderedEditor editor) => Insert((await ClipboardContent.ReadFrom(Clipboard)).Text, editor.Paste);
+
+   internal async Task PasteAsQuote(RenderedEditor editor) => Insert((await ClipboardContent.ReadFrom(Clipboard)).Markdown, editor.Quote);
+
+   void Insert(string markdown, Action<string> insert)
+   {
+      if(markdown.Length == 0) return;
+
+      insert(markdown);
       _view.BringTheCaretIntoView();
    }
 }

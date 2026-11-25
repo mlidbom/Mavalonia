@@ -24,7 +24,9 @@
          <rendered:RenderedMarkdownView x:Name="RenderedView"
                                         Watermark="{Binding #Root.Watermark}"
                                         StartNewBlockGesture="{Binding #Root.StartNewBlockGesture}"
-                                        BreakLineGesture="{Binding #Root.BreakLineGesture}" />
+                                        BreakLineGesture="{Binding #Root.BreakLineGesture}"
+                                        PasteTextGesture="{Binding #Root.PasteTextGesture}"
+                                        PasteAsQuoteGesture="{Binding #Root.PasteAsQuoteGesture}" />
       </ScrollViewer>
       <edit:TextEditor x:Name="SourceView"
                        IsVisible="False"

@@ -15,6 +15,8 @@ public partial class MarkdownEditor : UserControl
    public static readonly StyledProperty<string?> WatermarkProperty = AvaloniaProperty.Register<MarkdownEditor, string?>(nameof(Watermark));
    public static readonly StyledProperty<KeyGesture?> StartNewBlockGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(StartNewBlockGesture), new KeyGesture(Key.Enter));
    public static readonly StyledProperty<KeyGesture?> BreakLineGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(BreakLineGesture), new KeyGesture(Key.Enter, KeyModifiers.Shift));
+   public static readonly StyledProperty<KeyGesture?> PasteTextGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteTextGesture), new KeyGesture(Key.V, KeyModifiers.Control | KeyModifiers.Shift));
+   public static readonly StyledProperty<KeyGesture?> PasteAsQuoteGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteAsQuoteGesture), new KeyGesture(Key.Q, KeyModifiers.Control | KeyModifiers.Shift));
 
    RenderedEditor? _renderedEditor;
 
@@ -22,6 +24,7 @@ public partial class MarkdownEditor : UserControl
    {
       InitializeComponent();
       SourceView.Options.AllowScrollBelowDocument = false;
+      _ = new SourceInput(this, SourceView);
       SetCurrentValue(DocumentProperty, new TextDocument());
    }
 
@@ -40,6 +43,12 @@ public partial class MarkdownEditor : UserControl
    ///<summary>The keys that break the line inside a block, in the rendered view. Null for none.</summary>
    public KeyGesture? BreakLineGesture { get => GetValue(BreakLineGestureProperty); set => SetValue(BreakLineGestureProperty, value); }
 
+   ///<summary>The keys that paste only the text of what is on the clipboard, when that is rich text. Null for none.</summary>
+   public KeyGesture? PasteTextGesture { get => GetValue(PasteTextGestureProperty); set => SetValue(PasteTextGestureProperty, value); }
+
+   ///<summary>The keys that paste what is on the clipboard as a quote. Null for none.</summary>
+   public KeyGesture? PasteAsQuoteGesture { get => GetValue(PasteAsQuoteGestureProperty); set => SetValue(PasteAsQuoteGestureProperty, value); }
+
    ///<summary>What is selected in the view that is shown.</summary>
    public TextSelection Selection
    {
@@ -49,6 +58,17 @@ public partial class MarkdownEditor : UserControl
          SourceView.TextSelection = value;
          _renderedEditor?.Select(value);
       }
+   }
+
+   ///<summary>Puts a quote of <paramref name="markdown"/> in place of the selection, and the caret in a paragraph after it.</summary>
+   public void Quote(string markdown)
+   {
+      using var editor = new RenderedEditor(Document, Selection); // Another than that of the rendered view, which there is none of while the control isn't shown.
+      editor.Quote(markdown);
+      Selection = editor.Selection;
+
+      if(ShowsSource) SourceView.TextArea.Caret.BringCaretToView();
+      else if(_renderedEditor is not null) RenderedView.BringTheCaretIntoView();
    }
 
    ///<summary>Puts the keyboard focus in the view that is shown.</summary>

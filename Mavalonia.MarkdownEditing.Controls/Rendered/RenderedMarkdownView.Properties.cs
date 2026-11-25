@@ -22,6 +22,8 @@ partial class RenderedMarkdownView
    public static readonly StyledProperty<string?> WatermarkProperty = AvaloniaProperty.Register<RenderedMarkdownView, string?>(nameof(Watermark));
    public static readonly StyledProperty<KeyGesture?> StartNewBlockGestureProperty = MarkdownEditor.StartNewBlockGestureProperty.AddOwner<RenderedMarkdownView>();
    public static readonly StyledProperty<KeyGesture?> BreakLineGestureProperty = MarkdownEditor.BreakLineGestureProperty.AddOwner<RenderedMarkdownView>();
+   public static readonly StyledProperty<KeyGesture?> PasteTextGestureProperty = MarkdownEditor.PasteTextGestureProperty.AddOwner<RenderedMarkdownView>();
+   public static readonly StyledProperty<KeyGesture?> PasteAsQuoteGestureProperty = MarkdownEditor.PasteAsQuoteGestureProperty.AddOwner<RenderedMarkdownView>();
 
    static readonly AvaloniaProperty[] PropertiesThatTheLayoutDependsOn = [FontFamilyProperty, FontSizeProperty, ForegroundProperty, MonospaceFontFamilyProperty, FaintForegroundProperty, LinkForegroundProperty, CodeBackgroundProperty, LineBrushProperty, SelectionBrushProperty, PaddingProperty];
 
@@ -52,6 +54,12 @@ partial class RenderedMarkdownView
 
    ///<inheritdoc cref="MarkdownEditor.BreakLineGesture"/>
    public KeyGesture? BreakLineGesture { get => GetValue(BreakLineGestureProperty); set => SetValue(BreakLineGestureProperty, value); }
+
+   ///<inheritdoc cref="MarkdownEditor.PasteTextGesture"/>
+   public KeyGesture? PasteTextGesture { get => GetValue(PasteTextGestureProperty); set => SetValue(PasteTextGestureProperty, value); }
+
+   ///<inheritdoc cref="MarkdownEditor.PasteAsQuoteGesture"/>
+   public KeyGesture? PasteAsQuoteGesture { get => GetValue(PasteAsQuoteGestureProperty); set => SetValue(PasteAsQuoteGestureProperty, value); }
 
    MarkdownAppearance Appearance => new(FontFamily, MonospaceFontFamily, FontSize, Foreground ?? Brushes.Black, FaintForeground, LinkForeground, CodeBackground, LineBrush, SelectionBrush, CaretBrush: Foreground ?? Brushes.Black);
 }

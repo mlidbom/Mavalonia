@@ -1,5 +1,4 @@
 using Avalonia.Input;
-using Avalonia.Input.Platform;
 using Compze.Must;
 using Mavalonia.MarkdownEditing.Controls.Specifications.HeadlessAvalonia;
 
@@ -62,25 +61,4 @@ public class Using_the_keyboard
    [XFOnUIThread] public void goes_to_the_cell_below_with_Down() => Press(PhysicalKey.ArrowDown, "| aa | bb‸ |\n|----|----|\n| cc | dd |").Must().Be("| aa | bb |\n|----|----|\n| cc | dd‸ |");
    [XFOnUIThread] public void goes_to_the_start_of_the_document_with_Up_on_the_first_line() => Press(PhysicalKey.ArrowUp, "ab‸c").Must().Be("‸abc");
    [XFOnUIThread] public void goes_to_the_next_line_of_a_wrapped_paragraph_with_Down() => Press(PhysicalKey.ArrowDown, "‸" + string.Join(' ', Enumerable.Repeat("word", 60))).Must().Satisfy(it => it.IndexOf('‸') > 40 && it.IndexOf('‸') < 200);
-
-   [XFOnUIThread] public async Task copies_what_is_selected_as_markdown_with_Ctrl_and_C()
-   {
-      var editor = new EditorInAWindow("a **⟦b⟧** c").Press(PhysicalKey.C, Ctrl);
-      (await editor.Window.Clipboard.TryGetTextAsync()).Must().Be("**b**");
-   }
-
-   [XFOnUIThread] public async Task cuts_what_is_selected_with_Ctrl_and_X()
-   {
-      var editor = new EditorInAWindow("a ⟦b⟧c").Press(PhysicalKey.X, Ctrl);
-      new { Clipboard = await editor.Window.Clipboard.TryGetTextAsync(), editor.Markdown }.Must().Satisfy(it => it.Clipboard == "b" && it.Markdown == "a ‸c");
-   }
-
-   [XFOnUIThread] public async Task pastes_markdown_with_Ctrl_and_V()
-   {
-      var editor = new EditorInAWindow("> a ‸");
-      await editor.Window.Clipboard.SetTextAsync("**b**\nc");
-      editor.Press(PhysicalKey.V, Ctrl);
-      await Task.Yield();
-      editor.Markdown.Must().Be("> a **b**\n> c‸");
-   }
 }

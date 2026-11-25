@@ -5,6 +5,8 @@ using Mavalonia.MarkdownEditing.Rendering.Containers;
 
 namespace Mavalonia.MarkdownEditing.Specifications.Editing;
 
+// ReSharper disable NotAccessedPositionalProperty.Global They are for the message of a failing specification.
+
 ///<summary>What comes of inserting a quote of <see cref="TextOfTheQuote"/> at some offset of some document.</summary>
 record InsertionOfAQuote(string Markdown, int Offset, string MarkdownAfterwards, int CountOfQuotes, bool IsTheCaretInTheQuote, string OtherTextBefore, string OtherTextAfterwards)
 {
