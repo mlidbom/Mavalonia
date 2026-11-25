@@ -101,7 +101,7 @@ public class The_menu
       string? target = null;
       var menuOfTheApplication = new ContextMenu { ItemsSource = new[] { new MenuItem { Header = "Copy link" } } };
       view.View.ContextMenu = menuOfTheApplication;
-      view.View.AddHandler(Control.ContextRequestedEvent, (_, request) => target = request.TryGetPosition(view.View, out var point) ? view.View.TargetOfTheLinkAt(point) : null, RoutingStrategies.Tunnel);
+      view.View.AddHandler(InputElement.ContextRequestedEvent, (_, request) => target = request.TryGetPosition(view.View, out var point) ? view.View.TargetOfTheLinkAt(point) : null, RoutingStrategies.Tunnel);
 
       var ours = OpenMenuAt("link", view);
       new { Theirs = menuOfTheApplication.IsOpen, Ours = ours.IsOpen, target }.Must().Satisfy(it => it.Theirs && !it.Ours && it.target == "https://b.c");

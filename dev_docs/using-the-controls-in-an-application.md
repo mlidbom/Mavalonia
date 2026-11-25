@@ -31,7 +31,7 @@ It is as high as what it shows, and doesn't scroll itself: put it in what scroll
 | Images not loaded, since `ImageBasePath` isn't set | Nothing: images are shown as their descriptions, unless `LoadImage` is set. **Don't load images from any URL:** one in an AI's reply can carry what it knows to somebody else. The rich text that is copied has links to images instead of them, for the same reason. |
 | Swallowing the request to bring a clicked message into view | Nothing: getting the focus scrolls nothing. Selecting by dragging or with the keyboard brings the end of the selection into view. |
 
-Copying: Ctrl+C in the view, or `CopySelection()`, such as for a menu. `SelectedMarkdown` is there for a "Quote" command, and `IsAnythingSelected` can be bound to enable it:
+Copying: Ctrl+C in the view, or `CopySelection()`. `SelectedMarkdown` is there for a "Quote" command, and `IsAnythingSelected` can be bound to enable it:
 
 ```csharp
 editor.Quote(view.SelectedMarkdown);
@@ -43,6 +43,34 @@ It shows what GitHub does: tables, task lists, alerts, bare URLs, strikethrough.
 
 **How many to show at a time:** 100 messages of 700 characters take 0.4 s to show and 15 MB; LiveMarkdown takes 1.5 s and 44 MB for the same. 15,000 would take half a minute and well over a gigabyte, so keep drawing the latest 100 and more on scrolling up, as Cloyd does. `Mavalonia.MarkdownEditing.Controls.Measurements` measures it.
 
+## Menus
+
+A right-click, or the menu key, opens a small menu: in `MarkdownView` copy, copy link where it's opened at one, and select all; in `MarkdownEditor` cut, copy, paste, paste as text, paste as quote and select all. The right button puts the caret where it's pressed, unless it's pressed in what is selected.
+
+Setting `ContextMenu` or `ContextFlyout`, which all Avalonia controls have, replaces the menu. `ContextFlyout = null` turns it off. The application's menu can't have our items besides its own, so it makes its own of the public actions. Such as one that quotes into Cloyd's writing box:
+
+```csharp
+string? target = null;
+var copy = new MenuItem { Header = "Copy" };
+copy.Click += async (_, _) => await view.CopySelection();
+var quote = new MenuItem { Header = "Quote" };
+quote.Click += (_, _) => editor.Quote(view.SelectedMarkdown);
+var copyLink = new MenuItem { Header = "Copy link" };
+copyLink.Click += async (_, _) => await TopLevel.GetTopLevel(view)!.Clipboard!.SetTextAsync(target!);
+
+view.ContextMenu = new ContextMenu { ItemsSource = new[] { copy, quote, copyLink } };
+view.AddHandler(InputElement.ContextRequestedEvent, (_, request) =>
+{
+   target = request.TryGetPosition(view, out var point) ? view.TargetOfTheLinkAt(point) : null;
+   copyLink.IsVisible = target is not null;
+   copy.IsEnabled = quote.IsEnabled = view.IsAnythingSelected;
+}, RoutingStrategies.Tunnel);
+```
+
+`RoutingStrategies.Tunnel` is what has it run before the menu opens: a handler of the `ContextRequested` event isn't called at all when the menu was set before it was added.
+
+A `MenuFlyout` without items in it when it first opens stays empty, also when its `Opening` handler adds some: an Avalonia bug, or so it seems, as of 12.1.5.
+
 ## Writing messages: `MarkdownEditor`
 
 ```xml
@@ -51,7 +79,10 @@ It shows what GitHub does: tables, task lists, alerts, bare URLs, strikethrough.
 
 - **`Document`** is an AvaloniaEdit `TextDocument`. Its text is the markdown, and all that is edited, so drafts are swapped by setting it, and stretches of it tracked with `TextSegment`s.
 - **`ShowsSource`** switches between the source and what it's rendered as. Bind it to whatever is to switch it: the editor takes no key for that.
-- **The application decides the keys:** `StartNewBlockGesture` (Enter), `BreakLineGesture` (Shift+Enter), `PasteTextGesture` (Ctrl+Shift+V), `PasteAsQuoteGesture` (Ctrl+Shift+Q). Null for none. A key it doesn't use goes on to the application, such as Ctrl+Enter to send.
+- **Keys that the application chooses,** for each editor, null for none. In both views: `PasteTextGesture` (Ctrl+Shift+V), `PasteAsQuoteGesture` (Ctrl+Shift+Q). In the rendered view: `StartNewBlockGesture` (Enter), `BreakLineGesture` (Shift+Enter), `ToggleBoldGesture` (Ctrl+B), `ToggleItalicGesture` (Ctrl+I), `ToggleCodeGesture` (Ctrl+E), `ToggleStrikethroughGesture` (Ctrl+Shift+X).
+- **Keys that are Avalonia's,** for the whole application: those to copy, cut, paste, undo, redo and select all are those of `PlatformHotkeyConfiguration`, as are the modifier keys for moving and deleting by word and for going to the start or end. Other keys, such as the arrows, are fixed. In the source view, the keys that aren't named here are AvaloniaEdit's own.
+- **A key it doesn't use goes on to the application,** such as Ctrl+Enter to send. To have one that it does use, handle it in the tunnel phase.
+- **What the keys and the menu do is public,** for buttons and menus of the application: `Cut()`, `Copy()`, `Paste()`, `PasteText()`, `PasteAsQuote()`, `SelectAll()` and `ToggleFormat(TextFormats)`. They do it in the view that is shown.
 - **`Quote(markdown)`** adds a quote where the caret is and puts the caret after it. It works while the control isn't shown.
 - **Pasting images** is the application's. The editor takes Ctrl+V also when there's only an image on the clipboard, and then inserts nothing: handle the key before it does, in the tunnel phase.
 - **An exception while using the clipboard,** such as when another program holds it, surfaces on the dispatcher as any other does.

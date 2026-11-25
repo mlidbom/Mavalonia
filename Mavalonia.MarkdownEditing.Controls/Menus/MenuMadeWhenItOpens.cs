@@ -15,7 +15,7 @@ abstract class MenuMadeWhenItOpens : MenuFlyout
    private protected MenuMadeWhenItOpens(Control control)
    {
       _control = control;
-      _control.AddHandler(Control.ContextRequestedEvent, RememberWhereItIsRequested, RoutingStrategies.Tunnel); // Before it opens.
+      _control.AddHandler(InputElement.ContextRequestedEvent, RememberWhereItIsRequested, RoutingStrategies.Tunnel); // Before it opens.
 
       Placement = PlacementMode.AnchorAndGravity;
       PlacementAnchor = PopupAnchor.TopLeft;
