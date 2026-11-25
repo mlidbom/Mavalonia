@@ -81,6 +81,17 @@ public class Reading_markdown
          new { One = one.SelectedMarkdown, Other = other.SelectedMarkdown }.Must().Satisfy(it => it.One == "" && it.Other == "other");
       }
 
+      [XFOnUIThread] public void in_a_view_ends_when_another_comes_into_the_window_with_something_selected()
+      {
+         var (one, other) = (new MarkdownView { Markdown = "one" }, new MarkdownView { Markdown = "other" });
+         var panel = new StackPanel { Children = { one } };
+         _ = new HeadlessWindow(panel);
+         one.SelectAll();
+         other.SelectAll();
+         panel.Children.Add(other);
+         new { One = one.SelectedMarkdown, Other = other.SelectedMarkdown }.Must().Satisfy(it => it.One == "" && it.Other == "other");
+      }
+
       [XFOnUIThread] public async Task goes_on_and_scrolls_while_the_pointer_is_held_below_what_is_seen()
       {
          var view = new ViewInAWindow(string.Join("\n\n", Enumerable.Range(0, 100).Select(it => $"line{it}")));

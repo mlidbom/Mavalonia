@@ -127,6 +127,12 @@ public class MarkdownView : RenderedMarkdownView
       ShowAnImageThatHasBecomeKnown();
    }
 
+   protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+   {
+      base.OnAttachedToVisualTree(e);
+      if(IsAnythingSelected) SelectionOfAWindow.IsNowIn(this);
+   }
+
    protected override Size MeasureOverride(Size availableSize)
    {
       _copyCode?.Measure(Size.Infinity);
