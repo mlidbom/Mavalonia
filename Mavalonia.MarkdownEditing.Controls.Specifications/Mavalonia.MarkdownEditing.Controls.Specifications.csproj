@@ -15,7 +15,7 @@
    </ItemGroup>
    <ItemGroup>
       <Compile Include="..\Mavalonia.MarkdownEditing.Specifications\MarkdownWithSelection.cs" Link="MarkdownWithSelection.cs" />
-      <Content Include="..\Mavalonia.DesktopHost\SampleDocuments\*.md" LinkBase="SampleDocuments" CopyToOutputDirectory="PreserveNewest" />
+      <Content Include="..\Mavalonia.DesktopHost\Samples\Tabs\*.md" LinkBase="SampleDocuments" CopyToOutputDirectory="PreserveNewest" />
       <AssemblyMetadata Include="RenderedFramesDirectory" Value="$(MSBuildThisFileDirectory)..\artifacts\rendered-frames" />
    </ItemGroup>
 </Project>
