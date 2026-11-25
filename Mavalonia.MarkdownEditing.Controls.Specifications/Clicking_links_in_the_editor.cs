@@ -121,6 +121,42 @@ public class Clicking_links_in_the_editor
       }
    }
 
+   public class In_the_source_view_of_markdown_that_has_links : Clicking_links_in_the_editor
+   {
+      ///<summary>Clicks on the char before the caret in <paramref name="markdown"/>.</summary>
+      IReadOnlyList<string> ClickedIn(string markdown)
+      {
+         var editor = Editor(markdown, inTheSource: true);
+         editor.Window.RenderFrame();
+         var textView = editor.Editor.GetVisualDescendants().OfType<TextView>().Single();
+         var end = editor.Window.PointOf(textView, editor.Editor.GetVisualDescendants().OfType<TextEditor>().Single().TextArea.Caret.CalculateCaretRectangle().Center);
+         editor.Window.Click(end - new Vector(3, 0));
+         return _clicked;
+      }
+
+      [XFOnUIThread] public void tells_where_a_link_leads_when_its_label_is_clicked() => ClickedIn("a [the lo‸g](src/x.cs:12) b").Must().SequenceEqual(["src/x.cs:12"]);
+      [XFOnUIThread] public void tells_where_a_link_leads_when_its_target_is_clicked() => ClickedIn("a [the log](src/x‸.cs:12) b").Must().SequenceEqual(["src/x.cs:12"]);
+      [XFOnUIThread] public void tells_where_a_link_leads_when_its_first_char_is_clicked() => ClickedIn("a [‸b](c) d").Must().SequenceEqual(["c"]);
+      [XFOnUIThread] public void tells_where_a_link_leads_when_its_last_char_is_clicked() => ClickedIn("a [b](c)‸ d").Must().SequenceEqual(["c"]);
+      [XFOnUIThread] public void tells_nothing_when_the_char_before_a_link_is_clicked() => ClickedIn("a ‸[b](c) d").Must().BeEmpty();
+      [XFOnUIThread] public void tells_nothing_when_the_char_after_a_link_is_clicked() => ClickedIn("a [b](c) ‸d").Must().BeEmpty();
+      [XFOnUIThread] public void tells_where_a_link_leads_rather_than_the_URL_that_its_label_is() => ClickedIn("a [https://b.inv‸alid](c) d").Must().SequenceEqual(["c"]);
+      [XFOnUIThread] public void tells_where_a_link_of_any_protocol_leads() => ClickedIn("a [b](clo‸yd://session/5) d").Must().SequenceEqual(["cloyd://session/5"]);
+      [XFOnUIThread] public void tells_where_a_link_in_angle_brackets_leads() => ClickedIn("a <vsco‸de://file/x> d").Must().SequenceEqual(["vscode://file/x"]);
+      [XFOnUIThread] public void tells_where_a_link_that_is_defined_elsewhere_leads() => ClickedIn("a [b‸][c] d\n\n[c]: src/x.cs").Must().SequenceEqual(["src/x.cs"]);
+      [XFOnUIThread] public void tells_where_a_link_in_bold_text_leads() => ClickedIn("**a [b‸](c)** d").Must().SequenceEqual(["c"]);
+      [XFOnUIThread] public void tells_where_a_link_in_a_cell_of_a_table_leads() => ClickedIn("| A |\n|---|\n| [b‸](c) |").Must().SequenceEqual(["c"]);
+      [XFOnUIThread] public void tells_where_a_link_in_a_list_in_a_quote_leads() => ClickedIn("> - a\n> - [b‸](c)").Must().SequenceEqual(["c"]);
+      [XFOnUIThread] public void tells_nothing_of_a_link_in_code() => ClickedIn("`[b‸](c)`").Must().BeEmpty();
+      [XFOnUIThread] public void tells_of_a_link_that_was_typed_there()
+      {
+         var editor = Editor("‸", inTheSource: true).Type("[b](c)");
+         editor.Window.RenderFrame();
+         editor.Window.Click(editor.Window.PointOf(editor.Editor.GetVisualDescendants().OfType<TextView>().Single(), new Point(3, 8)));
+         _clicked.Must().SequenceEqual(["c"]);
+      }
+   }
+
    public class In_the_source_view : Clicking_links_in_the_editor
    {
       readonly EditorInAWindow _editor;

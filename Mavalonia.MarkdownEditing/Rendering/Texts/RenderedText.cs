@@ -26,6 +26,9 @@ public class RenderedText
    public int Length => Chars.Count;
    public bool IsEmpty => Length == 0;
 
+   ///<summary>The link that is written at <paramref name="offset"/>: its label, or the markup around that. Null when none is.</summary>
+   internal Link? LinkWrittenAt(int offset) => Markups.Where(it => it.Source.Contains(offset)).Select(it => it.Formatting.Link).FirstOrDefault(it => it is not null);
+
    ///<summary>The box stands for what it's written as, such as <c>[x]</c>.</summary>
    internal bool StartsWithTheBoxOfATask => !IsEmpty && Chars[0] is { Value: BoxOfATask.Empty or BoxOfATask.Ticked, Source.Length: > 1 };
 

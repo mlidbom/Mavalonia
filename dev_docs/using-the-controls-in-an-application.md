@@ -51,7 +51,7 @@ It shows what GitHub does: tables, task lists, alerts, bare URLs, strikethrough.
 | --- | --- | --- |
 | `MarkdownView` | `[label](target)`, `[label][reference]`, `<protocol:...>` | `http:`, `https:`, `ftp:`, `mailto:`, `tel:`, `www.` |
 | `MarkdownEditor`, rendered | The same | Nothing |
-| `MarkdownEditor`, source | None | `http:`, `https:`, `ftp:`, `www.`, email addresses |
+| `MarkdownEditor`, source | The same, anywhere in the markdown of the link | `http:`, `https:`, `ftp:`, `www.`, email addresses |
 
 ## Menus
 
@@ -93,7 +93,7 @@ A `MenuFlyout` without items in it when it first opens stays empty, also when it
 - **Keys that are Avalonia's,** for the whole application: those to copy, cut, paste, undo, redo and select all are those of `PlatformHotkeyConfiguration`, as are the modifier keys for moving and deleting by word and for going to the start or end. Other keys, such as the arrows, are fixed. In the source view, the keys that aren't named here are AvaloniaEdit's own.
 - **A key it doesn't use goes on to the application,** such as Ctrl+Enter to send. To have one that it does use, handle it in the tunnel phase.
 - **What the keys and the menu do is public,** for buttons and menus of the application: `Cut()`, `Copy()`, `Paste()`, `PasteText()`, `PasteAsQuote()`, `SelectAll()` and `ToggleFormat(TextFormats)`. They do it in the view that is shown.
-- **`LinkClicked`** is the same event as that of `MarkdownView`, so one handler on what both are in is enough. A click raises it, in both views, and the editor itself opens nothing. The click puts the caret in the link too, so an application may want to open only what is clicked with Ctrl: see the event's `KeyModifiers`. In the rendered view, links are those that markdown has, and a bare URL is text. In the source view, they are the URLs, wherever they are.
+- **`LinkClicked`** is the same event as that of `MarkdownView`, so one handler on what both are in is enough. A click raises it, in both views, and the editor itself opens nothing. The click puts the caret in the link too, so an application may want to open only what is clicked with Ctrl: see the event's `KeyModifiers`. Links are those that markdown has, and, in the source view, URLs too, wherever they are.
 - **`Quote(markdown)`** adds a quote where the caret is and puts the caret after it. It works while the control isn't shown.
 - **Pasting images** is the application's. The editor takes Ctrl+V also when there's only an image on the clipboard, and then inserts nothing: handle the key before it does, in the tunnel phase.
 - **An exception while using the clipboard,** such as when another program holds it, surfaces on the dispatcher as any other does.

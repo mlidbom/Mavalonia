@@ -49,16 +49,22 @@ class PointerInput
       var isAClick = _pressedAt is {} pressedAt && e.GetPosition(_view).IsWithinAClickOf(pressedAt);
 
       _pressedAt = null;
-      if(isAClick && UrlAt(e) is {} url) _editor.RaiseEvent(new LinkClickedEventArgs(url, e.KeyModifiers));
+      if(isAClick && TargetOfTheLinkAt(e) is {} target) _editor.RaiseEvent(new LinkClickedEventArgs(target, e.KeyModifiers));
    }
 
-   string? UrlAt(PointerEventArgs e)
+   ///<summary>A link is one that the markdown has, or else a URL.</summary>
+   string? TargetOfTheLinkAt(PointerEventArgs e)
    {
       var textView = _view.TextArea.TextView;
       var point = e.GetPosition(textView) + textView.ScrollOffset;
       if(textView.GetVisualLineFromVisualTop(point.Y) is not {} line) return null;
 
       var column = line.GetVisualColumnFloor(point);
-      return line.Elements.OfType<VisualLineLinkText>().FirstOrDefault(it => it.VisualColumn <= column && column < it.VisualColumn + it.VisualLength)?.NavigateUri.OriginalString;
+      if(column >= line.VisualLength) return null;
+
+      return _editor.LinkWrittenAt(line.FirstDocumentLine.Offset + line.GetRelativeOffset(column))?.Target ?? UrlAt(column, line);
    }
+
+   static string? UrlAt(int column, VisualLine line) =>
+      line.Elements.OfType<VisualLineLinkText>().FirstOrDefault(it => it.VisualColumn <= column && column < it.VisualColumn + it.VisualLength)?.NavigateUri.OriginalString;
 }

@@ -77,6 +77,9 @@ public partial class MarkdownEditor : UserControl
       BringTheCaretIntoView();
    }
 
+   ///<summary>The link that the markdown has at <paramref name="offset"/>. Null when it has none there.</summary>
+   internal Link? LinkWrittenAt(int offset) => _renderedEditor?.Rendered.LinkWrittenAt(offset);
+
    ///<summary>Just below the caret of the view that is shown, from the corner of the control.</summary>
    internal Point PlaceBelowTheCaret => ShowsSource
                                            ? SourceView.TextArea.TextView.TranslatePoint(SourceView.PlaceBelowTheCaret, this)!.Value

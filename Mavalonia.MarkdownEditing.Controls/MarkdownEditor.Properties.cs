@@ -35,7 +35,7 @@ partial class MarkdownEditor
    ///<summary>A person has clicked a link. The editor itself opens nothing.</summary>
    ///<remarks>
    /// A click puts the caret in the link too, to edit it. So an application may want to open only what is clicked with Ctrl pressed: see <see cref="LinkClickedEventArgs.KeyModifiers"/>.<br/>
-   /// In the rendered view, links are those that markdown has. In the source view, they are the URLs, wherever they are.
+   /// Links are those that markdown has, and, in the source view, URLs too, wherever they are.
    /// </remarks>
    public event EventHandler<LinkClickedEventArgs>? LinkClicked { add => AddHandler(LinkClickedEvent, value); remove => RemoveHandler(LinkClickedEvent, value); }
 

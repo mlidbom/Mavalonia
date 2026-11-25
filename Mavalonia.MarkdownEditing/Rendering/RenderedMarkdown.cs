@@ -54,6 +54,9 @@ public class RenderedMarkdown
       return position.IsAtTheEndOfItsBlock ? offset : Math.Min(offset, text.Chars[position.Index].Source.Start);
    }
 
+   ///<summary>The link that is written at <paramref name="offset"/>: its label, or the markup around that. Null when none is.</summary>
+   public Link? LinkWrittenAt(int offset) => Blocks.FirstOrDefault(it => it.Text.Source.Contains(offset))?.Text.LinkWrittenAt(offset);
+
    internal PositionByNumbers NumbersOf(RenderedPosition position) => new(NumberOf(position.Block), position.Index);
 
    ///<summary>The position that <paramref name="numbers"/> say, or the nearest there is.</summary>
