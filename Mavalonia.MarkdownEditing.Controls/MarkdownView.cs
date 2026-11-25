@@ -91,7 +91,7 @@ public class MarkdownView : RenderedMarkdownView
    public void SelectNothing() => _read.SelectNothing();
 
    ///<summary>Puts what is selected on the clipboard: as markdown, and as rich text for programs that take that. Does nothing when nothing is selected.</summary>
-   public Task CopySelection() => IsAnythingSelected ? ClipboardContent.Write(_read, TopLevel.GetTopLevel(this)!.Clipboard!) : Task.CompletedTask;
+   public Task CopySelection() => IsAnythingSelected ? new CopiedSelection(_read).PutOn(TopLevel.GetTopLevel(this)!.Clipboard!) : Task.CompletedTask;
 
    internal override SelectableMarkdown Shown => _read;
 

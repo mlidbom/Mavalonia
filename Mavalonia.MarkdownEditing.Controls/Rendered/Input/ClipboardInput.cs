@@ -16,7 +16,7 @@ class ClipboardInput
 
    internal async Task Copy(RenderedEditor editor)
    {
-      if(!editor.Selection.IsEmpty) await ClipboardContent.Write(editor, Clipboard);
+      if(!editor.Selection.IsEmpty) await new CopiedSelection(editor).PutOn(Clipboard);
    }
 
    internal async Task Cut(RenderedEditor editor)
