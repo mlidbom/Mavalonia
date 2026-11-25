@@ -34,7 +34,7 @@ class CopyCodeButton : Button
 
    internal void ShowFor(CodeBlock block, Rect bounds)
    {
-      var isAnother = block != Block;
+      var isAnother = (block.Language, block.Text.Value) != (Block?.Language, Block?.Text.Value);
       (Block, _boundsOfTheBlock, IsVisible) = (block, bounds, true);
       if(isAnother) SayCopy();
    }

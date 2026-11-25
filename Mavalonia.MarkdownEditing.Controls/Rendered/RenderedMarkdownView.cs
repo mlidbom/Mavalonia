@@ -81,7 +81,7 @@ public abstract partial class RenderedMarkdownView : Control
    ///<summary>The layout of what is rendered now, also when it has changed since the view was measured.</summary>
    internal DocumentLayout Layout => LayOut(Bounds.Width);
 
-   DocumentLayout LayOut(double width) => _latestLayout.LayOut(Rendered, () => Appearance, width, Padding);
+   private protected DocumentLayout LayOut(double width) => _latestLayout.LayOut(Rendered, () => Appearance, width, Padding);
 
    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
    {

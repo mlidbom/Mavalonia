@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Mavalonia.MarkdownEditing.Controls.Rendered;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Input;
+using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;
 using Mavalonia.MarkdownEditing.Editing;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
@@ -32,6 +33,9 @@ public class MarkdownView : RenderedMarkdownView
 
    ///<summary>Null until the pointer is over code for the first time.</summary>
    CopyCodeButton? _copyCode;
+
+   ///<summary>Where the pointer is. Null when it isn't over the view.</summary>
+   Point? _pointedAt;
 
    static MarkdownView()
    {
@@ -128,6 +132,7 @@ public class MarkdownView : RenderedMarkdownView
 
    protected override Size ArrangeOverride(Size finalSize)
    {
+      if(_pointedAt is {} point) ShowWhatIsAt(point, LayOut(finalSize.Width));
       _copyCode?.ArrangeAtItsBlock();
       return base.ArrangeOverride(finalSize);
    }
@@ -136,9 +141,17 @@ public class MarkdownView : RenderedMarkdownView
 
    internal override void PointAt(Point point)
    {
-      Cursor = Layout.TargetAt(point) is null ? Cursors.OfText : Cursors.OfALink;
+      _pointedAt = point;
+      ShowWhatIsAt(point, Layout);
+      if(_copyCode is { IsVisible: true }) InvalidateArrange();
+   }
 
-      if(Layout.CodeAt(point) is {} code) ShowTheCopyButton(code.Block, code.Bounds);
+   ///<summary>Shows what can be done with what is at <paramref name="point"/>: that a link can be clicked, and the button to copy code.</summary>
+   void ShowWhatIsAt(Point point, DocumentLayout layout)
+   {
+      Cursor = layout.TargetAt(point) is null ? Cursors.OfText : Cursors.OfALink;
+
+      if(layout.CodeAt(point) is {} code) ShowTheCopyButton(code.Block, code.Bounds);
       else _copyCode?.Hide();
    }
 
@@ -152,12 +165,12 @@ public class MarkdownView : RenderedMarkdownView
       }
 
       _copyCode.ShowFor(block, bounds);
-      InvalidateArrange();
    }
 
    protected override void OnPointerExited(PointerEventArgs e)
    {
       base.OnPointerExited(e);
+      _pointedAt = null;
       _copyCode?.Hide();
    }
 
