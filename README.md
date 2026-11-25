@@ -33,6 +33,7 @@ To use them in an application, see [using the controls in an application](dev_do
 - **Run the specifications:** `dotnet test --solution Mavalonia.slnx`
 - **Run one project's:** `dotnet test --project Mavalonia.MarkdownEditing.Controls.Specifications`
 - **Try the controls, reloading code changes:** `dotnet watch --project Mavalonia.DesktopHost`
+- **CI:** GitHub Actions builds the solution from a clean checkout and runs all the specifications on every push, on Windows: `.github/workflows/build-and-test.yml`. The build fails on any warning.
 - **Measure how fast the controls are:** `dotnet run -c Release --project Mavalonia.MarkdownEditing.Controls.Measurements`, with how many messages as arguments, or none for 100 and 1,000
 - **Check that typing works on the real desktop:** `dotnet run --project Mavalonia.DesktopHost -- --check-typing`. The specifications run on the headless platform, which has no input methods. The window is off the screen and doesn't take the focus. The exit code is 0 when typing works.
 
