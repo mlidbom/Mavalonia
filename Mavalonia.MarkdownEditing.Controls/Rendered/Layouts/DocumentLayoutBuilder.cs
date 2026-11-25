@@ -45,7 +45,8 @@ class DocumentLayoutBuilder
    double SpaceAboveAHeading => _appearance.Scaled(12);
    double SpaceBetweenListItems => _appearance.Scaled(3);
    double IndentationInAQuote => _appearance.Scaled(16);
-   double IndentationInAListItem => _appearance.Scaled(24);
+   double SmallestIndentationInAListItem => _appearance.Scaled(24);
+   double SpaceAfterAMarker => _appearance.Scaled(5);
    double PaddingOfCode => _appearance.Scaled(8);
    double NarrowestText => _appearance.Scaled(40);
 
@@ -97,7 +98,14 @@ class DocumentLayoutBuilder
 
    double LeftOf(RenderedBlock block) => LeftInside(block.Containers.OutermostFirst);
 
-   double LeftInside(IEnumerable<BlockContainer> containers) => _area.Left + containers.Sum(it => it is Quote ? IndentationInAQuote : IndentationInAListItem);
+   double LeftInside(IEnumerable<BlockContainer> containers) => _area.Left + containers.Sum(IndentationIn);
+
+   double IndentationIn(BlockContainer container) => container switch
+   {
+      Quote => IndentationInAQuote,
+      ListItem { Number: {} number } => Math.Max(SmallestIndentationInAListItem, _texts.OfListMarker(MarkerOf(number)).Width + SpaceAfterAMarker),
+      _ => SmallestIndentationInAListItem
+   };
 
    void DecorateContainersOf(RenderedBlock block, double topOfText, double baseline)
    {
@@ -117,9 +125,10 @@ class DocumentLayoutBuilder
    void AddMarkerOf(ListItem item, IReadOnlyList<BlockContainer> around, double baseline)
    {
       var marker = _texts.OfListMarker(MarkerOf(item, around));
-      _decorations.Add(new ContainerDecoration.ListMarker(marker, new Point(LeftInside(around) + _appearance.Scaled(19), baseline - marker.Baseline)));
+      _decorations.Add(new ContainerDecoration.ListMarker(marker, new Point(LeftInside(around) + IndentationIn(item) - SpaceAfterAMarker, baseline - marker.Baseline)));
    }
 
-   static string MarkerOf(ListItem item, IEnumerable<BlockContainer> around) =>
-      item.Number is {} number ? number.ToString(CultureInfo.CurrentCulture) + "." : Bullets[around.OfType<ListItem>().Count() % Bullets.Length];
+   static string MarkerOf(ListItem item, IEnumerable<BlockContainer> around) => item.Number is {} number ? MarkerOf(number) : Bullets[around.OfType<ListItem>().Count() % Bullets.Length];
+
+   static string MarkerOf(int number) => number.ToString(CultureInfo.CurrentCulture) + ".";
 }

@@ -4,7 +4,7 @@ using Mavalonia.MarkdownEditing.Rendering.Blocks;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;
 
-///<summary>Lays out a table: each column as wide as its widest cell, or, when the table would be too wide, in proportion narrower.</summary>
+///<summary>Lays out a table: each column as wide as its widest cell, or, when the table would be too wide, the widest of them narrower, so that they are as wide as each other.</summary>
 class TableLayout
 {
    readonly Table _table;
@@ -35,11 +35,26 @@ class TableLayout
    IReadOnlyList<double> WidthsOfColumns(double widthAvailable)
    {
       var wanted = Enumerable.Range(0, _table.ColumnCount).Select(WidthWantedBy).ToList();
-      var shrinkage = Math.Min(1, widthAvailable / wanted.Sum());
+      var widest = WidestAColumnMayBe(wanted, widthAvailable);
 
-      return [..wanted.Select(it => it * shrinkage)];
+      return [..wanted.Select(it => Math.Min(it, widest))];
 
       double WidthWantedBy(int column) => _table.Cells.Where(it => it.Column == column).Max(it => _texts.Of(it, double.PositiveInfinity).WidthIncludingTrailingWhitespace) + 2 * HorizontalPadding + 1;
+   }
+
+   ///<summary>What the narrower columns leave of their share is there for the wider ones.</summary>
+   static double WidestAColumnMayBe(IReadOnlyList<double> wanted, double widthAvailable)
+   {
+      var left = widthAvailable;
+      foreach(var (number, width) in wanted.Order().Index())
+      {
+         var share = left / (wanted.Count - number);
+         if(width > share) return Math.Max(0, share);
+
+         left -= width;
+      }
+
+      return double.PositiveInfinity;
    }
 
    void LayOut(IReadOnlyList<TableCell> row, double left, IReadOnlyList<double> widths)

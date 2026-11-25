@@ -19,6 +19,21 @@ public class Laying_out_what_is_read
 
    [XFOnUIThread] public void says_where_text_is_also_before_it_is_shown() => new MarkdownView { Markdown = "a" }.BoundsOf(new PlainTextRange(0, 1)).Must().HaveCount(1);
 
+   public class A_table_that_is_too_wide : Laying_out_what_is_read
+   {
+      readonly ViewInAWindow _view = new($"| Name | Type | What it is for |\n|---|---|---|\n| Description | string | {LongText} {LongText} |\n| Remarks | string | {LongText} |");
+
+      int CountOfLinesOf(string text) => _view.View.BoundsOf(new PlainTextRange(_view.View.PlainText.Value.IndexOf(text, StringComparison.Ordinal), text.Length)).Count;
+
+      [XFOnUIThread] public void has_the_narrow_columns_as_wide_as_their_text() => new[] { "Name", "Type", "Description", "Remarks" }.Select(CountOfLinesOf).Must().SequenceEqual([1, 1, 1, 1]);
+      [XFOnUIThread] public void has_its_wide_column_up_to_where_the_view_ends() => _view.BoundsOfEach("word").Max(it => it.Right).Must().BeGreaterThan(700);
+   }
+
+   public class A_list_item_with_a_number_of_many_digits : Laying_out_what_is_read
+   {
+      [XFOnUIThread] public void has_room_for_the_number_before_its_text() => new ViewInAWindow("10000. a").BoundsOf("a").Left.Must().BeGreaterThan(10 + new ViewInAWindow("10000\\. b").BoundsOf("10000.").Width);
+   }
+
    public class Code : Laying_out_what_is_read
    {
       static readonly string LongLines = string.Join('\n', Enumerable.Range(0, 6).Select(it => $"if(some.Value{it}(x=>x.Other.Member(\"a string {it} with words\",42)).ToString().Length>0&&other!=null){{return(some+other-{it}*3)/some.Thing[{it}].Else?.Method<int,string>(a:1,b:2);}} // comment number {it} goes on"));
