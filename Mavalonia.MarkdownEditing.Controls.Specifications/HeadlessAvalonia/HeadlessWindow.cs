@@ -40,25 +40,25 @@ class HeadlessWindow
       DoWhatIsPending();
    }
 
-   public void Drag(Point from, Point to)
+   public void Drag(Point from, Point to, RawInputModifiers modifiers = RawInputModifiers.None)
    {
-      DragAndHold(from, to);
-      _window.MouseUp(to, MouseButton.Left);
+      DragAndHold(from, to, modifiers);
+      _window.MouseUp(to, MouseButton.Left, modifiers);
       DoWhatIsPending();
    }
 
    ///<summary>Drags, and doesn't release the button.</summary>
-   public void DragAndHold(Point from, Point to)
+   public void DragAndHold(Point from, Point to, RawInputModifiers modifiers = RawInputModifiers.None)
    {
-      _window.MouseDown(from, MouseButton.Left);
-      _window.MouseMove(to, RawInputModifiers.LeftMouseButton);
+      _window.MouseDown(from, MouseButton.Left, modifiers);
+      _window.MouseMove(to, RawInputModifiers.LeftMouseButton | modifiers);
       DoWhatIsPending();
    }
 
-   public void RightClick(Point point)
+   public void RightClick(Point point, RawInputModifiers modifiers = RawInputModifiers.None)
    {
-      _window.MouseDown(point, MouseButton.Right);
-      _window.MouseUp(point, MouseButton.Right);
+      _window.MouseDown(point, MouseButton.Right, modifiers);
+      _window.MouseUp(point, MouseButton.Right, modifiers);
       DoWhatIsPending();
    }
 
@@ -70,9 +70,9 @@ class HeadlessWindow
       DoWhatIsPending();
    }
 
-   public void MoveThePointerTo(Point point)
+   public void MoveThePointerTo(Point point, RawInputModifiers modifiers = RawInputModifiers.None)
    {
-      _window.MouseMove(point);
+      _window.MouseMove(point, modifiers);
       DoWhatIsPending();
    }
 

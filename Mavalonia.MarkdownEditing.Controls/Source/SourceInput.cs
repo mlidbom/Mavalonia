@@ -2,6 +2,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using AvaloniaEdit;
+using AvaloniaEdit.Rendering;
 using Mavalonia.MarkdownEditing.Editing;
 
 namespace Mavalonia.MarkdownEditing.Controls.Source;
@@ -12,6 +13,9 @@ class SourceInput
    readonly MarkdownEditor _editor;
    readonly TextEditor _view;
 
+   ///<summary>The button that was pressed latest. To the view, a link is clicked whichever it is.</summary>
+   PointerUpdateKind _latestPressed;
+
    internal SourceInput(MarkdownEditor editor, TextEditor view)
    {
       _editor = editor;
@@ -19,6 +23,7 @@ class SourceInput
       Clipboard = new ClipboardInput(editor, view);
       view.AddHandler(InputElement.KeyDownEvent, Press, RoutingStrategies.Tunnel); // Before the view pastes text itself.
       view.AddHandler(InputElement.PointerPressedEvent, Press, RoutingStrategies.Tunnel);
+      view.AddHandler(VisualLineLinkText.OpenUriEvent, TellOfTheClickedLink);
    }
 
    internal IClipboardInput Clipboard { get; }
@@ -41,7 +46,15 @@ class SourceInput
 
    void Press(object? sender, PointerPressedEventArgs e)
    {
-      if(e.Properties.PointerUpdateKind == PointerUpdateKind.RightButtonPressed) PutTheCaretWhereAMenuIsFor(e);
+      _latestPressed = e.Properties.PointerUpdateKind;
+      if(_latestPressed == PointerUpdateKind.RightButtonPressed) PutTheCaretWhereAMenuIsFor(e);
+   }
+
+   ///<summary>Were it not handled here, the window would have the link opened.</summary>
+   void TellOfTheClickedLink(object? sender, OpenUriRoutedEventArgs click)
+   {
+      click.Handled = true;
+      if(_latestPressed == PointerUpdateKind.LeftButtonPressed) _editor.RaiseEvent(new LinkClickedEventArgs(click.Uri.OriginalString));
    }
 
    ///<summary>A menu is for what is selected where the pointer is, or else for that place.</summary>

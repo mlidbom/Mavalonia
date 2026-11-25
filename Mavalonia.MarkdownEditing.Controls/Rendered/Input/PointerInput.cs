@@ -74,7 +74,7 @@ class PointerInput
 
    internal void Move(PointerEventArgs e)
    {
-      if(!_isPressed) _view.PointAt(e.GetPosition(_view));
+      if(!_isPressed) _view.PointAt(e.GetPosition(_view), e.KeyModifiers);
       else if(!IsNoMoreThanAClick(e.GetPosition(_view))) SelectUpTo(e);
    }
 
@@ -106,7 +106,7 @@ class PointerInput
 
       e.Pointer.Capture(null);
       EndSelecting();
-      if(isAClick) _view.ClickAt(point);
+      if(isAClick) _view.ClickAt(point, e.KeyModifiers);
    }
 
    internal void EndSelecting()

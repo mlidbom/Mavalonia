@@ -145,7 +145,7 @@ public class MarkdownView : RenderedMarkdownView
 
    protected override void OnKeyDown(KeyEventArgs e) => _keys.Press(e);
 
-   internal override void PointAt(Point point)
+   internal override void PointAt(Point point, KeyModifiers modifiers)
    {
       _pointedAt = point;
       ShowWhatIsAt(point, Layout);
@@ -180,7 +180,7 @@ public class MarkdownView : RenderedMarkdownView
       _copyCode?.Hide();
    }
 
-   internal override void ClickAt(Point point)
+   internal override void ClickAt(Point point, KeyModifiers modifiers)
    {
       if(Layout.TargetAt(point) is {} target) RaiseEvent(new LinkClickedEventArgs(target));
    }

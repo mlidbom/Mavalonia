@@ -81,6 +81,16 @@ public partial class RenderedEditorView : RenderedMarkdownView
 
    protected override AutomationPeer OnCreateAutomationPeer() => new RenderedEditorAutomationPeer(this);
 
+   ///<summary>A plain click puts the caret in a link, to edit its label.</summary>
+   string? TargetOfTheLinkToFollowAt(Point point, KeyModifiers modifiers) => modifiers == Hotkeys.CommandModifiers ? Layout.TargetAt(point) : null;
+
+   internal override void PointAt(Point point, KeyModifiers modifiers) => Cursor = TargetOfTheLinkToFollowAt(point, modifiers) is null ? Cursors.OfText : Cursors.OfALink;
+
+   internal override void ClickAt(Point point, KeyModifiers modifiers)
+   {
+      if(TargetOfTheLinkToFollowAt(point, modifiers) is {} target) RaiseEvent(new LinkClickedEventArgs(target));
+   }
+
    protected override void OnTextInput(TextInputEventArgs e) => _keyboard.Type(e);
    protected override void OnKeyDown(KeyEventArgs e) => _keyboard.Press(e);
 

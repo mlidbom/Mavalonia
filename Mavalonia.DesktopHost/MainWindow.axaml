@@ -21,7 +21,7 @@
       </StackPanel>
       <Grid ColumnDefinitions="*,*" Margin="8,0,8,8">
          <Border BorderThickness="1" BorderBrush="{DynamicResource TextControlBorderBrush}" CornerRadius="4" Margin="0,0,4,0">
-            <controls:MarkdownEditor x:Name="Editor" Padding="12,10" Watermark="Write something" />
+            <controls:MarkdownEditor x:Name="Editor" Padding="12,10" Watermark="Write something" LinkClicked="TellOfTheClickedLink" />
          </Border>
          <Border Grid.Column="1" BorderThickness="1" BorderBrush="{DynamicResource TextControlBorderBrush}" CornerRadius="4" Margin="4,0,0,0">
             <ScrollViewer>

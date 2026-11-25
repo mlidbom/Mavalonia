@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using AvaloniaEdit.Document;
 
 namespace Mavalonia.MarkdownEditing.Controls;
@@ -20,6 +21,8 @@ partial class MarkdownEditor
    public static readonly StyledProperty<KeyGesture?> PasteTextGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteTextGesture), new KeyGesture(Key.V, KeyModifiers.Control | KeyModifiers.Shift));
    public static readonly StyledProperty<KeyGesture?> PasteAsQuoteGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteAsQuoteGesture), new KeyGesture(Key.Q, KeyModifiers.Control | KeyModifiers.Shift));
 
+   public static readonly RoutedEvent<LinkClickedEventArgs> LinkClickedEvent = MarkdownView.LinkClickedEvent;
+
    ///<summary>The document. Its text is the markdown, and is all that is edited: the two views show the same text.</summary>
    public TextDocument Document { get => GetValue(DocumentProperty); set => SetValue(DocumentProperty, value); }
 
@@ -28,6 +31,10 @@ partial class MarkdownEditor
 
    ///<summary>What is shown while the document is empty.</summary>
    public string? Watermark { get => GetValue(WatermarkProperty); set => SetValue(WatermarkProperty, value); }
+
+   ///<summary>A person has clicked a link with Ctrl pressed, or with Command on a Mac. The editor itself opens nothing.</summary>
+   ///<remarks>In the rendered view, links are those that markdown has. In the source view, they are the URLs, wherever they are.</remarks>
+   public event EventHandler<LinkClickedEventArgs>? LinkClicked { add => AddHandler(LinkClickedEvent, value); remove => RemoveHandler(LinkClickedEvent, value); }
 
    ///<summary>The keys that start a new block, such as a paragraph or a list item, in the rendered view. Null for none.</summary>
    public KeyGesture? StartNewBlockGesture { get => GetValue(StartNewBlockGestureProperty); set => SetValue(StartNewBlockGestureProperty, value); }
