@@ -60,6 +60,6 @@ static class RenderedMarkdownDescriptionEX
 
    extension(TextFormatting @this)
    {
-      string Described => string.Join(", ", new[] { @this.Formats == TextFormats.None ? null : @this.Formats.ToString(), @this.Link is {} link ? $"link to {link.Target}" : null, @this.IsShownAsSource ? "source" : null }.OfType<string>());
+      string Described => string.Join(", ", new[] { @this.Formats == TextFormats.None ? null : @this.Formats.ToString(), @this.Link is {} link ? $"link to {link.Target}" : null, @this.IsShownAsSource ? "source" : null, @this.Image is {} image ? $"image {image.Source}" : null }.OfType<string>());
    }
 }

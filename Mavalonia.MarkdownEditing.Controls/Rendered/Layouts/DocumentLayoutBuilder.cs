@@ -1,5 +1,6 @@
 using System.Globalization;
 using Avalonia;
+using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts.Texts;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Containers;
@@ -71,7 +72,7 @@ class DocumentLayoutBuilder
 
       _blocks.Add(new BlockLayout(block, bounds, text, originOfText, _appearance));
       _top = bounds.Bottom;
-      DecorateContainersOf(block, originOfText.Y);
+      DecorateContainersOf(block, originOfText.Y, baseline: originOfText.Y + text.Baseline);
    }
 
    void LayOut(Table table)
@@ -83,7 +84,7 @@ class DocumentLayoutBuilder
 
       _blocks.AddRange(tableLayout.Cells);
       _top = tableLayout.Bottom;
-      DecorateContainersOf(table.FirstCell, topLeft.Y);
+      DecorateContainersOf(table.FirstCell, topLeft.Y, baseline: tableLayout.BaselineOfTheFirstRow);
    }
 
    void LeaveSpaceBefore(RenderedBlock block)
@@ -98,7 +99,7 @@ class DocumentLayoutBuilder
 
    double LeftInside(IEnumerable<BlockContainer> containers) => _area.Left + containers.Sum(it => it is Quote ? IndentationInAQuote : IndentationInAListItem);
 
-   void DecorateContainersOf(RenderedBlock block, double topOfText)
+   void DecorateContainersOf(RenderedBlock block, double topOfText, double baseline)
    {
       foreach(var (depth, container) in block.Containers.OutermostFirst.Index())
       {
@@ -106,15 +107,18 @@ class DocumentLayoutBuilder
          var isTheFirstBlockInside = _previous?.IsInside(container) != true;
 
          if(container is Quote quote) AddBarOf(quote, LeftInside(around), top: isTheFirstBlockInside ? topOfText : _bottomOfPrevious);
-         else if(container is ListItem item && isTheFirstBlockInside) AddMarkerOf(item, around, topOfText);
+         else if(container is ListItem item && isTheFirstBlockInside) AddMarkerOf(item, around, baseline);
       }
    }
 
    void AddBarOf(Quote quote, double left, double top) =>
       _decorations.Add(new ContainerDecoration.QuoteBar(new Rect(left + _appearance.Scaled(2), top, _appearance.Scaled(3), _top - top), quote is Alert alert ? _appearance.BrushOf(alert) : _appearance.LineBrush));
 
-   void AddMarkerOf(ListItem item, IReadOnlyList<BlockContainer> around, double topOfText) =>
-      _decorations.Add(new ContainerDecoration.ListMarker(_texts.OfListMarker(MarkerOf(item, around)), new Point(LeftInside(around) + _appearance.Scaled(19), topOfText)));
+   void AddMarkerOf(ListItem item, IReadOnlyList<BlockContainer> around, double baseline)
+   {
+      var marker = _texts.OfListMarker(MarkerOf(item, around));
+      _decorations.Add(new ContainerDecoration.ListMarker(marker, new Point(LeftInside(around) + _appearance.Scaled(19), baseline - marker.Baseline)));
+   }
 
    static string MarkerOf(ListItem item, IEnumerable<BlockContainer> around) =>
       item.Number is {} number ? number.ToString(CultureInfo.CurrentCulture) + "." : Bullets[around.OfType<ListItem>().Count() % Bullets.Length];

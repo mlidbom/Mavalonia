@@ -1,4 +1,5 @@
 using Avalonia;
+using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts.Texts;
 using Mavalonia.MarkdownEditing.Rendering;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;

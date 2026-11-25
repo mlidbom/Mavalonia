@@ -10,6 +10,8 @@ namespace Mavalonia.MarkdownEditing.Rendering.Reading;
 ///<summary>Reads the text of one block.</summary>
 partial class TextReader
 {
+   const string DescriptionOfAnImageWithoutOne = "image";
+
    readonly string _markdown;
    readonly BlockContainers _containers;
    readonly int _shift;
@@ -68,6 +70,7 @@ partial class TextReader
          case LiteralInline literal: ReadLiteral(literal, formatting); break;
          case EmphasisInline emphasis: ReadEmphasis(emphasis, formatting); break;
          case CodeInline code: ReadCode(code, formatting); break;
+         case LinkInline { IsImage: true } image when IsForReading: ReadImage(image, formatting); break;
          case LinkInline { IsImage: false, FirstChild: not null } link: ReadLink(link, formatting); break;
          case AutolinkInline link: ReadAutolink(link, formatting); break;
          case TaskList task: _text.Add(task.Checked ? '☑' : '☐', RangeOf(task), formatting); break;
@@ -122,6 +125,14 @@ partial class TextReader
       var link = new Link(markdigLink.GetDynamicUrl?.Invoke() ?? markdigLink.Url ?? "", opening: _markdown[range.Start..content.Start], closing: _markdown[content.End..range.End]);
 
       _text.AddMarkup(range, content, new TextFormatting(TextFormats.None, link), () => ReadAll(markdigLink, formatting with { Link = link }));
+   }
+
+   void ReadImage(LinkInline image, TextFormatting formatting)
+   {
+      var description = string.Concat(image.Descendants<LiteralInline>().Select(it => it.Content.ToString()));
+      var itsFormatting = formatting with { Image = new InlineImage(image.GetDynamicUrl?.Invoke() ?? image.Url ?? "") };
+
+      foreach(var value in description.Length > 0 ? description : DescriptionOfAnImageWithoutOne) _text.Add(value, RangeOf(image), itsFormatting);
    }
 
    void ReadAutolink(AutolinkInline autolink, TextFormatting formatting)

@@ -13,7 +13,12 @@ class FormattedText
 
    internal static FormattedText Typed(string text, TextFormatting formatting) => new([..text.Select(it => FormattedChar.Typed(it, formatting))]);
 
-   internal static FormattedText Of(RenderedMarkdown rendered, RenderedBlock block) => new([..block.Text.Chars.Select(it => FormattedChar.In(rendered, it))]);
+   ///<summary>Several chars may stand for the same markdown, such as those of an image's description. It is written once.</summary>
+   internal static FormattedText Of(RenderedMarkdown rendered, RenderedBlock block)
+   {
+      var chars = block.Text.Chars;
+      return new FormattedText([..chars.Select((it, index) => index > 0 && chars[index - 1].Source == it.Source ? FormattedChar.In(rendered, it) with { Markdown = "" } : FormattedChar.In(rendered, it))]);
+   }
 
    ///<summary>The text in <paramref name="range"/>, which must be in one block.</summary>
    internal static FormattedText In(RenderedRange range) => Of(range.Rendered, range.Start.Block)[range.Start.Index..range.End.Index];

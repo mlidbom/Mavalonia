@@ -62,6 +62,13 @@ public abstract partial class RenderedMarkdownView : Control
       InvalidateVisual();
    }
 
+   private protected void ShowAnImageThatHasBecomeKnown()
+   {
+      _latestLayout.LayOutAgain();
+      InvalidateMeasure();
+      InvalidateVisual();
+   }
+
    ///<summary>They change no sizes.</summary>
    void ShowColoursThatHaveBecomeKnown()
    {
@@ -103,9 +110,12 @@ public abstract partial class RenderedMarkdownView : Control
       context.FillRectangle(Brushes.Transparent, new Rect(Bounds.Size)); // So that the pointer hits the view where nothing is drawn.
       if(Shown is not {} shown) return;
 
-      Layout.Draw(context, shown.Selection.IsEmpty ? null : shown.Selection.Range, _viewport);
+      Layout.Draw(context, shown.Selection.IsEmpty ? null : shown.Selection.Range, HighlightsToDraw, _viewport);
       DrawOver(context);
    }
+
+   ///<summary>What is highlighted, the uppermost last.</summary>
+   private protected virtual IReadOnlyList<TextHighlight> HighlightsToDraw => [];
 
    ///<summary>Draws what is to be over the text.</summary>
    private protected virtual void DrawOver(DrawingContext context) {}

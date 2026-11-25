@@ -54,10 +54,17 @@ class BlockLayout
    ///<summary>Where a part of the block is: a rectangle for each line of it.</summary>
    internal IEnumerable<Rect> BoundsOf(PartOfABlock part) => _text.HitTestTextRange(part.Start, part.End - part.Start).Select(it => it.Translate(_originOfText));
 
+   internal void DrawHighlight(DrawingContext context, PartOfABlock part, IBrush background)
+   {
+      foreach(var rectangle in BoundsOf(part)) context.DrawRectangle(background, null, rectangle, _appearance.Scaled(2), _appearance.Scaled(2));
+   }
+
    internal void DrawText(DrawingContext context) => _text.Draw(context, _originOfText);
 
    ///<summary>Where a caret is drawn that is before the character at <paramref name="index"/>.</summary>
    internal Rect CaretAt(int index) => _text.HitTestTextPosition(index).Translate(_originOfText).WithWidth(1.5);
+
+   internal double BaselineOfTheFirstLine => _originOfText.Y + _text.Baseline;
 
    ///<summary>Where text as a whole starts on its first line.</summary>
    internal Point StartOfFirstLine => _originOfText;
@@ -78,8 +85,13 @@ class BlockLayout
    ///<summary>The line that a caret before the character at <paramref name="index"/> is on.</summary>
    internal LineLayout LineOf(int index) => Lines.ElementAt(_text.GetLineIndexFromCharacterIndex(Math.Min(index, Math.Max(0, Block.Text.Length)), trailingEdge: false));
 
-   ///<summary>The link whose label is at <paramref name="point"/>. Null when none is there.</summary>
-   internal Link? LinkAt(Point point) => _text.HitTestPoint(point - _originOfText) is { IsInside: true } hit && hit.TextPosition < Block.Text.Length ? Block.Text.Chars[hit.TextPosition].Formatting.Link : null;
+   ///<summary>Where what can be clicked at <paramref name="point"/> leads: a link, or else an image. Null when none is there.</summary>
+   internal string? TargetAt(Point point) =>
+      Block.Text.StretchesOfTheSameFormatting.Where(it => TargetOf(it.Formatting) is not null && BoundsOf(new PartOfABlock(Block, it.Start, it.Start + it.Length)).Any(bounds => bounds.Contains(point)))
+           .Select(it => TargetOf(it.Formatting))
+           .FirstOrDefault();
+
+   static string? TargetOf(TextFormatting formatting) => formatting.Link?.Target ?? formatting.Image?.Source;
 
    ///<summary>The position in the block's text that is nearest to <paramref name="point"/>.</summary>
    internal RenderedPosition PositionNearestTo(Point point)

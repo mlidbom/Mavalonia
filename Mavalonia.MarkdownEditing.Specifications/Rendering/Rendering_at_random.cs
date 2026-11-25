@@ -7,7 +7,7 @@ namespace Mavalonia.MarkdownEditing.Specifications.Rendering;
 ///<summary>Renders markdown that nobody would write. It is the same each time the specification runs.</summary>
 public class Rendering_at_random
 {
-   static readonly string[] Pieces = ["a", "b c", " ", "  ", "\n", "\n", "\n\n", "\r\n", "\t", "*", "**", "_", "`", "```", "~~", "[", "]", "(", ")", "](", "![", "<", ">", "&", "&amp;", "\\", "|", "|", "-", "---", "|-|", "#", "1.", "+", "=", ":", "!", "[ ]", "> [!NOTE]", "    ", "https://x.y", "<br>", "<!--", "-->", "é", "👩‍👩‍👧"];
+   static readonly string[] Pieces = ["a", "b c", " ", "  ", "\n", "\n", "\n\n", "\r\n", "\t", "*", "**", "_", "`", "```", "~~", "[", "]", "(", ")", "](", "![", "<", ">", "&", "&amp;", "\\", "|", "|", "-", "---", "|-|", "#", "1.", "+", "=", ":", "!", "![a](b)", "[ ]", "> [!NOTE]", "    ", "https://x.y", "<br>", "<!--", "-->", "é", "👩‍👩‍👧"];
 
    static string MarkdownOf(int seed)
    {

@@ -24,6 +24,9 @@ public class Markdown_rendered_for_reading
    [XF] public void shows_an_alert_of_an_unknown_kind_as_a_quote() => BlocksOf("> [!SOMETHING]\n> a").Must().SequenceEqual(["quote > paragraph \"[!SOMETHING]\"", "quote > paragraph \"a\""]);
    [XF] public void shows_a_br_tag_as_a_line_break() => TextOf("a<br>b<br />c").Must().Be("a\nb\nc");
    [XF] public void shows_a_br_tag_in_a_cell_as_a_line_break() => BlocksOf("| a<br>b |\n|---|").Must().SequenceEqual(["header 0,0 \"a\nb\""]);
+   [XF] public void shows_an_image_as_its_description() => TextOf("a ![b *c*](d.png) e").Must().Be("a [image d.png: b c] e");
+   [XF] public void shows_an_image_without_a_description_as_the_word_image() => TextOf("![](d.png)").Must().Be("[image d.png: image]");
+   [XF] public void shows_an_image_in_a_link_as_both() => TextOf("[![a](b.png)](c)").Must().Be("[link to c, image b.png: a]");
    [XF] public void hides_comments_and_definitions_of_links() => BlocksOf("[a][b]\n\n<!-- c -->\n\n[b]: d").Must().SequenceEqual(["paragraph \"a\""]);
    [XF] public void shows_other_HTML_as_source() => BlocksOf("<div>\na\n</div>").Must().SequenceEqual(["source \"<div>\na\n</div>\""]);
 

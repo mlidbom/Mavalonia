@@ -6,6 +6,7 @@ using Avalonia.Media.Immutable;
 using Avalonia.Styling;
 using Mavalonia.MarkdownEditing.Controls.Rendered.CodeColours;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
+using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered;
 
@@ -65,9 +66,13 @@ partial class RenderedMarkdownView
           LineBrush,
           SelectionBrush,
           IsDark,
-          ColoursOf);
+          ColoursOf,
+          ImageOf);
 
    ColouredCode? ColoursOf(CodeBlock block) => ColoursCode ? ColoursOfCode.OfTheApplication.Of(block, IsDark, ShowColoursThatHaveBecomeKnown) : null;
+
+   ///<summary>Null when there is none to show, or not yet.</summary>
+   private protected virtual IImage? ImageOf(InlineImage image) => null;
 
    private protected bool IsDark => ActualThemeVariant == ThemeVariant.Dark;
 

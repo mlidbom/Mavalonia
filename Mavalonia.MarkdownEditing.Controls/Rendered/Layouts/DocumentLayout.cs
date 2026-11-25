@@ -26,12 +26,14 @@ class DocumentLayout
    internal bool IsOf(RenderedMarkdown rendered, double width) => _rendered == rendered && Size.Width.Equals(width);
 
    ///<summary>Draws what is in <paramref name="viewport"/>.</summary>
-   internal void Draw(DrawingContext context, SourceRange? selected, Rect viewport)
+   internal void Draw(DrawingContext context, SourceRange? selected, IReadOnlyList<TextHighlight> highlights, Rect viewport)
    {
       var visible = _blocks.Where(it => it.Bounds.Intersects(viewport)).ToList();
 
       foreach(var decoration in _decorations.Where(it => it.Bounds.Intersects(viewport))) decoration.Draw(context);
       foreach(var block in visible) block.DrawBackground(context);
+      foreach(var highlight in highlights)
+         foreach(var part in _rendered.PlainText.PartsOf(highlight.Range)) visible.FirstOrDefault(it => it.Block == part.Block)?.DrawHighlight(context, part, highlight.Background);
       if(selected is {} range)
          foreach(var block in visible) block.DrawSelection(context, range);
 
@@ -52,8 +54,8 @@ class DocumentLayout
    ///<summary>The code at <paramref name="point"/>, and where its block is. Null when no code is there.</summary>
    internal (CodeBlock Block, Rect Bounds)? CodeAt(Point point) => _blocks.FirstOrDefault(it => it.Bounds.Contains(point)) is { Block: CodeBlock code } layout ? (code, layout.Bounds) : null;
 
-   ///<summary>The link whose label is at <paramref name="point"/>. Null when none is there.</summary>
-   internal Link? LinkAt(Point point) => _blocks.FirstOrDefault(it => it.Bounds.Contains(point))?.LinkAt(point);
+   ///<summary>Where what can be clicked at <paramref name="point"/> leads: a link, or else an image. Null when none is there.</summary>
+   internal string? TargetAt(Point point) => _blocks.FirstOrDefault(it => it.Bounds.Contains(point))?.TargetAt(point);
 
    ///<summary>What is to the left or right of a point is nearer to it than what is above or below.</summary>
    static double DistanceBetween(Rect bounds, Point point)

@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Media.TextFormatting;
+using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts.Texts;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;
@@ -26,6 +27,8 @@ class TableLayout
    internal IReadOnlyList<BlockLayout> Cells => _cells;
 
    internal double Bottom { get; private set; }
+
+   internal double BaselineOfTheFirstRow => _cells[0].BaselineOfTheFirstLine;
 
    double HorizontalPadding => _appearance.Scaled(9);
    double VerticalPadding => _appearance.Scaled(4);

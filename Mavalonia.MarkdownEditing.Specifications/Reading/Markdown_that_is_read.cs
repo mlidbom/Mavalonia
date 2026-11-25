@@ -22,6 +22,7 @@ public class Markdown_that_is_read
       [XF] public void nothing_copies_nothing() => Copied("a‸b").Must().Be("");
       [XF] public void formatted_text_copies_its_markup() => Copied("a **b⟦c** [d](e) `f⟧g`").Must().Be("**c** [d](e) `f`");
       [XF] public void a_bare_URL_copies_it_as_it_is_written() => Copied("a ⟦https://example.org⟧ b").Must().Be("https://example.org");
+      [XF] public void an_image_copies_its_markup() => Copied("⟦a ![b c](d.png) e⟧").Must().Be("a ![b c](d.png) e");
       [XF] public void tasks_copies_their_boxes() => Copied("⟦- [ ] a\n- [x] b⟧").Must().Be("- [ ] a\n- [x] b");
       [XF] public void an_alert_copies_its_kind() => Copied("⟦> [!NOTE]\n> a⟧").Must().Be("> [!NOTE]\n> a");
       [XF] public void the_title_of_an_alert_alone_copies_its_text() => Copied("> ⟦[!NOTE]⟧\n> a").Must().Be("Note");

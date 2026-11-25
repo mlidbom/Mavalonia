@@ -2,11 +2,14 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
 using Compze.Must;
 using Mavalonia.MarkdownEditing.Controls.Specifications.HeadlessAvalonia;
 using Mavalonia.MarkdownEditing.Html;
 using Mavalonia.MarkdownEditing.Rendering;
+using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Controls.Specifications;
 
@@ -154,6 +157,68 @@ public class Reading_markdown
       }
 
       Point CenterOf(Control control) => _view.Window.PointOf(control, new Rect(control.Bounds.Size).Center);
+   }
+
+   public class An_image : Reading_markdown
+   {
+      static async Task<ViewInAWindow> Show(string markdown, double width = 120)
+      {
+         var view = new ViewInAWindow(markdown) { View = { LoadImage = source => Task.FromResult<IImage?>(source == "missing.png" ? null : PictureThatIs(width)) } };
+         await Task.Delay(50);
+         view.Window.RenderFrame();
+         return view;
+      }
+
+      static RenderTargetBitmap PictureThatIs(double width)
+      {
+         var picture = new RenderTargetBitmap(new PixelSize((int)width, 60));
+         using var context = picture.CreateDrawingContext();
+         context.FillRectangle(Brushes.Orange, new Rect(picture.Size));
+         return picture;
+      }
+
+      [XFOnUIThread] public void is_shown_as_its_description_when_none_are_loaded() => new ViewInAWindow("a ![b c](d.png)").BoundsOf("b c").Must().Satisfy(it => it.Height < 30 && it.Width < 60);
+      [XFOnUIThread] public async Task that_is_loaded_is_shown_in_its_size() => (await Show("a ![b c](d.png) e")).BoundsOf("b c").Must().Satisfy(it => Math.Abs(it.Width - 120) < 1);
+      [XFOnUIThread] public async Task that_is_loaded_makes_its_line_as_high_as_it_is() => (await Show("a ![b c](d.png) e")).View.DesiredSize.Height.Must().BeGreaterThan(75);
+      [XFOnUIThread] public async Task that_is_wider_than_the_view_is_shown_as_wide_as_that() => (await Show("![b](d.png)", width: 5000)).BoundsOf("b").Must().Satisfy(it => Math.Abs(it.Width - 780) < 2);
+      [XFOnUIThread] public async Task that_there_is_none_of_is_shown_as_its_description() => (await Show("![b c](missing.png)")).BoundsOf("b c").Height.Must().BeGreaterThan(0);
+      [XFOnUIThread] public async Task is_copied_as_its_markdown() => (await Show("a ![b c](d.png) e")).Select("a", to: "e").View.SelectedMarkdown.Must().Be("a ![b c](d.png) e");
+      [XFOnUIThread] public async Task tells_that_it_is_clicked() => Clicked(await Show("![b c](d.png)"), "b c").ClickedLinks.Must().SequenceEqual(["d.png"]);
+      [XFOnUIThread] public async Task in_a_link_tells_that_the_link_is_clicked() => Clicked(await Show("[![b c](d.png)](https://e.f)"), "b c").ClickedLinks.Must().SequenceEqual(["https://e.f"]);
+      [XFOnUIThread] public async Task is_seen() => (await Show("- a ![b c](d.png) e\n- [x] ticked\n- [ ] not ticked")).Window.RenderFrame().SaveForInspectionAs("Images and boxes");
+   }
+
+   public class Highlighting : Reading_markdown
+   {
+      readonly ViewInAWindow _view = new("# one two\n\na **two** b\n\n- three");
+
+      PlainTextRange RangeOf(string text) => new(_view.View.PlainText.Value.IndexOf(text, StringComparison.Ordinal), text.Length);
+
+      [XFOnUIThread] public void some_text_shows_it_otherwise()
+      {
+         var before = _view.Window.RenderFrame().Fingerprint;
+         _view.View.Highlights = [new TextHighlight(RangeOf("two"), Brushes.Yellow)];
+         _view.Window.RenderFrame().SaveForInspectionAs("A highlight");
+         _view.Window.RenderFrame().Fingerprint.Must().NotBe(before);
+      }
+
+      [XFOnUIThread] public void nothing_any_more_shows_it_as_before()
+      {
+         var before = _view.Window.RenderFrame().Fingerprint;
+         _view.View.Highlights = [new TextHighlight(RangeOf("two"), Brushes.Yellow)];
+         _view.Window.RenderFrame();
+         _view.View.Highlights = [];
+         _view.Window.RenderFrame().Fingerprint.Must().Be(before);
+      }
+
+      [XFOnUIThread] public void the_same_text_twice_shows_the_last() => FrameWith(Brushes.Yellow, Brushes.Orange).Must().NotBe(FrameWith(Brushes.Orange, Brushes.Yellow));
+      [XFOnUIThread] public void text_across_blocks_says_where_all_of_it_is() => _view.View.BoundsOf(RangeOf("two\na two b\nth")).Must().Satisfy(it => it.Count >= 3 && it.Zip(it.Skip(1)).All(pair => pair.First.Top <= pair.Second.Top));
+
+      string FrameWith(params IBrush[] brushes)
+      {
+         _view.View.Highlights = [..brushes.Select(it => new TextHighlight(RangeOf("two"), it))];
+         return _view.Window.RenderFrame().Fingerprint;
+      }
    }
 
    public class The_keys : Reading_markdown
