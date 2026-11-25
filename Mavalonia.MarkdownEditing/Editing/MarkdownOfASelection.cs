@@ -67,7 +67,7 @@ class MarkdownOfASelection
    (string Markdown, int EndOfSource) MarkdownOfTheEnd()
    {
       var (block, index) = _selected.End;
-      if(IsNothingSelectedOfTheLast) return ("", _rendered.Source.StartOfLineAt(block.Source.Start));
+      if(IsNothingSelectedOfTheLast) return ("", Math.Max(_rendered.Source.StartOfLineAt(block.Source.Start), _rendered.BlockBefore(block)!.Source.End)); // The block before may end with the line break.
 
       return _selected.End.IsAtTheEndOfItsBlock || IsCopiedAsAWhole(block)
                 ? ("", block.Source.End)

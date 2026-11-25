@@ -25,5 +25,6 @@ public class Copying
    [XF] public void a_table_in_a_quote_copies_the_table() => Markdown("> | ⟦A |\n> |---|\n> | 1⟧ |").Must().Be("| A |\n|---|\n| 1 |");
    [XF] public void a_part_of_one_cell_copies_text() => Markdown("| A⟦B⟧ |\n|---|").Must().Be("B");
    [XF] public void a_part_of_code_copies_the_code() => Markdown("```\na ⟦*b*\nc⟧\n```").Must().Be("*b*\nc");
+   [XF] public void the_line_break_before_a_table_on_the_next_line_copies_it() => Markdown("> a⟦\n> | ⟧b | c |\n|---|---|").Must().Be("\n");
    [XF] public void text_and_a_part_of_code_copies_the_code_block() => Markdown("⟦a\n\n```cs\nb⟧c\n```").Must().Be("a\n\n```cs\nbc\n```");
 }
