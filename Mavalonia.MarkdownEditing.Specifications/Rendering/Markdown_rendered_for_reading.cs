@@ -16,6 +16,7 @@ public class Markdown_rendered_for_reading
    [XF] public void shows_indented_lines_in_a_quote_as_code() => BlocksOf(">     a\n>     b").Must().SequenceEqual(["quote > code \"a\nb\""]);
    [XF] public void shows_a_bare_URL_as_a_link() => TextOf("see https://example.org/a_b_c, then").Must().Be("see [link to https://example.org/a_b_c: https://example.org/a_b_c], then");
    [XF] public void shows_no_empty_paragraph_where_there_are_many_blank_lines() => BlocksOf("a\n\n\n\n\nb\n\n\n").Must().SequenceEqual(["paragraph \"a\"", "paragraph \"b\""]);
+   [XF] public void shows_no_line_break_before_a_table_on_the_next_line() => BlocksOf("a\nb | c\n---|---").Must().SequenceEqual(["paragraph \"a\"", "header 0,0 \"b\"", "header 0,1 \"c\""]);
    [XF] public void shows_no_line_break_at_the_end() => BlocksOf("a\n").Must().SequenceEqual(["paragraph \"a\""]);
    [XF] public void shows_an_empty_paragraph_when_there_is_no_markdown() => BlocksOf("").Must().SequenceEqual(["paragraph \"\""]);
    [XF] public void shows_tasks_as_boxes() => BlocksOf("- [ ] a\n- [x] b").Must().SequenceEqual(["• > paragraph \"☐ a\"", "• > paragraph \"☑ b\""]);

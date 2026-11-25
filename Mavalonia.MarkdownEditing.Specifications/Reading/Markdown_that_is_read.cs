@@ -27,6 +27,7 @@ public class Markdown_that_is_read
       [XF] public void a_character_back_over_an_image_selects_all_of_it() => Select("a ![b c](d.png)‸ e", CaretMovement.ToTheCharacterBefore, times: 1).Must().Be("![b c](d.png)");
       [XF] public void a_character_back_goes_on_before_an_image() => Select("a ![b c](d.png)‸ e", CaretMovement.ToTheCharacterBefore, times: 2).Must().Be(" ![b c](d.png)");
       [XF] public void a_word_back_over_an_image_selects_all_of_it() => Select("a ![b c](d.png)‸ e", CaretMovement.ToTheWordBefore, times: 1).Must().Be("![b c](d.png)");
+      [XF] public void a_character_back_goes_on_before_a_table_on_the_next_line() => Select("a\n‸b | c\n---|---", CaretMovement.ToTheCharacterBefore, times: 2).Must().Be("a\n");
       [XF] public void a_character_on_over_an_image_selects_all_of_it() => Select("a ‸![b c](d.png) e", CaretMovement.ToTheCharacterAfter, times: 1).Must().Be("![b c](d.png)");
    }
 
@@ -62,6 +63,7 @@ public class Markdown_that_is_read
       [XF] public void a_task_without_its_box_copies_its_text() => Copied("- [x] ⟦a⟧").Must().Be("a");
       [XF] public void up_to_the_start_of_a_block_of_code_copies_nothing_of_it() => Copied("⟦a\n\n```\n⟧b\n```").Must().Be("a\n\n");
       [XF] public void up_to_the_start_of_a_table_copies_nothing_of_it() => Copied("⟦a\n\n| ⟧b | c |\n|---|---|").Must().Be("a\n\n");
+      [XF] public void up_to_the_start_of_a_table_on_the_next_line_copies_nothing_of_it() => Copied("> ⟦a\n> | ⟧b | c |\n|---|---|").Must().Be("a\n");
       [XF] public void up_to_the_start_of_a_heading_copies_nothing_of_it() => Copied("⟦a\n\n# ⟧b").Must().Be("a\n\n");
       [XF] public void up_to_the_start_of_a_list_item_copies_nothing_of_it() => Copied("⟦a\n\n- ⟧b").Must().Be("a\n\n");
       [XF] public void from_the_end_of_a_block_of_code_copies_nothing_of_it() => Copied("```\na⟦\n```\n\nb⟧").Must().Be("\n\nb");

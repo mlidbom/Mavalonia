@@ -76,6 +76,7 @@ class TextReader
          case HtmlInline { IsALineBreak: true } lineBreak when IsForReading: _text.Add('\n', RangeOf(lineBreak), formatting); break;
          case HtmlInline { IsAComment: true } when IsForReading: break;
          case HtmlEntityInline entity: ReadEntity(entity, formatting); break;
+         case LineBreakInline { NextSibling: null, Parent.Parent: null } when IsForReading: break; // What is on the next line is another block, such as a table.
          case LineBreakInline lineBreak: ReadLineBreak(lineBreak, formatting); break;
          case DelimiterInline delimiter: ReadCharactersAlong(RangeOf(delimiter), delimiter.ToLiteral(), formatting); break;
          case ContainerInline container and not LinkInline: ReadAll(container, formatting); break;
