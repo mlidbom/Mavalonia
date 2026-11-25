@@ -24,12 +24,6 @@ class MenuOfAnEditor : MenuMadeWhenItOpens
       yield return new MenuCommand("Paste as text", _editor.PasteText, _editor.PasteTextGesture);
       yield return new MenuCommand("Paste as quote", _editor.PasteAsQuote, _editor.PasteAsQuoteGesture);
       yield return new Separator();
-      yield return new MenuCommand("Select all", SelectAll, keys.SelectAll.FirstOrDefault()) { IsEnabled = _editor.Document.TextLength > 0 };
-   }
-
-   Task SelectAll()
-   {
-      _editor.SelectAll();
-      return Task.CompletedTask;
+      yield return new MenuCommand("Select all", _editor.SelectAll, keys.SelectAll.FirstOrDefault()) { IsEnabled = _editor.Document.TextLength > 0 };
    }
 }

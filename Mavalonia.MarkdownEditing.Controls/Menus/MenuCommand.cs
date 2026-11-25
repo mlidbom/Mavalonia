@@ -16,5 +16,12 @@ class MenuCommand : MenuItem
       Click += (_, _) => action().SurfaceExceptions();
    }
 
+   ///<inheritdoc cref="MenuCommand(string, Func{Task}, KeyGesture?)"/>
+   internal MenuCommand(string header, Action action, KeyGesture? gesture = null) : this(header, () =>
+   {
+      action();
+      return Task.CompletedTask;
+   }, gesture) {}
+
    protected override Type StyleKeyOverride => typeof(MenuItem);
 }
