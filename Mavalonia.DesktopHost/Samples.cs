@@ -8,10 +8,10 @@ static class Samples
 {
    static readonly DirectoryInfo Folder = new(Path.Combine(AppContext.BaseDirectory, "Samples"));
 
-   internal static string WhatTheEditorStartsWith => File.ReadAllText(Path.Combine(Folder.FullName, "What the editor starts with.md"));
+   internal static string ReadWhatTheEditorStartsWith() => File.ReadAllText(Path.Combine(Folder.FullName, "What the editor starts with.md"));
 
    ///<summary>Each markdown file in the <c>Samples/Tabs</c> folder.</summary>
-   internal static IReadOnlyList<SampleDocument> ForTabs =>
+   internal static IReadOnlyList<SampleDocument> ReadTheDocumentsForTabs() =>
       [..Folder.GetDirectories("Tabs").Single()
                .GetFiles("*.md")
                .OrderBy(it => it.Name, StringComparer.Ordinal)

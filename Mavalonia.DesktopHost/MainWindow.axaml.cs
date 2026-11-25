@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
 using AvaloniaEdit.Document;
@@ -14,27 +15,17 @@ partial class MainWindow : Window
    {
       InitializeComponent();
 
-      var document = new TextDocument(Samples.WhatTheEditorStartsWith);
-      document.TextChanged += (_, _) => Preview.Markdown = document.Text;
+      var document = new TextDocument(Samples.ReadWhatTheEditorStartsWith());
+      var preview = new TabWithAMarkdownView("Preview", document.Text);
+      document.TextChanged += (_, _) => preview.View.Markdown = document.Text;
       Editor.Document = document;
-      Preview.Markdown = document.Text;
-      Preview.LoadImage = Samples.LoadImage;
 
-      foreach(var sample in Samples.ForTabs) Tabs.Items.Add(TabOf(sample));
+      Tabs.Items.Add(preview);
+      foreach(var sample in Samples.ReadTheDocumentsForTabs()) Tabs.Items.Add(new TabWithAMarkdownView(sample.Name, sample.Markdown));
       AddHandler(MarkdownView.LinkClickedEvent, TellOfTheClickedLink); // Of the editor and of all the views.
    }
 
-   static TabItem TabOf(SampleDocument sample) => new()
-   {
-      Header = sample.Name,
-      Content = new Border
-      {
-         Classes = { "Frame" },
-         Child = new ScrollViewer { Content = new MarkdownView { Markdown = sample.Markdown, Padding = new Thickness(12, 10), LoadImage = Samples.LoadImage } }
-      }
-   };
-
-   MarkdownView ViewOfTheTabThatIsShown => (MarkdownView)((ScrollViewer)((Border)Tabs.SelectedContent!).Child!).Content!;
+   MarkdownView ViewOfTheTabThatIsShown => ((TabWithAMarkdownView)Tabs.SelectedItem!).View;
 
    void QuoteWhatIsSelected(object? sender, RoutedEventArgs e)
    {
@@ -46,6 +37,11 @@ partial class MainWindow : Window
 
    void ChangeTheTheme(object? sender, RoutedEventArgs e) => Application.Current!.RequestedThemeVariant = IsDark.IsChecked == true ? ThemeVariant.Dark : ThemeVariant.Light;
 
-   void TellOfTheClickedLink(object? sender, LinkClickedEventArgs click) =>
-      ClickedLink.Text = $"Clicked a link to {click.Target}{(click.KeyModifiers == default ? "" : $" with {click.KeyModifiers}")}, in {(click.Source is MarkdownView ? "a view" : "the editor")}";
+   void TellOfTheClickedLink(object? sender, LinkClickedEventArgs click)
+   {
+      ClickedLink.Text = $"Clicked a link to {click.Target}{WithWhatKeys()}, in {InWhat()}";
+
+      string WithWhatKeys() => click.KeyModifiers == KeyModifiers.None ? "" : $" with {click.KeyModifiers}";
+      string InWhat() => click.Source is MarkdownView ? "a view" : "the editor";
+   }
 }

@@ -27,15 +27,7 @@
          <Border Classes="Frame" Margin="0,0,4,0">
             <controls:MarkdownEditor x:Name="Editor" Padding="12,10" Watermark="Write something" />
          </Border>
-         <TabControl x:Name="Tabs" Grid.Column="1" Margin="4,0,0,0" Padding="0,4,0,0">
-            <TabItem Header="Preview">
-               <Border Classes="Frame">
-                  <ScrollViewer>
-                     <controls:MarkdownView x:Name="Preview" Padding="12,10" />
-                  </ScrollViewer>
-               </Border>
-            </TabItem>
-         </TabControl>
+         <TabControl x:Name="Tabs" Grid.Column="1" Margin="4,0,0,0" Padding="0,4,0,0" />
       </Grid>
    </DockPanel>
 </Window>
