@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+      <OutputType>Exe</OutputType>
+   </PropertyGroup>
+   <ItemGroup>
+      <!-- Not Avalonia.Headless.XUnit: it's built on xunit.v3 3.2.2, breaks on 4.x (https://github.com/AvaloniaUI/Avalonia/issues/22072), and Compze.xUnitBDD needs 4.x. -->
+      <PackageReference Include="Avalonia.Headless" />
+      <PackageReference Include="Avalonia.Skia" />
+      <PackageReference Include="Avalonia.Fonts.Inter" />
+      <PackageReference Include="Avalonia.Themes.Fluent" />
+      <PackageReference Include="Compze.Must" />
+      <PackageReference Include="Compze.xUnitBDD" />
+      <PackageReference Include="xunit.v3" />
+      <ProjectReference Include="..\Mavalonia.MarkdownEditing.Controls\Mavalonia.MarkdownEditing.Controls.csproj" />
+   </ItemGroup>
+   <ItemGroup>
+      <AssemblyMetadata Include="RenderedFramesDirectory" Value="$(MSBuildThisFileDirectory)..\artifacts\rendered-frames" />
+   </ItemGroup>
+</Project>

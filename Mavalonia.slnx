@@ -1,3 +1,16 @@
 <Solution>
-  <Project Path="Mavalonia/Mavalonia.csproj" />
+   <Folder Name="/Solution Items/">
+      <File Path=".editorconfig" />
+      <File Path="Directory.Build.props" />
+      <File Path="Directory.Packages.props" />
+      <File Path="global.json" />
+      <File Path="README.md" />
+   </Folder>
+   <Folder Name="/Specifications/">
+      <Project Path="Mavalonia.MarkdownEditing.Controls.Specifications/Mavalonia.MarkdownEditing.Controls.Specifications.csproj" />
+      <Project Path="Mavalonia.MarkdownEditing.Specifications/Mavalonia.MarkdownEditing.Specifications.csproj" />
+   </Folder>
+   <Project Path="Mavalonia.DesktopHost/Mavalonia.DesktopHost.csproj" />
+   <Project Path="Mavalonia.MarkdownEditing.Controls/Mavalonia.MarkdownEditing.Controls.csproj" />
+   <Project Path="Mavalonia.MarkdownEditing/Mavalonia.MarkdownEditing.csproj" />
 </Solution>

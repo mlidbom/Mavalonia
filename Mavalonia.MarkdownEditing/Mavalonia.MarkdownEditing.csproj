@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+   <!-- Everything about editing markdown that needs no UI. It must never reference Avalonia. -->
+   <ItemGroup>
+      <PackageReference Include="Markdig" />
+   </ItemGroup>
+</Project>

@@ -1,0 +1,12 @@
+<Project>
+   <PropertyGroup>
+      <TargetFramework>net11.0</TargetFramework>
+      <LangVersion>latest</LangVersion>
+      <Nullable>enable</Nullable>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <IsPackable>false</IsPackable>
+      <!-- Generate the XML doc file so that the build validates the crefs in doc comments: CS1574 flags a broken or stale one. CS1591 ("missing doc on a public member") isn't our policy. -->
+      <GenerateDocumentationFile>true</GenerateDocumentationFile>
+      <NoWarn>$(NoWarn);CS1591</NoWarn>
+   </PropertyGroup>
+</Project>
