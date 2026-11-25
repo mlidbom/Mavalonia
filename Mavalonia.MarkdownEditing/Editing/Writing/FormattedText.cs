@@ -15,7 +15,13 @@ class FormattedText
 
    internal static FormattedText Of(RenderedMarkdown rendered, RenderedBlock block) => new([..block.Text.Characters.Select(it => FormattedCharacter.In(rendered, it))]);
 
+   ///<summary>The text in <paramref name="range"/>, which must be in one block.</summary>
+   internal static FormattedText In(RenderedRange range) => Of(range.Rendered, range.Start.Block)[range.Start.Index..range.End.Index];
+
    internal IReadOnlyList<FormattedCharacter> Characters { get; }
+
+   ///<summary>The characters as a string.</summary>
+   internal string Value => new([..Characters.Select(it => it.Value)]);
 
    internal int Length => Characters.Count;
 

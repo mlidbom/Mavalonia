@@ -1,5 +1,9 @@
 using AvaloniaEdit.Document;
+using Mavalonia.MarkdownEditing.Editing.Changes;
 using Mavalonia.MarkdownEditing.Editing.Edits;
+using Mavalonia.MarkdownEditing.Editing.Edits.Deletion;
+using Mavalonia.MarkdownEditing.Editing.Edits.Nesting;
+using Mavalonia.MarkdownEditing.Editing.Edits.NewBlocks;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Containers;
@@ -50,18 +54,17 @@ public sealed class RenderedEditor : IDisposable
    }
 
    public RenderedPosition CaretPosition => Rendered.PositionAt(Selection.Caret);
-   RenderedPosition StartOfSelection => Rendered.PositionAt(Selection.Start);
-   RenderedPosition EndOfSelection => Rendered.PositionAt(Selection.End);
+   RenderedRange Selected => new(Rendered, Rendered.PositionAt(Selection.Start), Rendered.PositionAt(Selection.End));
 
    ///<summary>The formatting that text typed now gets.</summary>
    TextFormatting FormattingToType => _formattingToType ?? FormattingOfTheSelection;
 
    TextFormatting FormattingOfTheSelection => Selection.IsEmpty ? CaretPosition.Block.Text.FormattingAt(Selection.Caret) : FirstSelectedCharacter?.Formatting ?? TextFormatting.None;
 
-   RenderedCharacter? FirstSelectedCharacter => StartOfSelection is { IsAtTheEndOfItsBlock: false } start ? start.Block.Text.Characters[start.Index] : null;
+   RenderedCharacter? FirstSelectedCharacter => Selected.Start is { IsAtTheEndOfItsBlock: false } start ? start.Block.Text.Characters[start.Index] : null;
 
    ///<summary>The markdown of what is selected.</summary>
-   public string SelectedMarkdown => Selection.IsEmpty ? "" : new MarkdownOfASelection(Rendered, StartOfSelection, EndOfSelection).Markdown;
+   public string SelectedMarkdown => Selection.IsEmpty ? "" : new MarkdownOfASelection(Selected).Markdown;
 
    ///<summary>Puts the caret at <paramref name="position"/>. With <paramref name="extendSelection"/>, what is selected then reaches to there.</summary>
    public void MoveTo(RenderedPosition position, bool extendSelection = false)
@@ -113,10 +116,10 @@ public sealed class RenderedEditor : IDisposable
    public void BreakLine() => Edit(() => new BreakingTheLine(Rendered, Selection.Caret).Change());
 
    ///<summary>Whether the caret is in a list item that can be made an item of a list inside the one before it.</summary>
-   public bool CanIndent => new IndentingAListItem(Rendered, CaretPosition).Change() is not null;
+   public bool CanIndent => IndentingAListItem.At(Rendered, CaretPosition) is not null;
 
    ///<summary>Makes the list item that the caret is in an item of a list inside the one before it.</summary>
-   public void Indent() => AsOneUndo(() => Make(new IndentingAListItem(Rendered, CaretPosition).Change()!));
+   public void Indent() => AsOneUndo(() => Make(IndentingAListItem.At(Rendered, CaretPosition)!.Change()));
 
    ///<summary>Whether the caret is in a list item that can be taken out of its list.</summary>
    public bool CanOutdent => CaretPosition.Block is Paragraph or Heading && CaretPosition.Block.Containers.Innermost is ListItem;
@@ -143,15 +146,11 @@ public sealed class RenderedEditor : IDisposable
 
    void ToggleOfTheSelection(TextFormats format)
    {
-      var (start, end) = (Place.Of(StartOfSelection, Rendered), Place.Of(EndOfSelection, Rendered));
+      var selected = Selected;
+      AsOneUndo(() => MakeAll(new TogglingAFormat(selected, format).Changes()));
 
-      AsOneUndo(() =>
-      {
-         foreach(var change in new TogglingAFormat(Rendered, StartOfSelection, EndOfSelection, format).Changes())
-            if(change(Rendered) is {} toggling) Make(toggling);
-      });
-
-      Selection = new TextSelection(start.In(Rendered).Offset, end.In(Rendered).Offset);
+      var selectedAfterwards = selected.ByNumbers.In(Rendered);
+      Selection = new TextSelection(selectedAfterwards.Start.Offset, selectedAfterwards.End.Offset);
    }
 
    public void Undo() => Revert(Document.UndoStack.Undo);
@@ -179,9 +178,9 @@ public sealed class RenderedEditor : IDisposable
    {
       if(Selection.IsEmpty) return;
 
-      var start = Place.Of(StartOfSelection, Rendered);
-      foreach(var change in new DeletingASelection(Rendered, StartOfSelection, EndOfSelection).Changes().ToList()) Make(change(Rendered));
-      Selection = TextSelection.CaretAt(start.In(Rendered).Offset);
+      var selected = Selected;
+      MakeAll(new DeletingASelection(selected).Changes());
+      Selection = TextSelection.CaretAt(selected.ByNumbers.In(Rendered).Start.Offset);
    }
 
    void Edit(Func<SourceChange> change) => AsOneUndo(() =>
@@ -189,6 +188,12 @@ public sealed class RenderedEditor : IDisposable
       DeleteTheSelection();
       Make(change());
    });
+
+   void MakeAll(IEnumerable<Func<RenderedMarkdown, SourceChange?>> changes)
+   {
+      foreach(var change in changes)
+         if(change(Rendered) is {} toMake) Make(toMake);
+   }
 
    void Make(SourceChange change)
    {
@@ -229,13 +234,4 @@ public sealed class RenderedEditor : IDisposable
 
       _rendered = null;
       Selection = new TextSelection(change.GetNewOffset(_selection.Anchor), change.GetNewOffset(_selection.Caret));
-   }
-
-   ///<summary>A position that stays the same when the text of the block is formatted in other ways.</summary>
-   readonly record struct Place(int BlockNumber, int Index)
-   {
-      internal static Place Of(RenderedPosition position, RenderedMarkdown rendered) => new(rendered.NumberOf(position.Block), position.Index);
-
-      internal RenderedPosition In(RenderedMarkdown rendered) => rendered.PositionNearestTo(BlockNumber, Index);
-   }
-}
+   }}

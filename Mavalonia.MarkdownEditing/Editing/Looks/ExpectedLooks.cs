@@ -21,9 +21,9 @@ class ExpectedLooks
    internal static ExpectedLooks OfReplacing(RenderedMarkdown rendered, RenderedBlock first, RenderedBlock last, params IReadOnlyList<BlockLooks> replacements) =>
       new([..rendered.Blocks.Take(rendered.NumberOf(first))], replacements, [..rendered.Blocks.Skip(rendered.NumberOf(last) + 1)]);
 
-   internal bool AreThoseAfter(SourceChange change)
+   internal bool AreThoseOf(RenderedMarkdown rendered)
    {
-      var blocks = change.After.Blocks;
+      var blocks = rendered.Blocks;
       if(blocks.Count != _unchangedBefore.Count + _changed.Count + _unchangedAfter.Count) return false;
 
       return _changed.Zip(blocks.Skip(_unchangedBefore.Count)).All(it => it.First.AreThoseOf(it.Second))

@@ -25,6 +25,8 @@ class InlineMarkdownWriter
    internal static IEnumerable<string> WaysToWrite(FormattedText text) =>
       text.Characters.Any(it => it.Formatting.Has(TextFormats.Italic)) ? [Write(text, "*"), Write(text, "_")] : [Write(text, "*")];
 
+   internal static string PreferredWayToWrite(FormattedText text) => WaysToWrite(text).First();
+
    static string Write(FormattedText text, string italicDelimiter) => new InlineMarkdownWriter(text, italicDelimiter).Write();
 
    ///<summary>Markup must start and end at a character that isn't white space: <c>**bold **</c> isn't bold.</summary>

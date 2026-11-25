@@ -1,3 +1,5 @@
+using Mavalonia.MarkdownEditing.Editing.Changes;
+using Mavalonia.MarkdownEditing.Editing.Edits.NewBlocks;
 using Mavalonia.MarkdownEditing.Editing.Writing;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
@@ -27,9 +29,10 @@ class BreakingTheLine
 
    SourceChange Break()
    {
-      var newLine = new Separator(_rendered, _position.Block.Containers).NewLine;
+      var newLine = new LineBreaksInside(_rendered, _position.Block.Containers).NewLine;
       var lineBreak = new FormattedText([new FormattedCharacter('\n', _position.Block.Text.FormattingAt(_offset), newLine)]);
+      var inserted = SourceChange.Insert(_rendered, _offset, newLine);
 
-      return new TextReplacement(_rendered, _position, _position, lineBreak).ThatLooksRightInsertedAt(_offset) ?? SourceChange.Insert(_rendered, _offset, newLine);
+      return new TextReplacement(RenderedRange.EmptyAt(_rendered, _position), lineBreak).ThatLooksRight(tryFirst: inserted) ?? inserted;
    }
 }

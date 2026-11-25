@@ -1,8 +1,10 @@
+using Mavalonia.MarkdownEditing.Editing.Changes;
+using Mavalonia.MarkdownEditing.Editing.Writing;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Containers;
 
-namespace Mavalonia.MarkdownEditing.Editing.Edits;
+namespace Mavalonia.MarkdownEditing.Editing.Edits.Nesting;
 
 ///<summary>Takes a block out of the innermost container it is inside. Out of an item of a list inside another list, it becomes an item of the other list.</summary>
 class LeavingAContainer
@@ -30,7 +32,7 @@ class LeavingAContainer
 
       var (end, textAfter) = Next is null || BecomesAListItem ? (Block.Text.Source.End, "") : (_rendered.Source.StartOfLineAt(Next.Source.Start), SeparatorFrom(Next));
 
-      return SourceChange.Replace(_rendered, new SourceRange(start, end), text + textAfter).WithTheCaretIn(_rendered.NumberOf(Block), _position.Index);
+      return SourceChange.Replace(_rendered, new SourceRange(start, end), text + textAfter).WithTheCaretAt(_rendered.NumbersOf(_position));
    }
 
    BlockContainers ContainersAfterLeaving()
@@ -43,7 +45,7 @@ class LeavingAContainer
    }
 
    ///<summary>Without a blank line between them, blocks could become one.</summary>
-   string SeparatorFrom(RenderedBlock other) => BecomesAListItem ? _rendered.Source.LineBreak : new Separator(_rendered, _containers.SharedWith(other.Containers)).BlankLine + _rendered.Source.LineBreak;
+   string SeparatorFrom(RenderedBlock other) => BecomesAListItem ? _rendered.Source.LineBreak : new LineBreaksInside(_rendered, _containers.SharedWith(other.Containers)).BlankLine + _rendered.Source.LineBreak;
 
    bool IsEntered(BlockContainer container) => Previous?.IsInside(container) != true;
 

@@ -41,13 +41,15 @@ public class RenderedMarkdown
       return position.IsAtTheEndOfItsBlock ? offset : Math.Min(offset, text.Characters[position.Index].Source.Start);
    }
 
-   ///<summary>The position in block number <paramref name="blockNumber"/> before its character number <paramref name="index"/>, or the nearest there is.</summary>
-   internal RenderedPosition PositionNearestTo(int blockNumber, int index)
-   {
-      if(blockNumber < 0) return Start;
-      if(blockNumber >= Blocks.Count) return End;
+   internal PositionByNumbers NumbersOf(RenderedPosition position) => new(NumberOf(position.Block), position.Index);
 
-      return new RenderedPosition(Blocks[blockNumber], Math.Min(index, Blocks[blockNumber].Text.Length));
+   ///<summary>The position that <paramref name="numbers"/> say, or the nearest there is.</summary>
+   internal RenderedPosition PositionNearestTo(PositionByNumbers numbers)
+   {
+      if(numbers.BlockNumber >= Blocks.Count) return End;
+
+      var block = Blocks[numbers.BlockNumber];
+      return new RenderedPosition(block, Math.Min(numbers.Index, block.Text.Length));
    }
 
    internal RenderedBlock? BlockBefore(RenderedBlock block) => NumberOf(block) is var number and > 0 ? Blocks[number - 1] : null;

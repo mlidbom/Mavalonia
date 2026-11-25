@@ -1,3 +1,5 @@
+using Mavalonia.MarkdownEditing.Editing.Changes;
+using Mavalonia.MarkdownEditing.Editing.Writing;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 
@@ -18,7 +20,7 @@ class Pasting
    }
 
    RenderedBlock Block => _position.Block;
-   Separator Separator => new(_rendered, Block.Containers);
+   LineBreaksInside LineBreaks => new(_rendered, Block.Containers);
 
    internal SourceChange Of(string markdown) => Block switch
    {
@@ -35,18 +37,18 @@ class Pasting
 
    ///<summary>With the prefix that each line must have to be in the block.</summary>
    string InTheLinesOfTheBlock(string markdown) =>
-      string.Concat(markdown.ReplaceLineEndings("\n").Split('\n').Select((line, number) => number == 0 ? line : line.Length == 0 ? Separator.BlankLine : Separator.NewLine + line));
+      string.Concat(markdown.ReplaceLineEndings("\n").Split('\n').Select((line, number) => number == 0 ? line : line.Length == 0 ? LineBreaks.BlankLine : LineBreaks.NewLine + line));
 
    ///<summary>The markdown has blocks of its own, so the text before and after the caret become blocks of theirs.</summary>
    SourceChange BetweenTheTextBeforeAndAfter(string markdown)
    {
       var end = Block.Text.EndOfSourceUpTo(_position.Index);
-      var textBefore = _position.IsAtTheStartOfItsBlock ? "" : Separator.OfParagraphs;
-      var textAfter = _position.IsAtTheEndOfItsBlock ? SeparatorFromNext : Separator.OfParagraphs;
+      var textBefore = _position.IsAtTheStartOfItsBlock ? "" : LineBreaks.BetweenParagraphs;
+      var textAfter = _position.IsAtTheEndOfItsBlock ? SeparatorFromNext : LineBreaks.BetweenParagraphs;
       var pasted = textBefore + InTheLinesOfTheBlock(markdown.Trim('\r', '\n'));
 
       return SourceChange.Replace(_rendered, new SourceRange(end, Block.Text.StartOfSourceFrom(_position.Index)), pasted + textAfter).WithTheCaretAt(end + pasted.Length);
    }
 
-   string SeparatorFromNext => _rendered.IsFollowedByABlockOnTheNextLine(Block) ? Separator.BlankLine : "";
+   string SeparatorFromNext => _rendered.IsFollowedByABlockOnTheNextLine(Block) ? LineBreaks.BlankLine : "";
 }

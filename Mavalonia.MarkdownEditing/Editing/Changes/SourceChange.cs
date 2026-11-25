@@ -1,6 +1,6 @@
 using Mavalonia.MarkdownEditing.Rendering;
 
-namespace Mavalonia.MarkdownEditing.Editing;
+namespace Mavalonia.MarkdownEditing.Editing.Changes;
 
 ///<summary>A change to a markdown text, and where the caret is after it.</summary>
 class SourceChange
@@ -39,8 +39,6 @@ class SourceChange
 
    internal SourceChange WithTheCaretAt(int offset) => new(Replaced, Replacement, After, offset);
 
-   ///<summary>Puts the caret in block number <paramref name="blockNumber"/> after the change, before its character number <paramref name="index"/>. Where the change has made less of the text than that, as near to there as there is text.</summary>
-   internal SourceChange WithTheCaretIn(int blockNumber, int index) => WithTheCaretAt(After.PositionNearestTo(blockNumber, index).Offset);
-
-   internal SourceChange WithTheCaretAtTheEndOf(int blockNumber) => WithTheCaretIn(blockNumber, int.MaxValue);
+   ///<summary>Puts the caret at <paramref name="position"/> of what is rendered after the change, or as near to there as it can be.</summary>
+   internal SourceChange WithTheCaretAt(PositionByNumbers position) => WithTheCaretAt(After.PositionNearestTo(position).Offset);
 }
