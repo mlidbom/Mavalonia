@@ -30,6 +30,7 @@ public class Starting_a_new_block
    [XF] public void in_a_heading_with_marks_after_its_text_leaves_them_out() => From("# a‸b #").Must().Be("# a\n\n‸b");
    [XF] public void in_a_list_item_with_a_tab_after_its_marker_adds_another() => From("-\ta‸").Must().Be("-\ta\n- ‸");
    [XF] public void in_a_numbered_list_item_adds_the_next_number() => From("9. a‸").Must().Be("9. a\n10. ‸");
+   [XF] public void in_a_numbered_list_item_with_a_parenthesis_adds_the_next_number_with_one() => From("9) a‸").Must().Be("9) a\n10) ‸");
    [XF] public void in_a_list_item_of_a_list_in_a_list_adds_another_to_the_inner_list() => From("- a\n  - b‸").Must().Be("- a\n  - b\n  - ‸");
    [XF] public void in_a_list_item_in_a_quote_adds_another_in_the_quote() => From("> - a‸").Must().Be("> - a\n> - ‸");
    [XF] public void in_a_second_paragraph_of_a_list_item_adds_a_third() => From("- a\n\n  b‸").Must().Be("- a\n\n  b\n\n  ‸");

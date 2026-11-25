@@ -25,6 +25,7 @@ public class Rendered_blocks
    [XF] public void leave_out_the_quote_mark_of_every_line_of_a_paragraph() => Rendered("> one\n> two", "quote > paragraph \"one\ntwo\"");
    [XF] public void are_inside_the_list_items_they_are_written_in() => Rendered("- one\n- two\n  - three", "• > paragraph \"one\"", "• > paragraph \"two\"", "• > • > paragraph \"three\"");
    [XF] public void number_the_items_of_a_list_from_the_number_of_the_first() => Rendered("3. one\n3. two", "3. > paragraph \"one\"", "4. > paragraph \"two\"");
+   [XF] public void show_the_numbers_of_a_list_with_the_parenthesis_that_they_are_written_with() => Rendered("3) one\n4) two", "3) > paragraph \"one\"", "4) > paragraph \"two\"");
    [XF] public void can_be_several_in_a_list_item() => Rendered("- one\n\n  two\n\n  ```\n  three\n  ```", "• > paragraph \"one\"", "• > paragraph \"two\"", "• > code \"three\"");
    [XF] public void can_be_inside_a_list_inside_a_quote() => Rendered("> 1. one\n>\n>    two", "quote > 1. > paragraph \"one\"", "quote > 1. > paragraph \"two\"");
 

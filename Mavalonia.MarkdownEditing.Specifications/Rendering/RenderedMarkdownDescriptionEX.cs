@@ -37,7 +37,7 @@ static class RenderedMarkdownDescriptionEX
       {
          Alert alert => alert.Kind.ToString(),
          Quote => "quote",
-         ListItem { Number: {} number } => $"{number}.",
+         ListItem { ShownNumber: {} number } => number,
          ListItem => "•",
          _ => throw new ArgumentOutOfRangeException(nameof(@this), @this.GetType().Name)
       };

@@ -1,4 +1,3 @@
-using System.Globalization;
 using Avalonia;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts.Texts;
 using Mavalonia.MarkdownEditing.Rendering;
@@ -103,7 +102,7 @@ class DocumentLayoutBuilder
    double IndentationIn(BlockContainer container) => container switch
    {
       Quote => IndentationInAQuote,
-      ListItem { Number: {} number } => Math.Max(SmallestIndentationInAListItem, _texts.OfListMarker(MarkerOf(number)).Width + SpaceAfterAMarker),
+      ListItem { ShownNumber: {} number } => Math.Max(SmallestIndentationInAListItem, _texts.OfListMarker(number).Width + SpaceAfterAMarker),
       _ => SmallestIndentationInAListItem
    };
 
@@ -128,7 +127,5 @@ class DocumentLayoutBuilder
       _decorations.Add(new ContainerDecoration.ListMarker(marker, new Point(LeftInside(around) + IndentationIn(item) - SpaceAfterAMarker, baseline - marker.Baseline)));
    }
 
-   static string MarkerOf(ListItem item, IEnumerable<BlockContainer> around) => item.Number is {} number ? MarkerOf(number) : Bullets[around.OfType<ListItem>().Count() % Bullets.Length];
-
-   static string MarkerOf(int number) => number.ToString(CultureInfo.CurrentCulture) + ".";
+   static string MarkerOf(ListItem item, IEnumerable<BlockContainer> around) => item.ShownNumber ?? Bullets[around.OfType<ListItem>().Count() % Bullets.Length];
 }
