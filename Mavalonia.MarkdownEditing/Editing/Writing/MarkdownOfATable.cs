@@ -1,8 +1,7 @@
-using Mavalonia.MarkdownEditing.Editing.Writing;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 
-namespace Mavalonia.MarkdownEditing.Html;
+namespace Mavalonia.MarkdownEditing.Editing.Writing;
 
 ///<summary>Writes a table as markdown. Its first row becomes the header.</summary>
 ///<remarks>

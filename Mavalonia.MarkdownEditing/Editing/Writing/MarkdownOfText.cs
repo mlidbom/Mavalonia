@@ -1,8 +1,7 @@
-using Mavalonia.MarkdownEditing.Editing.Writing;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 
-namespace Mavalonia.MarkdownEditing.Html;
+namespace Mavalonia.MarkdownEditing.Editing.Writing;
 
 ///<summary>Writes text that isn't markdown as markdown that shows it. What looks like markup in it must not become that.</summary>
 ///<remarks>
