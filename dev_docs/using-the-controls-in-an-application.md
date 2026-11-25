@@ -53,5 +53,5 @@ It shows what GitHub does: tables, task lists, alerts, bare URLs, strikethrough.
 - **`ShowsSource`** switches between the source and what it's rendered as. Bind it to whatever is to switch it: the editor takes no key for that.
 - **The application decides the keys:** `StartNewBlockGesture` (Enter), `BreakLineGesture` (Shift+Enter), `PasteTextGesture` (Ctrl+Shift+V), `PasteAsQuoteGesture` (Ctrl+Shift+Q). Null for none. A key it doesn't use goes on to the application, such as Ctrl+Enter to send.
 - **`Quote(markdown)`** adds a quote where the caret is and puts the caret after it. It works while the control isn't shown.
-- **Pasting images** is the application's: the editor leaves the clipboard alone when there's only an image on it.
+- **Pasting images** is the application's. The editor takes Ctrl+V also when there's only an image on the clipboard, and then inserts nothing: handle the key before it does, in the tunnel phase.
 - **An exception while using the clipboard,** such as when another program holds it, surfaces on the dispatcher as any other does.
