@@ -16,6 +16,7 @@ public class Clicking_links_in_the_editor
 
    readonly List<string> _clicked = [];
    readonly List<KeyModifiers> _modifiers = [];
+   readonly List<string?> _sources = [];
 
    EditorInAWindow Editor(string markdown, bool inTheSource = false)
    {
@@ -24,6 +25,7 @@ public class Clicking_links_in_the_editor
       {
          _clicked.Add(click.Target);
          _modifiers.Add(click.KeyModifiers);
+         _sources.Add(click.Source?.GetType().Name);
       };
       editor.Editor.FocusTheView();
       return editor;
@@ -50,6 +52,12 @@ public class Clicking_links_in_the_editor
       {
          _editor.Window.Click(_link);
          _editor.Markdown.Must().Satisfy(it => it.IndexOf('‸') < it.IndexOf(']'));
+      }
+
+      [XFOnUIThread] public void tells_it_as_the_editor()
+      {
+         _editor.Window.Click(_link);
+         _sources.Must().SequenceEqual(["MarkdownEditor"]);
       }
 
       [XFOnUIThread] public void tells_that_no_modifier_keys_are_pressed()
@@ -213,6 +221,12 @@ public class Clicking_links_in_the_editor
       {
          _editor.Window.Click(_link);
          _editor.Markdown.Must().Satisfy(it => it.IndexOf('‸') < it.IndexOf(' '));
+      }
+
+      [XFOnUIThread] public void tells_it_as_the_editor()
+      {
+         _editor.Window.Click(_link);
+         _sources.Must().SequenceEqual(["MarkdownEditor"]);
       }
 
       [XFOnUIThread] public void tells_that_no_modifier_keys_are_pressed()

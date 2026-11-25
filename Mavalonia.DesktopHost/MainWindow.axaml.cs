@@ -42,6 +42,6 @@ partial class MainWindow : Window
       ClickedLink.Text = $"Clicked a link to {click.Target}{WithWhatKeys()}, in {InWhat()}";
 
       string WithWhatKeys() => click.KeyModifiers == KeyModifiers.None ? "" : $" with {click.KeyModifiers}";
-      string InWhat() => click.Source is MarkdownView ? "a view" : "the editor";
+      string InWhat() => click.Source is MarkdownEditor ? "the editor" : "a view";
    }
 }

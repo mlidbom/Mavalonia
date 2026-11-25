@@ -20,8 +20,16 @@ public partial class MarkdownEditor : UserControl
       InitializeComponent();
       SourceView.Options.AllowScrollBelowDocument = false;
       _source = new SourceInput(this, SourceView);
+      RenderedView.AddHandler(MarkdownView.LinkClickedEvent, TellOfALinkClickedInTheRenderedView);
       SetCurrentValue(ContextFlyoutProperty, new MenuOfAMarkdownEditor(this));
       SetCurrentValue(DocumentProperty, new TextDocument());
+   }
+
+   ///<summary>The application is told by the editor, as of a link in the source view: the views are parts of the editor.</summary>
+   void TellOfALinkClickedInTheRenderedView(object? sender, LinkClickedEventArgs click)
+   {
+      click.Handled = true;
+      RaiseEvent(new LinkClickedEventArgs(click.Target, click.KeyModifiers));
    }
 
    ///<summary>Edits what the rendered view shows. Null while the source is shown instead, and while the control isn't in a window.</summary>
