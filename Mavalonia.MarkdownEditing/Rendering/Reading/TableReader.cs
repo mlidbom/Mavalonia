@@ -22,12 +22,14 @@ class TableReader
    readonly string _markdown;
    readonly BlockContainers _containers;
    readonly IReadOnlyList<MarkdigTableRow> _rows;
+   readonly Func<TextReader> _readerOfText;
 
    ///<summary>Where the lines of the table start: first that of the header, then the line that separates it from the other rows, then theirs.</summary>
    readonly IReadOnlyList<int> _startsOfLines;
 
-   internal TableReader(string markdown, BlockContainers containers, MarkdigTable table)
+   internal TableReader(string markdown, BlockContainers containers, MarkdigTable table, Func<TextReader> readerOfText)
    {
+      _readerOfText = readerOfText;
       _markdown = markdown;
       _containers = containers;
       _rows = [..table.Cast<MarkdigTableRow>()];
@@ -42,7 +44,7 @@ class TableReader
       var table = new Table(new SourceRange(StartOfTable(), EndOfTable()));
       foreach(var (number, row) in _rows.Index()) ReadRow(table, row, number);
 
-      return table.Cells.Count > 0 && AreOneAfterTheOther(table.Cells) ? table.Cells : [new SourceBlock(_containers, new TextReader(_markdown, _containers).ReadAsSource(table.Source))];
+      return table.Cells.Count > 0 && AreOneAfterTheOther(table.Cells) ? table.Cells : [new SourceBlock(_containers, _readerOfText().ReadAsSource(table.Source))];
    }
 
    int? StartOfTheTextOfTheHeader => CellsOf(_rows[0]).SelectMany(it => it.OfType<ParagraphBlock>()).Select(it => it.Inline?.FirstChild?.Span.Start).FirstOrDefault(it => it is not null);
@@ -84,7 +86,7 @@ class TableReader
    }
 
    RenderedText? TextOf(MarkdigTableCell cell) =>
-      cell.OfType<ParagraphBlock>().Select(it => new TextReader(_markdown, _containers).Read(it.Inline, includeTrailingSpaces: false)).FirstOrDefault();
+      cell.OfType<ParagraphBlock>().Select(it => _readerOfText().Read(it.Inline, includeTrailingSpaces: false)).FirstOrDefault();
 
    ///<summary>Starts after the <c>|</c> that starts the cell, and the space that usually follows it. Null when the line has no more cells.</summary>
    RenderedText? TextOfAnEmptyCellAfter(int endOfPreviousCell)

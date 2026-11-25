@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+using Markdig.Extensions.TaskLists;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using Mavalonia.MarkdownEditing.Rendering.Containers;
@@ -6,7 +8,7 @@ using Mavalonia.MarkdownEditing.Rendering.Texts;
 namespace Mavalonia.MarkdownEditing.Rendering.Reading;
 
 ///<summary>Reads the text of one block.</summary>
-class TextReader
+partial class TextReader
 {
    readonly string _markdown;
    readonly BlockContainers _containers;
@@ -24,13 +26,17 @@ class TextReader
       _text = new RenderedTextBuilder(markdown, containers);
    }
 
+   internal MarkdownDialect Dialect { private get; init; } = MarkdownDialect.ForEditing;
+
+   bool IsForReading => Dialect == MarkdownDialect.ForReading;
+
    ///<summary>The text of <paramref name="inlines"/>, or null when there is none.</summary>
    internal RenderedText? Read(ContainerInline? inlines, bool includeTrailingSpaces = true)
    {
       if(inlines is not null) ReadAll(inlines, TextFormatting.None);
       if(_text.IsEmpty) return null;
 
-      if(includeTrailingSpaces) _text.AddSpacesBeforeTheEndOfTheLine(_text.End);
+      if(includeTrailingSpaces && !IsForReading) _text.AddSpacesBeforeTheEndOfTheLine(_text.End);
       return _text.Text;
    }
 
@@ -64,6 +70,8 @@ class TextReader
          case CodeInline code: ReadCode(code, formatting); break;
          case LinkInline { IsImage: false, FirstChild: not null } link: ReadLink(link, formatting); break;
          case AutolinkInline link: ReadAutolink(link, formatting); break;
+         case TaskList task: _text.Add(task.Checked ? '☑' : '☐', RangeOf(task), formatting); break;
+         case HtmlInline html when IsForReading && TagOfALineBreak().IsMatch(html.Tag): _text.Add('\n', RangeOf(html), formatting); break;
          case HtmlEntityInline entity: ReadEntity(entity, formatting); break;
          case LineBreakInline lineBreak: ReadLineBreak(lineBreak, formatting); break;
          case DelimiterInline delimiter: ReadDelimiterThatDelimitsNothing(delimiter, formatting); break;
@@ -144,6 +152,9 @@ class TextReader
          _text.AddLineBreak(endOfLine, formatting);
       }
    }
+
+   [GeneratedRegex(@"^<br\s*/?>$", RegexOptions.IgnoreCase)]
+   private static partial Regex TagOfALineBreak();
 
    ///<summary>Finds each char of <paramref name="text"/> in the markdown in <paramref name="range"/>. What there is between them is the backslashes of escaped chars, and, in code of several lines, the line breaks, which code shows as spaces.</summary>
    void ReadCharactersAlong(SourceRange range, string text, TextFormatting formatting)

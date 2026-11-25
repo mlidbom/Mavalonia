@@ -25,6 +25,7 @@ static class RenderedMarkdownDescriptionEX
          CodeBlock code => $"code {code.Language}".TrimEnd(),
          ThematicBreak => "break",
          SourceBlock => "source",
+         AlertTitle => "title",
          TableCell cell => $"{(cell.IsInTheHeader ? "header" : "cell")} {cell.Row},{cell.Column}",
          _ => throw new ArgumentOutOfRangeException(nameof(@this), @this.GetType().Name)
       };
@@ -34,6 +35,7 @@ static class RenderedMarkdownDescriptionEX
    {
       string Described => @this switch
       {
+         Alert alert => alert.Kind.ToString(),
          Quote => "quote",
          ListItem { Number: {} number } => $"{number}.",
          ListItem => "•",

@@ -25,7 +25,7 @@ class CodeBlockReader
    internal CodeBlock Read(FencedCodeBlock code)
    {
       var lines = LinesOf(code).ToList();
-      var text = lines.Count == 0 ? RenderedText.EmptyAt(_markdown.EndOfLineAt(code.Span.Start)) : TextOf(lines);
+      var text = lines.Count == 0 ? RenderedText.EmptyAt(_markdown.EndOfLineAt(code.Span.Start)) : TextOfLines.Read(_markdown, lines, Formatting);
       var source = new SourceRange(code.Span.Start, Math.Clamp(code.Span.End + 1, text.Source.End, _markdown.Length)); // Markdig takes code that no fence ends to go on after the end of the document.
 
       return new CodeBlock(_containers, text, source, code.Info ?? "", hasNoLine: lines.Count == 0);
@@ -62,16 +62,4 @@ class CodeBlockReader
 
       return Math.Min(_markdown.SkipSpaces(endOfPrefix), Math.Min(endOfPrefix + indentation, endOfLine));
    }
-
-   RenderedText TextOf(IReadOnlyList<SourceRange> lines)
-   {
-      var chars = lines.SelectMany((line, index) => index == 0 ? CharsOf(line) : CharsOf(line).Prepend(LineBreakBetween(lines[index - 1], line)));
-
-      return new RenderedText([..chars], [], new SourceRange(lines[0].Start, lines[^1].End));
-   }
-
-   IEnumerable<RenderedChar> CharsOf(SourceRange line) =>
-      Enumerable.Range(line.Start, line.Length).Select(it => new RenderedChar(_markdown[it], new SourceRange(it, it + 1), Formatting));
-
-   static RenderedChar LineBreakBetween(SourceRange line, SourceRange next) => new('\n', new SourceRange(line.End, next.Start), Formatting);
 }

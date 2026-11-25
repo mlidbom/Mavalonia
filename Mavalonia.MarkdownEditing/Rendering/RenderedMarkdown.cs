@@ -13,7 +13,8 @@ public class RenderedMarkdown
       Blocks = blocks;
    }
 
-   public static RenderedMarkdown Of(string markdown) => new(markdown, MarkdownReader.Read(markdown));
+   public static RenderedMarkdown Of(string markdown) => Of(markdown, MarkdownDialect.ForEditing);
+   public static RenderedMarkdown Of(string markdown, MarkdownDialect dialect) => new(markdown, MarkdownReader.Read(markdown, dialect));
 
    ///<summary>The markdown.</summary>
    public string Source { get; }

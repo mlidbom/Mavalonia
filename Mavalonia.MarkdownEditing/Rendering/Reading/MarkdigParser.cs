@@ -8,15 +8,18 @@ namespace Mavalonia.MarkdownEditing.Rendering.Reading;
 ///<summary>Has Markdig parse markdown, with the markup that we render.</summary>
 static class MarkdigParser
 {
-   static readonly MarkdownPipeline Pipeline = CreatePipeline();
+   static readonly MarkdownPipeline PipelineForEditing = CreatePipelineForEditing();
+   static readonly MarkdownPipeline PipelineForReading = PipelineOfAllDialects().UseAutoLinks().UseTaskLists().UseAlertBlocks().Build();
 
-   internal static MarkdownDocument Parse(string markdown) => Markdown.Parse(markdown, Pipeline);
+   internal static MarkdownDocument Parse(string markdown, MarkdownDialect dialect) => Markdown.Parse(markdown, dialect == MarkdownDialect.ForReading ? PipelineForReading : PipelineForEditing);
 
-   static MarkdownPipeline CreatePipeline()
+   static MarkdownPipelineBuilder PipelineOfAllDialects() => new MarkdownPipelineBuilder().UsePreciseSourceLocation()
+                                                                                         .UsePipeTables()
+                                                                                         .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough);
+
+   static MarkdownPipeline CreatePipelineForEditing()
    {
-      var builder = new MarkdownPipelineBuilder().UsePreciseSourceLocation()
-                                                 .UsePipeTables()
-                                                 .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough);
+      var builder = PipelineOfAllDialects();
 
       TurnOffTheMarkupThatPeopleTypeWithoutMeaningTo();
       return builder.Build();
