@@ -80,7 +80,7 @@ class MarkdownReader
          case MarkdigTable table: ReadTable(table, place.Containers); break;
          case HeadingBlock heading: ReadHeading(heading, place.Containers); break;
          case ParagraphBlock paragraph: ReadParagraph(paragraph, place.Containers); break;
-         case FencedCodeBlock code: _blocks.Add(new CodeBlockReader(_markdown, place.Containers).Read(code)); break;
+         case FencedCodeBlock code: _blocks.Add(new FencedCodeReader(_markdown, place.Containers).Read(code)); break;
          case MarkdigCodeBlock code: _blocks.Add(new IndentedCodeReader(_markdown, place).Read(code)); break;
          case ThematicBreakBlock thematicBreak: _blocks.Add(new ThematicBreak(place.Containers, RangeOf(thematicBreak))); break;
          case LeafBlock leaf: _blocks.Add(AsSource(RangeOf(leaf), place.Containers)); break;

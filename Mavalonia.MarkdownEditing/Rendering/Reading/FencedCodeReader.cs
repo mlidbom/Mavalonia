@@ -5,18 +5,18 @@ using CodeBlock = Mavalonia.MarkdownEditing.Rendering.Blocks.CodeBlock;
 
 namespace Mavalonia.MarkdownEditing.Rendering.Reading;
 
-///<summary>Reads a block of code.</summary>
+///<summary>Reads a block of code that is between fences.</summary>
 ///<remarks>
 /// Where each line of code starts is worked out here, since Markdig takes too many of the spaces away that code in a list item starts with.
 /// </remarks>
-class CodeBlockReader
+class FencedCodeReader
 {
    static readonly TextFormatting Formatting = new(TextFormats.Code);
 
    readonly string _markdown;
    readonly BlockContainers _containers;
 
-   internal CodeBlockReader(string markdown, BlockContainers containers)
+   internal FencedCodeReader(string markdown, BlockContainers containers)
    {
       _markdown = markdown;
       _containers = containers;

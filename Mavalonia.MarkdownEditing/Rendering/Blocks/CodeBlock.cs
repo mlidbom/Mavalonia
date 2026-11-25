@@ -3,7 +3,7 @@ using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Rendering.Blocks;
 
-///<summary>A block of code, between two fences such as <c>```</c>.</summary>
+///<summary>A block of code: what is between two fences such as <c>```</c>, or, where markdown is only read, lines that are indented.</summary>
 public class CodeBlock : RenderedBlock
 {
    ///<summary>The fence that we write. A person may write another.</summary>
