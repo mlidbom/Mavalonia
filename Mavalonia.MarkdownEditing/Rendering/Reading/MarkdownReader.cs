@@ -94,22 +94,28 @@ class MarkdownReader
       if(item.Count == 0)
          ReadEmptyItem();
       else
-         ReadBlocksIn(item, InTheItem(StartOfItsContent()));
+         ReadBlocksIn(item, InTheItem(ColumnOfItsContent()));
 
       void ReadEmptyItem()
       {
          var endOfLine = _markdown.EndOfLineAt(endOfMarker);
          _blocks.Add(endOfLine == endOfMarker
                         ? new Paragraph(place.Containers, new TextReader(_markdown, place.Containers).ReadAsText(new SourceRange(item.Span.Start, endOfMarker))) // So far, it may be the start of anything, such as of -5.
-                        : Paragraph.EmptyAt(endOfLine, InTheItem(endOfMarker + 1).Containers));
+                        : Paragraph.EmptyAt(endOfLine, InTheItem(ColumnAfterTheSpaceAfterTheMarker()).Containers));
       }
 
-      int StartOfItsContent() => item[0].Span.Start is var start && start <= _markdown.EndOfLineAt(endOfMarker) ? start : endOfMarker + 1;
+      int ColumnOfItsContent() => item[0].Span.Start <= _markdown.EndOfLineAt(endOfMarker) ? ColumnOf(item[0].Span.Start) : ColumnAfterTheSpaceAfterTheMarker();
 
-      Place InTheItem(int startOfItsContent)
+      int ColumnAfterTheSpaceAfterTheMarker() => ColumnOf(endOfMarker) + 1;
+
+      Place InTheItem(int column) => place.In(new ListItem(marker, number, column - ColumnThatItIsIndentedFrom()), column);
+
+      // On a line that isn't the first one inside a container, text may start at another column than on the first.
+      int ColumnThatItIsIndentedFrom()
       {
-         var column = ColumnOf(startOfItsContent);
-         return place.In(new ListItem(marker, number, column - place.Column), column);
+         var startOfLine = _markdown.StartOfLineAt(item.Span.Start);
+         var isOnALineWithAllPrefixes = place.Containers.OfTheLineAt(_markdown, startOfLine).Count == place.Containers.Count;
+         return isOnALineWithAllPrefixes ? place.Containers.EndOfTheirPrefixes(_markdown, startOfLine) - startOfLine : place.Column;
       }
    }
 

@@ -32,6 +32,9 @@ public class ListItem : BlockContainer
 
    internal override bool LooksLike(BlockContainer other) => other is ListItem item && item.Number is null == Number is null;
 
+   ///<summary>The item, were it the first of a list.</summary>
+   internal ListItem AsTheFirstOfItsList() => Number is null ? this : new ListItem("1" + _marker[^1], 1, _width);
+
    ///<summary>A new item to follow this one in its list.</summary>
    internal ListItem NewItemAfter()
    {

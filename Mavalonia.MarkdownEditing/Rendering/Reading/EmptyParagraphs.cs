@@ -33,13 +33,13 @@ class EmptyParagraphs
    IEnumerable<RenderedBlock> Before(RenderedBlock first)
    {
       var blankLines = LinesFrom(0).TakeWhile(it => it < _markdown.StartOfLineAt(first.Source.Start)).ToList();
-      return EveryOther(blankLines, first: 0).Take(blankLines.Count / 2).Select(it => EmptyAt(it, BlockContainers.None));
+      return EveryOther(blankLines, first: 0).Take(blankLines.Count / 2).Select(it => EmptyAt(it, first.Containers));
    }
 
    IEnumerable<RenderedBlock> Between(RenderedBlock block, RenderedBlock next)
    {
       var blankLines = LinesAfter(block).TakeWhile(it => it < _markdown.StartOfLineAt(next.Source.Start)).ToList();
-      return EveryOther(blankLines, first: 1).Take(Math.Max(0, blankLines.Count - 1) / 2).Select(it => EmptyAt(it, block.Containers));
+      return EveryOther(blankLines, first: 1).Take(Math.Max(0, blankLines.Count - 1) / 2).Select(it => EmptyAt(it, block.Containers, next.Containers));
    }
 
    IEnumerable<RenderedBlock> LastBlockAndWhatIsAfterIt(RenderedBlock last)
@@ -60,8 +60,9 @@ class EmptyParagraphs
       return new Paragraph(paragraph.Containers, new RenderedText([..text.Characters, lineBreak], text.Markups, text.Source with { End = _markdown.Length }));
    }
 
-   Paragraph EmptyAt(int startOfLine, BlockContainers containersOfTheBlockBefore) =>
-      Paragraph.EmptyAt(_markdown.EndOfLineAt(startOfLine), containersOfTheBlockBefore.OfTheLineAt(_markdown, startOfLine));
+   ///<summary>An empty paragraph on the line that starts at <paramref name="startOfLine"/>. It is inside those containers of the blocks around it whose prefixes are on the line.</summary>
+   Paragraph EmptyAt(int startOfLine, params IReadOnlyList<BlockContainers> containersOfTheBlocksAroundIt) =>
+      Paragraph.EmptyAt(_markdown.EndOfLineAt(startOfLine), containersOfTheBlocksAroundIt.Select(it => it.OfTheLineAt(_markdown, startOfLine)).MaxBy(it => it.Count)!);
 
    static IEnumerable<int> EveryOther(IEnumerable<int> lines, int first) => lines.Where((_, index) => index >= first && (index - first) % 2 == 0);
 

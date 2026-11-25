@@ -106,7 +106,8 @@ class TextReader
    {
       var range = RangeOf(autolink);
       var content = new SourceRange(range.Start + 1, range.End - 1);
-      var link = new Link(autolink.IsEmail ? "mailto:" + autolink.Url : autolink.Url, opening: "<", closing: ">");
+      var target = autolink.IsEmail ? "mailto:" + autolink.Url : autolink.Url;
+      var link = new Link(target, opening: "[", closing: $"]({target})"); // Written anew with another label, it has to be an ordinary link.
       ReadMarkup(range, content, new TextFormatting(TextFormats.None, link), () => ReadCharactersAlong(content, autolink.Url, formatting with { Link = link }));
    }
 
@@ -175,7 +176,7 @@ class TextReader
    ///<summary>Finds each character of <paramref name="text"/> in the _markdown in <paramref name="range"/>. What there is between them is the backslashes of escaped characters, and, in code of several lines, the line breaks, which code shows as spaces.</summary>
    void ReadCharactersAlong(SourceRange range, string text, TextFormatting formatting)
    {
-      var offset = range.Start;
+      var offset = text.StartsWith(' ') || text.StartsWith('\t') ? range.Start : _markdown.SkipSpaces(range.Start); // Markdig takes the spaces around the text of a cell away, but not from its range.
       foreach(var character in text)
       {
          var end = EndOf(character);
