@@ -11,6 +11,8 @@ namespace Mavalonia.MarkdownEditing.Controls.Specifications;
 ///<summary>A <see cref="MarkdownEditor"/> that a person is writing in. Its markdown is said with <c>‸</c> for the caret, or <c>⟦</c> and <c>⟧</c> for the start and end of what is selected.</summary>
 class EditorInAWindow
 {
+   //refactor: Editing, in Mavalonia.MarkdownEditing.Specifications, reads and writes the same notation for the caret and the selection. One type that both projects compile should do it.
+
    const string Caret = "‸";
    const string StartOfSelection = "⟦";
    const string EndOfSelection = "⟧";
