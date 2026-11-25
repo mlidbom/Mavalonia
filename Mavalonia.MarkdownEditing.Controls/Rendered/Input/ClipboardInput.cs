@@ -5,18 +5,22 @@ using Mavalonia.MarkdownEditing.Rendering.Blocks;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 
-///<summary>What a person does with the clipboard in a <see cref="RenderedMarkdownView"/>.</summary>
+///<summary>What a person does with the clipboard in a <see cref="RenderedEditorView"/>.</summary>
 class ClipboardInput
 {
-   readonly RenderedMarkdownView _view;
+   readonly RenderedEditorView _view;
 
-   internal ClipboardInput(RenderedMarkdownView view) => _view = view;
+   internal ClipboardInput(RenderedEditorView view) => _view = view;
 
    IClipboard Clipboard => TopLevel.GetTopLevel(_view)!.Clipboard!;
 
+   ///<summary>Awaits <paramref name="use"/> of the clipboard, so that an exception in it surfaces where all of the application's do.</summary>
+   // ReSharper disable once AsyncVoidMethod
+   internal static async void Use(Task use) => await use;
+
    internal async Task Copy(RenderedEditor editor)
    {
-      if(editor.SelectedMarkdown is { Length: > 0 } markdown) await Clipboard.SetTextAsync(markdown);
+      if(!editor.Selection.IsEmpty) await ClipboardContent.Write(editor, Clipboard);
    }
 
    internal async Task Cut(RenderedEditor editor)

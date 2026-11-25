@@ -6,10 +6,8 @@
              x:Name="Root">
    <UserControl.Styles>
       <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
-      <Style Selector="rendered|RenderedMarkdownView">
+      <Style Selector="rendered|RenderedEditorView">
          <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
-         <Setter Property="FaintForeground" Value="{DynamicResource TextControlPlaceholderForeground}" />
-         <Setter Property="LinkForeground" Value="{DynamicResource SystemControlForegroundAccentBrush}" />
          <Setter Property="Padding" Value="{Binding #Root.Padding}" />
       </Style>
    </UserControl.Styles>
@@ -21,7 +19,7 @@
    </UserControl.Template>
    <Panel>
       <ScrollViewer x:Name="ScrollOfTheRenderedView" Focusable="False">
-         <rendered:RenderedMarkdownView x:Name="RenderedView"
+         <rendered:RenderedEditorView x:Name="RenderedView"
                                         Watermark="{Binding #Root.Watermark}"
                                         StartNewBlockGesture="{Binding #Root.StartNewBlockGesture}"
                                         BreakLineGesture="{Binding #Root.BreakLineGesture}"

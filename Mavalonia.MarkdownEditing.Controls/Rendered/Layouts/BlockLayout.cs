@@ -3,6 +3,7 @@ using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
+using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;
 
@@ -45,10 +46,13 @@ class BlockLayout
 
       var (start, end) = (Block.Text.IndexAt(selected.Start), Block.Text.IndexAt(selected.End));
       if(end > start)
-         foreach(var rectangle in _text.HitTestTextRange(start, end - start)) context.FillRectangle(_appearance.SelectionBrush, rectangle.Translate(_originOfText));
+         foreach(var rectangle in BoundsOf(new PartOfABlock(Block, start, end))) context.FillRectangle(_appearance.SelectionBrush, rectangle);
       else if(Block.Text.IsEmpty)
          context.FillRectangle(_appearance.SelectionBrush, CaretAt(0).WithWidth(_appearance.Scaled(5)));
    }
+
+   ///<summary>Where a part of the block is: a rectangle for each line of it.</summary>
+   internal IEnumerable<Rect> BoundsOf(PartOfABlock part) => _text.HitTestTextRange(part.Start, part.End - part.Start).Select(it => it.Translate(_originOfText));
 
    internal void DrawText(DrawingContext context) => _text.Draw(context, _originOfText);
 
@@ -73,6 +77,9 @@ class BlockLayout
 
    ///<summary>The line that a caret before the character at <paramref name="index"/> is on.</summary>
    internal LineLayout LineOf(int index) => Lines.ElementAt(_text.GetLineIndexFromCharacterIndex(Math.Min(index, Math.Max(0, Block.Text.Length)), trailingEdge: false));
+
+   ///<summary>The link whose label is at <paramref name="point"/>. Null when none is there.</summary>
+   internal Link? LinkAt(Point point) => _text.HitTestPoint(point - _originOfText) is { IsInside: true } hit && hit.TextPosition < Block.Text.Length ? Block.Text.Chars[hit.TextPosition].Formatting.Link : null;
 
    ///<summary>The position in the block's text that is nearest to <paramref name="point"/>.</summary>
    internal RenderedPosition PositionNearestTo(Point point)

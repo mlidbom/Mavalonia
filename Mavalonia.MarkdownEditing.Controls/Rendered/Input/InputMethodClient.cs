@@ -3,12 +3,12 @@ using Avalonia.Input.TextInput;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 
-///<summary>Tells an input method, such as one for Japanese, what it needs to know of a <see cref="RenderedMarkdownView"/>: where to show what is being composed.</summary>
+///<summary>Tells an input method, such as one for Japanese, what it needs to know of a <see cref="RenderedEditorView"/>: where to show what is being composed.</summary>
 class InputMethodClient : TextInputMethodClient
 {
-   readonly RenderedMarkdownView _view;
+   readonly RenderedEditorView _view;
 
-   internal InputMethodClient(RenderedMarkdownView view) => _view = view;
+   internal InputMethodClient(RenderedEditorView view) => _view = view;
 
    public override Visual TextViewVisual => _view;
    public override Rect CursorRectangle => _view.CaretRectangle;

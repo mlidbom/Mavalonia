@@ -1,8 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Media;
-using Avalonia.Media.TextFormatting;
+using Avalonia.VisualTree;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;
 using Mavalonia.MarkdownEditing.Editing;
@@ -10,17 +11,14 @@ using Mavalonia.MarkdownEditing.Rendering;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered;
 
-///<summary>Shows a markdown document as it is rendered, and lets a person edit it there.</summary>
-public partial class RenderedMarkdownView : Control
+///<summary>Shows markdown as it is rendered, and lets a person select in it.</summary>
+public abstract partial class RenderedMarkdownView : Control
 {
    const double WidthWhenAnyIsAvailable = 600;
 
    static readonly RenderedMarkdown NothingRendered = RenderedMarkdown.Of("");
 
-   readonly BlinkingCaret _blinkingCaret;
-   readonly KeyboardInput _keyboard;
    readonly PointerInput _pointer;
-   readonly InputMethodClient _inputMethod;
    readonly LatestLayout _latestLayout = new();
    Rect _viewport = new(0, 0, double.MaxValue, double.MaxValue);
 
@@ -29,45 +27,38 @@ public partial class RenderedMarkdownView : Control
       FocusableProperty.OverrideDefaultValue<RenderedMarkdownView>(true);
       ClipToBoundsProperty.OverrideDefaultValue<RenderedMarkdownView>(true);
       AffectsMeasure<RenderedMarkdownView>(PropertiesThatTheLayoutDependsOn);
-      AffectsRender<RenderedMarkdownView>([..PropertiesThatTheLayoutDependsOn, WatermarkProperty]);
-      TextInputMethodClientRequestedEvent.AddClassHandler<RenderedMarkdownView>((view, request) => request.Client = view._inputMethod);
+      AffectsRender<RenderedMarkdownView>(PropertiesThatTheLayoutDependsOn);
+      RequestBringIntoViewEvent.AddClassHandler<RenderedMarkdownView>((view, request) => view.StayWhereItIsWhenItGetsTheFocus(request));
    }
 
-   public RenderedMarkdownView()
+   private protected RenderedMarkdownView()
    {
-      _blinkingCaret = new BlinkingCaret(InvalidateVisual);
-      _keyboard = new KeyboardInput(this);
       _pointer = new PointerInput(this);
-      _inputMethod = new InputMethodClient(this);
-      Cursor = new Cursor(StandardCursorType.Ibeam);
+      Cursor = Cursors.OfText;
       EffectiveViewportChanged += (_, change) => ShowWhatIsIn(change.EffectiveViewport);
+      ActualThemeVariantChanged += (_, _) => LayOutAnew();
    }
 
-   ///<summary>Edits the document that is shown. Null while none is.</summary>
-   public RenderedEditor? Editor
-   {
-      get;
-      set
-      {
-         if(field is not null) field.Changed -= ShowTheChange;
-         field = value;
-         if(field is not null) field.Changed += ShowTheChange;
-         InvalidateWhatIsShown();
-      }
-   }
+   ///<summary>What is shown. Null while nothing is.</summary>
+   private protected abstract SelectableMarkdown? Shown { get; }
 
-   void ShowTheChange(object? sender, EventArgs e)
-   {
-      InvalidateWhatIsShown();
-      if(IsFocused) _blinkingCaret.Show();
-      _inputMethod.CaretHasMoved();
-   }
+   internal SelectableMarkdown? Selectable => Shown;
 
-   RenderedMarkdown Rendered => Editor?.Rendered ?? NothingRendered;
+   internal PlatformHotkeyConfiguration Hotkeys => this.GetPlatformSettings()!.HotkeyConfiguration;
 
-   void InvalidateWhatIsShown()
+   RenderedMarkdown Rendered => Shown?.Rendered ?? NothingRendered;
+
+   ///<summary>To be done when what is shown, or what is selected in it, has changed.</summary>
+   private protected void InvalidateWhatIsShown()
    {
       if(!_latestLayout.IsOf(Rendered, Bounds.Width)) InvalidateMeasure();
+      InvalidateVisual();
+   }
+
+   void LayOutAnew()
+   {
+      _latestLayout.Forget();
+      InvalidateMeasure();
       InvalidateVisual();
    }
 
@@ -100,24 +91,20 @@ public partial class RenderedMarkdownView : Control
       InvalidateVisual();
    }
 
-   public override void Render(DrawingContext context)
+   public sealed override void Render(DrawingContext context)
    {
       context.FillRectangle(Brushes.Transparent, new Rect(Bounds.Size)); // So that the pointer hits the view where nothing is drawn.
-      if(Editor is null) return;
+      if(Shown is not {} shown) return;
 
-      if(Watermark is not null && Editor.Document.TextLength == 0) DrawTheWatermark(context, Watermark);
-      Layout.Draw(context, Editor.Selection.IsEmpty ? null : Editor.Selection.Range, _viewport);
-      if(IsFocused && _blinkingCaret.IsSeen) context.FillRectangle(Appearance.CaretBrush, CaretRectangle);
+      Layout.Draw(context, shown.Selection.IsEmpty ? null : shown.Selection.Range, _viewport);
+      DrawOver(context);
    }
 
-   void DrawTheWatermark(DrawingContext context, string watermark)
-   {
-      using var text = new TextLayout(watermark, new Typeface(FontFamily), FontSize, FaintForeground);
-      text.Draw(context, Layout.StartOfTheFirstLine);
-   }
+   ///<summary>Draws what is to be over the text.</summary>
+   private protected virtual void DrawOver(DrawingContext context) {}
 
-   ///<summary>Where the caret is, whether or not it is seen right now.</summary>
-   internal Rect CaretRectangle => Editor is null ? default : Layout.CaretAt(Editor.CaretPosition);
+   ///<summary>Where the end of the selection that moves is.</summary>
+   internal Rect CaretRectangle => Shown is null ? default : Layout.CaretAt(Shown.CaretPosition);
 
    internal void BringTheCaretIntoView()
    {
@@ -125,30 +112,23 @@ public partial class RenderedMarkdownView : Control
       this.BringIntoView(CaretRectangle.Inflate(new Thickness(0, 4)));
    }
 
-   protected override void OnGotFocus(FocusChangedEventArgs e)
+   ///<summary>A view that gets the focus is to be brought into view as a whole. What is higher than the place it's in would be scrolled to its start by that.</summary>
+   void StayWhereItIsWhenItGetsTheFocus(RequestBringIntoViewEventArgs request)
    {
-      base.OnGotFocus(e);
-      _blinkingCaret.Show();
-      InvalidateVisual();
+      if(ReferenceEquals(request.TargetObject, this) && request.TargetRect == new Rect(Bounds.Size)) request.Handled = true;
    }
-
-   protected override void OnLostFocus(FocusChangedEventArgs e)
-   {
-      base.OnLostFocus(e);
-      _blinkingCaret.Hide();
-      InvalidateVisual();
-   }
-
-   protected override void OnTextInput(TextInputEventArgs e) => _keyboard.Type(e);
-   protected override void OnKeyDown(KeyEventArgs e) => _keyboard.Press(e);
 
    protected override void OnPointerPressed(PointerPressedEventArgs e) => _pointer.Press(e);
    protected override void OnPointerMoved(PointerEventArgs e) => _pointer.Move(e);
-   protected override void OnPointerReleased(PointerReleasedEventArgs e) => PointerInput.Release(e);
+   protected override void OnPointerReleased(PointerReleasedEventArgs e) => _pointer.Release(e);
+   protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e) => _pointer.EndSelecting();
 
-   protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
-   {
-      base.OnDetachedFromVisualTree(e);
-      _blinkingCaret.Hide();
-   }
+   ///<summary>The view has been clicked at <paramref name="point"/>, with nothing selected by that.</summary>
+   internal virtual void ClickAt(Point point) {}
+
+   ///<summary>The pointer is at <paramref name="point"/>, with no button pressed.</summary>
+   internal virtual void PointAt(Point point) {}
+
+   ///<summary>A person has started to select in the view.</summary>
+   internal virtual void SelectingStarts() {}
 }

@@ -18,6 +18,7 @@ partial class TextLayouts
          Heading heading => $"heading {heading.Level}",
          TableCell { IsInTheHeader: true } => "header",
          CodeBlock => "code",
+         AlertTitle title => title.Text.Value,
          _ => "text"
       };
    }

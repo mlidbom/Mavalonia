@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Media;
 using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
+using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;
 
@@ -44,6 +45,12 @@ class DocumentLayout
    internal Point StartOfTheFirstLine => _blocks[0].StartOfFirstLine;
 
    internal RenderedPosition PositionNearestTo(Point point) => _blocks.MinBy(it => DistanceBetween(it.Bounds, point))!.PositionNearestTo(point);
+
+   ///<summary>Where a part of a block is: a rectangle for each line of it.</summary>
+   internal IEnumerable<Rect> BoundsOf(PartOfABlock part) => LayoutOf(part.Block).BoundsOf(part);
+
+   ///<summary>The link whose label is at <paramref name="point"/>. Null when none is there.</summary>
+   internal Link? LinkAt(Point point) => _blocks.FirstOrDefault(it => it.Bounds.Contains(point))?.LinkAt(point);
 
    ///<summary>What is to the left or right of a point is nearer to it than what is above or below.</summary>
    static double DistanceBetween(Rect bounds, Point point)

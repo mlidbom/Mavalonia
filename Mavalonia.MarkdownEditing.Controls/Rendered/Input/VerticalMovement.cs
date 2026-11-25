@@ -14,21 +14,21 @@ class VerticalMovement
 
    internal VerticalMovement(RenderedMarkdownView view) => _view = view;
 
-   internal void Up(RenderedEditor editor, bool extendSelection) =>
-      Move(editor, extendSelection, _view.Layout.LineAbove(editor.CaretPosition, XOf(editor))?.PositionNearestTo(XOf(editor)) ?? editor.Rendered.Start);
+   internal void Up(SelectableMarkdown selectable, bool extendSelection) =>
+      Move(selectable, extendSelection, _view.Layout.LineAbove(selectable.CaretPosition, XOf(selectable))?.PositionNearestTo(XOf(selectable)) ?? selectable.Rendered.Start);
 
-   internal void Down(RenderedEditor editor, bool extendSelection) =>
-      Move(editor, extendSelection, _view.Layout.LineBelow(editor.CaretPosition, XOf(editor))?.PositionNearestTo(XOf(editor)) ?? editor.Rendered.End);
+   internal void Down(SelectableMarkdown selectable, bool extendSelection) =>
+      Move(selectable, extendSelection, _view.Layout.LineBelow(selectable.CaretPosition, XOf(selectable))?.PositionNearestTo(XOf(selectable)) ?? selectable.Rendered.End);
 
-   double XOf(RenderedEditor editor)
+   double XOf(SelectableMarkdown selectable)
    {
-      if(editor.Selection != _selectionAfterTheLast) _x = _view.CaretRectangle.X;
+      if(selectable.Selection != _selectionAfterTheLast) _x = _view.CaretRectangle.X;
       return _x;
    }
 
-   void Move(RenderedEditor editor, bool extendSelection, RenderedPosition position)
+   void Move(SelectableMarkdown selectable, bool extendSelection, RenderedPosition position)
    {
-      editor.MoveTo(position, extendSelection);
-      _selectionAfterTheLast = editor.Selection;
+      selectable.MoveTo(position, extendSelection);
+      _selectionAfterTheLast = selectable.Selection;
    }
 }

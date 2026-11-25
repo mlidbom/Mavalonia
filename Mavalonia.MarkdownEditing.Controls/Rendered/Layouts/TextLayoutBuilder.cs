@@ -25,7 +25,7 @@ class TextLayoutBuilder
 
    double FontSize => _block is Heading heading ? _appearance.FontSizeOfHeading(heading.Level) : _appearance.FontSize;
    FontFamily FontFamily => _block is CodeBlock ? _appearance.MonospaceFontFamily : _appearance.FontFamily;
-   bool IsAllBold => _block is Heading or TableCell { IsInTheHeader: true };
+   bool IsAllBold => _block is Heading or AlertTitle or TableCell { IsInTheHeader: true };
 
    TextLayout LayOut(double width) =>
       new(_block.Text.Value.EndsWith('\n') ? _block.Text.Value + ZeroWidthSpace : _block.Text.Value,
@@ -54,7 +54,7 @@ class TextLayoutBuilder
    {
       { Link: not null } => _appearance.LinkForeground,
       { IsShownAsSource: true } => _appearance.FaintForeground,
-      _ => _appearance.Foreground
+      _ => _block is AlertTitle title ? _appearance.BrushOf(title.Alert) : _appearance.Foreground
    };
 
    static TextDecorationCollection? DecorationsOf(TextFormatting formatting) => (formatting.Link, formatting.Has(TextFormats.Strikethrough)) switch

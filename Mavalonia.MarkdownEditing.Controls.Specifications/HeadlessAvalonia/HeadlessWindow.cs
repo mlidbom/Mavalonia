@@ -42,9 +42,22 @@ class HeadlessWindow
 
    public void Drag(Point from, Point to)
    {
+      DragAndHold(from, to);
+      _window.MouseUp(to, MouseButton.Left);
+      DoWhatIsPending();
+   }
+
+   ///<summary>Drags, and doesn't release the button.</summary>
+   public void DragAndHold(Point from, Point to)
+   {
       _window.MouseDown(from, MouseButton.Left);
       _window.MouseMove(to, RawInputModifiers.LeftMouseButton);
-      _window.MouseUp(to, MouseButton.Left);
+      DoWhatIsPending();
+   }
+
+   public void MoveThePointerTo(Point point)
+   {
+      _window.MouseMove(point);
       DoWhatIsPending();
    }
 

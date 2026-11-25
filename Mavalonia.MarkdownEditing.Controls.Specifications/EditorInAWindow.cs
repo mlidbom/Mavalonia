@@ -23,7 +23,7 @@ class EditorInAWindow
    internal MarkdownEditor Editor { get; }
    internal HeadlessWindow Window { get; }
 
-   internal RenderedMarkdownView RenderedView => Editor.GetVisualDescendants().OfType<RenderedMarkdownView>().Single();
+   internal RenderedEditorView RenderedView => Editor.GetVisualDescendants().OfType<RenderedEditorView>().Single();
 
    internal string Markdown => new MarkdownWithSelection(Editor.Document.Text, Editor.Selection).ToString();
 

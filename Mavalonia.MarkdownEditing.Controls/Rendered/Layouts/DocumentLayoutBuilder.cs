@@ -105,13 +105,13 @@ class DocumentLayoutBuilder
          var around = block.Containers.OutermostFirst.Take(depth).ToList();
          var isTheFirstBlockInside = _previous?.IsInside(container) != true;
 
-         if(container is Quote) AddQuoteBar(LeftInside(around), top: isTheFirstBlockInside ? topOfText : _bottomOfPrevious);
+         if(container is Quote quote) AddBarOf(quote, LeftInside(around), top: isTheFirstBlockInside ? topOfText : _bottomOfPrevious);
          else if(container is ListItem item && isTheFirstBlockInside) AddMarkerOf(item, around, topOfText);
       }
    }
 
-   void AddQuoteBar(double left, double top) =>
-      _decorations.Add(new ContainerDecoration.QuoteBar(new Rect(left + _appearance.Scaled(2), top, _appearance.Scaled(3), _top - top), _appearance.LineBrush));
+   void AddBarOf(Quote quote, double left, double top) =>
+      _decorations.Add(new ContainerDecoration.QuoteBar(new Rect(left + _appearance.Scaled(2), top, _appearance.Scaled(3), _top - top), quote is Alert alert ? _appearance.BrushOf(alert) : _appearance.LineBrush));
 
    void AddMarkerOf(ListItem item, IReadOnlyList<BlockContainer> around, double topOfText) =>
       _decorations.Add(new ContainerDecoration.ListMarker(_texts.OfListMarker(MarkerOf(item, around)), new Point(LeftInside(around) + _appearance.Scaled(19), topOfText)));

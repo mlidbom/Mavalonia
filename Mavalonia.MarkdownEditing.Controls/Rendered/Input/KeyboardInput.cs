@@ -1,29 +1,26 @@
 using Avalonia.Input;
 using Avalonia.Input.Platform;
-using Avalonia.VisualTree;
-using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;
 using Mavalonia.MarkdownEditing.Editing;
-using Mavalonia.MarkdownEditing.Rendering;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 
-///<summary>What a person does with the keyboard in a <see cref="RenderedMarkdownView"/>.</summary>
+///<summary>What a person does with the keyboard in a <see cref="RenderedEditorView"/>.</summary>
 class KeyboardInput
 {
-   readonly RenderedMarkdownView _view;
-   readonly VerticalMovement _verticalMovement;
+   readonly RenderedEditorView _view;
+   readonly MovementKeys _movement;
    readonly ClipboardInput _clipboard;
 
-   internal KeyboardInput(RenderedMarkdownView view)
+   internal KeyboardInput(RenderedEditorView view)
    {
       _view = view;
-      _verticalMovement = new VerticalMovement(view);
+      _movement = new MovementKeys(view);
       _clipboard = new ClipboardInput(view);
    }
 
-   PlatformHotkeyConfiguration Hotkeys => _view.GetPlatformSettings()!.HotkeyConfiguration;
+   PlatformHotkeyConfiguration Hotkeys => _view.Hotkeys;
 
    internal void Type(TextInputEventArgs e)
    {
@@ -43,7 +40,7 @@ class KeyboardInput
       _view.BringTheCaretIntoView();
    }
 
-   Action? ActionOf(KeyEventArgs e, RenderedEditor editor) => EditOf(e, editor) ?? MovementOf(e, editor) ?? SelectionOf(e, editor) ?? ClipboardActionOf(e, editor);
+   Action? ActionOf(KeyEventArgs e, RenderedEditor editor) => EditOf(e, editor) ?? _movement.ActionOf(e, editor) ?? SelectionOf(e, editor) ?? ClipboardActionOf(e, editor);
 
    Action? EditOf(KeyEventArgs e, RenderedEditor editor)
    {
@@ -83,48 +80,17 @@ class KeyboardInput
       _ => editor.CanOutdent ? editor.Outdent : null
    };
 
-   Action? MovementOf(KeyEventArgs e, RenderedEditor editor)
-   {
-      var extendsSelection = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
-      var modifiers = e.KeyModifiers & ~KeyModifiers.Shift;
-      var isForWords = modifiers == Hotkeys.WholeWordTextActionModifiers;
-
-      return (e.Key, modifiers) switch
-      {
-         (Key.Left, KeyModifiers.None) when !extendsSelection && !editor.Selection.IsEmpty => Move(CaretMovement.ToTheStartOfTheSelection),
-         (Key.Right, KeyModifiers.None) when !extendsSelection && !editor.Selection.IsEmpty => Move(CaretMovement.ToTheEndOfTheSelection),
-         (Key.Left, KeyModifiers.None) => Move(CaretMovement.ToTheCharacterBefore),
-         (Key.Right, KeyModifiers.None) => Move(CaretMovement.ToTheCharacterAfter),
-         (Key.Left, _) when isForWords => Move(CaretMovement.ToTheWordBefore),
-         (Key.Right, _) when isForWords => Move(CaretMovement.ToTheWordAfter),
-         (Key.Home, KeyModifiers.None) => MoveTo(line => line.Start),
-         (Key.End, KeyModifiers.None) => MoveTo(line => line.End),
-         (Key.Home, _) when modifiers == Hotkeys.CommandModifiers => Move(CaretMovement.ToTheStart),
-         (Key.End, _) when modifiers == Hotkeys.CommandModifiers => Move(CaretMovement.ToTheEnd),
-         (Key.Up, KeyModifiers.None) => () => _verticalMovement.Up(editor, extendsSelection),
-         (Key.Down, KeyModifiers.None) => () => _verticalMovement.Down(editor, extendsSelection),
-         _ => null
-      };
-
-      Action Move(CaretMovement movement) => () => editor.Move(movement, extendsSelection);
-      Action MoveTo(Func<LineLayout, RenderedPosition> positionOn) => () => editor.MoveTo(positionOn(_view.Layout.LineOf(editor.CaretPosition)), extendsSelection);
-   }
-
    Action? SelectionOf(KeyEventArgs e, RenderedEditor editor) => Is(Hotkeys.SelectAll, e) ? editor.SelectAll : null;
 
    Action? ClipboardActionOf(KeyEventArgs e, RenderedEditor editor)
    {
-      if(Is(Hotkeys.Copy, e)) return () => UseTheClipboard(_clipboard.Copy(editor));
-      if(Is(Hotkeys.Cut, e)) return () => UseTheClipboard(_clipboard.Cut(editor));
-      if(_view.PasteAsQuoteGesture?.Matches(e) == true) return () => UseTheClipboard(_clipboard.PasteAsQuote(editor));
-      if(_view.PasteTextGesture?.Matches(e) == true) return () => UseTheClipboard(_clipboard.PasteText(editor));
-      if(Is(Hotkeys.Paste, e)) return () => UseTheClipboard(_clipboard.Paste(editor));
+      if(Is(Hotkeys.Copy, e)) return () => ClipboardInput.Use(_clipboard.Copy(editor));
+      if(Is(Hotkeys.Cut, e)) return () => ClipboardInput.Use(_clipboard.Cut(editor));
+      if(_view.PasteAsQuoteGesture?.Matches(e) == true) return () => ClipboardInput.Use(_clipboard.PasteAsQuote(editor));
+      if(_view.PasteTextGesture?.Matches(e) == true) return () => ClipboardInput.Use(_clipboard.PasteText(editor));
+      if(Is(Hotkeys.Paste, e)) return () => ClipboardInput.Use(_clipboard.Paste(editor));
       return null;
    }
-
-   ///<summary>Awaits <paramref name="use"/> of the clipboard, so that an exception in it surfaces where all of the application's do.</summary>
-   // ReSharper disable once AsyncVoidMethod
-   static async void UseTheClipboard(Task use) => await use;
 
    static bool Is(IEnumerable<KeyGesture> gestures, KeyEventArgs e) => gestures.Any(it => it.Matches(e));
 }
