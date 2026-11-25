@@ -33,7 +33,7 @@ class LineLayout
    ///<summary>The position on the line that is nearest to <paramref name="x"/>.</summary>
    internal RenderedPosition PositionNearestTo(double x)
    {
-      var nearest = _block.PositionNearestTo(new Point(x, Bounds.Center.Y));
-      return nearest.Index > End.Index ? End : nearest;
+      var hit = _line.GetCharacterHitFromDistance(x - Bounds.Left);
+      return PositionBefore(Math.Min(hit.FirstCharacterIndex + hit.TrailingLength, End.Index));
    }
 }

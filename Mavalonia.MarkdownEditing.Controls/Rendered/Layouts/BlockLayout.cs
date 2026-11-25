@@ -94,9 +94,5 @@ class BlockLayout
    static string? TargetOf(TextFormatting formatting) => formatting.Link?.Target ?? formatting.Image?.Source;
 
    ///<summary>The position in the block's text that is nearest to <paramref name="point"/>.</summary>
-   internal RenderedPosition PositionNearestTo(Point point)
-   {
-      var hit = _text.HitTestPoint(point - _originOfText);
-      return new RenderedPosition(Block, Math.Min(hit.TextPosition + (hit.IsTrailing ? 1 : 0), Block.Text.Length));
-   }
+   internal RenderedPosition PositionNearestTo(Point point) => (Lines.FirstOrDefault(it => point.Y < it.Bounds.Bottom) ?? Lines.Last()).PositionNearestTo(point.X);
 }

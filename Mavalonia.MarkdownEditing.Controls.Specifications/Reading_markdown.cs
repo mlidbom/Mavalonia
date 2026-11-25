@@ -22,6 +22,20 @@ public class Reading_markdown
    {
       [XFOnUIThread] public void with_the_pointer_selects_what_it_is_dragged_over() => new ViewInAWindow("# one\n\na **two** b").Select("ne", to: "tw").View.SelectedMarkdown.Must().Be("ne\n\na **tw**");
 
+      [XFOnUIThread] public void with_the_pointer_to_the_right_of_a_line_that_is_wrapped_selects_to_the_end_of_that_line()
+      {
+         var view = new ViewInAWindow(string.Join(' ', Enumerable.Range(0, 60).Select(it => $"word{it}")));
+         view.Window.Drag(view.StartOf("word0"), new Point(789, view.StartOf("word0").Y));
+         view.View.SelectedMarkdown.Must().Be("word0 word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12 word13 word14 word15");
+      }
+
+      [XFOnUIThread] public void with_the_pointer_below_the_text_of_a_block_selects_to_the_char_above()
+      {
+         var view = new ViewInAWindow("```\nabcdef\n```");
+         view.Window.Drag(view.StartOf("a"), view.StartOf("c") + new Vector(0, 14));
+         view.View.SelectedMarkdown.Must().Be("ab");
+      }
+
       [XFOnUIThread] public void with_the_pointer_selects_a_word_that_is_pressed_twice()
       {
          var view = new ViewInAWindow("a **two** b");
