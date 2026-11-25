@@ -22,6 +22,27 @@ public class Using_the_keyboard
       editor.Press(PhysicalKey.Enter, Ctrl).Markdown.Must().Be("a\n\n‸");
    }
 
+   static string MarkdownOfASelectedTextAfterF2(Action<MarkdownEditor> choose)
+   {
+      var editor = new EditorInAWindow("⟦a⟧");
+      choose(editor.Editor);
+      return editor.Press(PhysicalKey.F2).Markdown;
+   }
+
+   [XFOnUIThread] public void makes_text_bold_with_the_keys_that_the_application_chooses() => MarkdownOfASelectedTextAfterF2(it => it.ToggleBoldGesture = new KeyGesture(Key.F2)).Must().Be("⟦**a⟧**");
+   [XFOnUIThread] public void makes_text_italic_with_the_keys_that_the_application_chooses() => MarkdownOfASelectedTextAfterF2(it => it.ToggleItalicGesture = new KeyGesture(Key.F2)).Must().Be("⟦*a⟧*");
+   [XFOnUIThread] public void makes_text_code_with_the_keys_that_the_application_chooses() => MarkdownOfASelectedTextAfterF2(it => it.ToggleCodeGesture = new KeyGesture(Key.F2)).Must().Be("⟦`a⟧`");
+   [XFOnUIThread] public void strikes_text_through_with_the_keys_that_the_application_chooses() => MarkdownOfASelectedTextAfterF2(it => it.ToggleStrikethroughGesture = new KeyGesture(Key.F2)).Must().Be("⟦~~a⟧~~");
+
+   [XFOnUIThread] public void leaves_the_keys_for_formatting_to_the_application_when_it_wants_them()
+   {
+      var editor = new EditorInAWindow("⟦a⟧") { Editor = { ToggleBoldGesture = null, ToggleItalicGesture = null, ToggleCodeGesture = null, ToggleStrikethroughGesture = null } };
+      var received = new List<Key>();
+      editor.Editor.KeyDown += (_, key) => received.Add(key.Key);
+      editor.Press(PhysicalKey.B, Ctrl).Press(PhysicalKey.I, Ctrl).Press(PhysicalKey.E, Ctrl).Press(PhysicalKey.X, Ctrl | Shift);
+      new { received, editor.Markdown }.Must().Satisfy(it => it.received.SequenceEqual(new[] { Key.B, Key.I, Key.E, Key.X }) && it.Markdown == "⟦a⟧");
+   }
+
    [XFOnUIThread] public void leaves_keys_to_the_application_that_it_does_not_use()
    {
       var editor = new EditorInAWindow("a‸");

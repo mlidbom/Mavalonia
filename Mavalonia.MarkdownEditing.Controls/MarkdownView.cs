@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Mavalonia.MarkdownEditing.Controls.Menus;
 using Mavalonia.MarkdownEditing.Controls.Rendered;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;
@@ -48,6 +49,7 @@ public class MarkdownView : RenderedMarkdownView
    {
       _keys = new ReadingKeys(this);
       _read.Changed += (_, _) => ShowTheChange();
+      SetCurrentValue(ContextFlyoutProperty, new MenuOfAView(this));
    }
 
    void ShowTheChange()
@@ -84,6 +86,9 @@ public class MarkdownView : RenderedMarkdownView
 
    ///<summary>Where the text of <paramref name="range"/> is shown: a rectangle for each line of it.</summary>
    public IReadOnlyList<Rect> BoundsOf(PlainTextRange range) => [..PlainText.PartsOf(range).SelectMany(Layout.BoundsOf)];
+
+   ///<summary>Where the link at <paramref name="point"/> of the view leads, as the markdown says it, or else the image there. Null when none is there.</summary>
+   public string? TargetOfTheLinkAt(Point point) => Layout.TargetAt(point);
 
    ///<summary>Tells when it changes, such as for a command that needs something to be selected.</summary>
    public bool IsAnythingSelected { get; private set => SetAndRaise(IsAnythingSelectedProperty, ref field, value); }

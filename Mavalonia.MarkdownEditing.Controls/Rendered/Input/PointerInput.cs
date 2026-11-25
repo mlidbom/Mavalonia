@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
+using Mavalonia.MarkdownEditing.Editing;
 
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 
@@ -32,8 +33,29 @@ class PointerInput
 
    internal void Press(PointerPressedEventArgs e)
    {
-      if(_view.Shown is not {} selectable || !e.GetCurrentPoint(_view).Properties.IsLeftButtonPressed) return;
+      if(_view.Shown is not {} selectable) return;
 
+      switch(e.Properties.PointerUpdateKind)
+      {
+         case PointerUpdateKind.LeftButtonPressed: StartSelecting(selectable, e); break;
+         case PointerUpdateKind.RightButtonPressed when !_isPressed: PutTheCaretWhereAMenuIsFor(selectable, e); break;
+      }
+   }
+
+   ///<summary>A menu is for what is selected where the pointer is, or else for that place.</summary>
+   void PutTheCaretWhereAMenuIsFor(SelectableMarkdown selectable, PointerPressedEventArgs e)
+   {
+      _view.Focus(NavigationMethod.Pointer);
+
+      var position = _view.Layout.PositionNearestTo(e.GetPosition(_view));
+      if(selectable.Selection.Includes(position.Offset)) return;
+
+      _view.SelectingStarts();
+      selectable.MoveTo(position, extendSelection: false);
+   }
+
+   void StartSelecting(SelectableMarkdown selectable, PointerPressedEventArgs e)
+   {
       e.Handled = true;
       _view.Focus(NavigationMethod.Pointer);
       e.Pointer.Capture(_view);

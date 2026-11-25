@@ -3,11 +3,11 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using AvaloniaEdit;
-using AvaloniaEdit.Document;
+using Mavalonia.MarkdownEditing.Editing;
 
 namespace Mavalonia.MarkdownEditing.Controls.Source;
 
-///<summary>What a person pastes in the source view of a <see cref="MarkdownEditor"/>, which has no notion itself of rich text, nor of markdown.</summary>
+///<summary>What a person does in the source view of a <see cref="MarkdownEditor"/>, other than what any <see cref="TextEditor"/> does.</summary>
 class SourceInput
 {
    readonly MarkdownEditor _editor;
@@ -17,36 +17,41 @@ class SourceInput
    {
       _editor = editor;
       _view = view;
+      Clipboard = new ClipboardInput(editor, view);
       view.AddHandler(InputElement.KeyDownEvent, Press, RoutingStrategies.Tunnel); // Before the view pastes text itself.
+      view.AddHandler(InputElement.PointerPressedEvent, Press, RoutingStrategies.Tunnel);
    }
 
-   // ReSharper disable once AsyncVoidEventHandlerMethod
-   async void Press(object? sender, KeyEventArgs e)
+   internal IClipboardInput Clipboard { get; }
+
+   void Press(object? sender, KeyEventArgs e)
    {
-      if(ActionOf(e) is not {} insert) return;
+      if(ActionOf(e) is not {} action) return;
 
       e.Handled = true;
-      insert(await ClipboardContent.ReadFrom(TopLevel.GetTopLevel(_view)!.Clipboard!));
+      action().SurfaceExceptions();
    }
 
-   Action<ClipboardContent>? ActionOf(KeyEventArgs e)
+   Func<Task>? ActionOf(KeyEventArgs e)
    {
-      if(_editor.PasteAsQuoteGesture?.Matches(e) == true) return Quote;
-      if(_editor.PasteTextGesture?.Matches(e) == true) return it => Insert(it.Text);
-      if(_view.GetPlatformSettings()!.HotkeyConfiguration.Paste.Any(it => it.Matches(e))) return it => Insert(it.Markdown);
+      if(_editor.PasteAsQuoteGesture?.Matches(e) == true) return Clipboard.PasteAsQuote;
+      if(_editor.PasteTextGesture?.Matches(e) == true) return Clipboard.PasteText;
+      if(_view.GetPlatformSettings()!.HotkeyConfiguration.Paste.Any(it => it.Matches(e))) return Clipboard.Paste;
       return null;
    }
 
-   void Quote(ClipboardContent content)
+   void Press(object? sender, PointerPressedEventArgs e)
    {
-      if(content.Markdown.Length > 0) _editor.Quote(content.Markdown);
+      if(e.Properties.PointerUpdateKind == PointerUpdateKind.RightButtonPressed) PutTheCaretWhereAMenuIsFor(e);
    }
 
-   void Insert(string markdown)
+   ///<summary>A menu is for what is selected where the pointer is, or else for that place.</summary>
+   void PutTheCaretWhereAMenuIsFor(PointerPressedEventArgs e)
    {
-      if(markdown.Length == 0) return;
+      _view.TextArea.Focus(NavigationMethod.Pointer);
+      if(_view.GetPositionFromPoint(e.GetPosition(_view)) is not {} position) return;
 
-      _view.TextArea.Selection.ReplaceSelectionWithText(TextUtilities.NormalizeNewLines(markdown, TextUtilities.GetNewLineFromDocument(_view.Document, _view.TextArea.Caret.Line)));
-      _view.TextArea.Caret.BringCaretToView();
+      var offset = _view.Document.GetOffset(position.Location);
+      if(!_view.TextSelection.Includes(offset)) _view.TextSelection = TextSelection.CaretAt(offset);
    }
 }

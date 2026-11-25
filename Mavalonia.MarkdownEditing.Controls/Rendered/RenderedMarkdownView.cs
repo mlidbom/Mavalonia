@@ -156,10 +156,29 @@ public abstract partial class RenderedMarkdownView : Control
 
    protected override AutomationPeer OnCreateAutomationPeer() => new RenderedMarkdownAutomationPeer(this);
 
-   protected override void OnPointerPressed(PointerPressedEventArgs e) => _pointer.Press(e);
-   protected override void OnPointerMoved(PointerEventArgs e) => _pointer.Move(e);
-   protected override void OnPointerReleased(PointerReleasedEventArgs e) => _pointer.Release(e);
-   protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e) => _pointer.EndSelecting();
+   protected override void OnPointerPressed(PointerPressedEventArgs e)
+   {
+      base.OnPointerPressed(e);
+      _pointer.Press(e);
+   }
+
+   protected override void OnPointerMoved(PointerEventArgs e)
+   {
+      base.OnPointerMoved(e);
+      _pointer.Move(e);
+   }
+
+   protected override void OnPointerReleased(PointerReleasedEventArgs e)
+   {
+      _pointer.Release(e);
+      base.OnPointerReleased(e); // Opens the menu.
+   }
+
+   protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
+   {
+      base.OnPointerCaptureLost(e);
+      _pointer.EndSelecting();
+   }
 
    ///<summary>The view has been clicked at <paramref name="point"/>, with nothing selected by that.</summary>
    internal virtual void ClickAt(Point point) {}

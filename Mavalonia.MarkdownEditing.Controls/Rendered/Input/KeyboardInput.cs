@@ -11,13 +11,11 @@ class KeyboardInput
 {
    readonly RenderedEditorView _view;
    readonly MovementKeys _movement;
-   readonly ClipboardInput _clipboard;
 
    internal KeyboardInput(RenderedEditorView view)
    {
       _view = view;
       _movement = new MovementKeys(view);
-      _clipboard = new ClipboardInput(view);
    }
 
    PlatformHotkeyConfiguration Hotkeys => _view.Hotkeys;
@@ -40,7 +38,7 @@ class KeyboardInput
       _view.BringTheCaretIntoView();
    }
 
-   Action? ActionOf(KeyEventArgs e, RenderedEditor editor) => EditOf(e, editor) ?? _movement.ActionOf(e, editor) ?? SelectionOf(e, editor) ?? ClipboardActionOf(e, editor);
+   Action? ActionOf(KeyEventArgs e, RenderedEditor editor) => EditOf(e, editor) ?? _movement.ActionOf(e, editor) ?? SelectionOf(e, editor) ?? ClipboardActionOf(e);
 
    Action? EditOf(KeyEventArgs e, RenderedEditor editor)
    {
@@ -48,6 +46,7 @@ class KeyboardInput
       if(_view.BreakLineGesture?.Matches(e) == true) return editor.BreakLine;
       if(Is(Hotkeys.Undo, e)) return editor.Undo;
       if(Is(Hotkeys.Redo, e)) return editor.Redo;
+      if(FormatToToggleBy(e) is {} format) return () => editor.Toggle(format);
 
       var isForWords = e.KeyModifiers == Hotkeys.WholeWordTextActionModifiers;
       return (e.Key, e.KeyModifiers) switch
@@ -58,12 +57,17 @@ class KeyboardInput
          (Key.Delete, _) when isForWords => editor.DeleteWordAfter,
          (Key.Tab, KeyModifiers.None) => Tab(editor),
          (Key.Tab, KeyModifiers.Shift) => ShiftTab(editor),
-         (Key.B, _) when e.KeyModifiers == Hotkeys.CommandModifiers => () => editor.Toggle(TextFormats.Bold),
-         (Key.I, _) when e.KeyModifiers == Hotkeys.CommandModifiers => () => editor.Toggle(TextFormats.Italic),
-         (Key.E, _) when e.KeyModifiers == Hotkeys.CommandModifiers => () => editor.Toggle(TextFormats.Code),
-         (Key.X, _) when e.KeyModifiers == (Hotkeys.CommandModifiers | KeyModifiers.Shift) => () => editor.Toggle(TextFormats.Strikethrough),
          _ => null
       };
+   }
+
+   TextFormats? FormatToToggleBy(KeyEventArgs e)
+   {
+      if(_view.ToggleBoldGesture?.Matches(e) == true) return TextFormats.Bold;
+      if(_view.ToggleItalicGesture?.Matches(e) == true) return TextFormats.Italic;
+      if(_view.ToggleCodeGesture?.Matches(e) == true) return TextFormats.Code;
+      if(_view.ToggleStrikethroughGesture?.Matches(e) == true) return TextFormats.Strikethrough;
+      return null;
    }
 
    ///<summary>Null where the key isn't for editing, so that it moves the focus as it does everywhere else.</summary>
@@ -82,13 +86,13 @@ class KeyboardInput
 
    Action? SelectionOf(KeyEventArgs e, RenderedEditor editor) => Is(Hotkeys.SelectAll, e) ? editor.SelectAll : null;
 
-   Action? ClipboardActionOf(KeyEventArgs e, RenderedEditor editor)
+   Action? ClipboardActionOf(KeyEventArgs e)
    {
-      if(Is(Hotkeys.Copy, e)) return () => _clipboard.Copy(editor).SurfaceExceptions();
-      if(Is(Hotkeys.Cut, e)) return () => _clipboard.Cut(editor).SurfaceExceptions();
-      if(_view.PasteAsQuoteGesture?.Matches(e) == true) return () => _clipboard.PasteAsQuote(editor).SurfaceExceptions();
-      if(_view.PasteTextGesture?.Matches(e) == true) return () => _clipboard.PasteText(editor).SurfaceExceptions();
-      if(Is(Hotkeys.Paste, e)) return () => _clipboard.Paste(editor).SurfaceExceptions();
+      if(Is(Hotkeys.Copy, e)) return () => _view.Clipboard.Copy().SurfaceExceptions();
+      if(Is(Hotkeys.Cut, e)) return () => _view.Clipboard.Cut().SurfaceExceptions();
+      if(_view.PasteAsQuoteGesture?.Matches(e) == true) return () => _view.Clipboard.PasteAsQuote().SurfaceExceptions();
+      if(_view.PasteTextGesture?.Matches(e) == true) return () => _view.Clipboard.PasteText().SurfaceExceptions();
+      if(Is(Hotkeys.Paste, e)) return () => _view.Clipboard.Paste().SurfaceExceptions();
       return null;
    }
 

@@ -6,37 +6,45 @@ using Mavalonia.MarkdownEditing.Rendering.Blocks;
 namespace Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 
 ///<summary>What a person does with the clipboard in a <see cref="RenderedEditorView"/>.</summary>
-class ClipboardInput
+class ClipboardInput : IClipboardInput
 {
    readonly RenderedEditorView _view;
 
    internal ClipboardInput(RenderedEditorView view) => _view = view;
 
    IClipboard Clipboard => TopLevel.GetTopLevel(_view)!.Clipboard!;
+   RenderedEditor Editor => _view.Editor!;
 
-   internal async Task Copy(RenderedEditor editor)
+   public Task Copy() => Editor.Selection.IsEmpty ? Task.CompletedTask : new CopiedSelection(Editor).PutOn(Clipboard);
+
+   public async Task Cut()
    {
-      if(!editor.Selection.IsEmpty) await new CopiedSelection(editor).PutOn(Clipboard);
-   }
+      if(Editor.Selection.IsEmpty) return;
 
-   internal async Task Cut(RenderedEditor editor)
-   {
-      if(editor.Selection.IsEmpty) return;
-
-      var copying = Copy(editor);
-      editor.DeleteCharacterBefore();
+      var copying = Copy();
+      Editor.DeleteCharacterBefore();
+      _view.BringTheCaretIntoView();
       await copying;
    }
 
-   internal async Task Paste(RenderedEditor editor)
+   public async Task Paste()
    {
+      var editor = Editor;
       var content = await ClipboardContent.ReadFrom(Clipboard);
       Insert(editor.CaretPosition.Block is CodeBlock ? content.Text : content.Markdown, editor.Paste);
    }
 
-   internal async Task PasteText(RenderedEditor editor) => Insert((await ClipboardContent.ReadFrom(Clipboard)).Text, editor.Paste);
+   public async Task PasteText()
+   {
+      var editor = Editor;
+      Insert((await ClipboardContent.ReadFrom(Clipboard)).Text, editor.Paste);
+   }
 
-   internal async Task PasteAsQuote(RenderedEditor editor) => Insert((await ClipboardContent.ReadFrom(Clipboard)).Markdown, editor.Quote);
+   public async Task PasteAsQuote()
+   {
+      var editor = Editor;
+      Insert((await ClipboardContent.ReadFrom(Clipboard)).Markdown, editor.Quote);
+   }
 
    void Insert(string markdown, Action<string> insert)
    {

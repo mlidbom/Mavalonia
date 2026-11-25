@@ -15,4 +15,7 @@ public readonly record struct TextSelection(int Anchor, int Caret)
 
    ///<summary>All of what is selected.</summary>
    public SourceRange Range => new(Start, End);
+
+   ///<summary>Whether anything is selected, and <paramref name="offset"/> is in it or at either end of it.</summary>
+   public bool Includes(int offset) => !IsEmpty && Start <= offset && offset <= End;
 }

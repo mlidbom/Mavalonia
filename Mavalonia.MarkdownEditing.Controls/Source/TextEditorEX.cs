@@ -1,3 +1,4 @@
+using Avalonia;
 using AvaloniaEdit;
 using AvaloniaEdit.Editing;
 using Mavalonia.MarkdownEditing.Editing;
@@ -8,6 +9,9 @@ static class TextEditorEX
 {
    extension(TextEditor @this)
    {
+      ///<summary>Just below the caret, from the corner of the <see cref="TextArea.TextView"/>.</summary>
+      internal Point PlaceBelowTheCaret => @this.TextArea.Caret.CalculateCaretRectangle().BottomLeft - @this.TextArea.TextView.ScrollOffset;
+
       ///<summary>What is selected, and the caret's end of it.</summary>
       internal TextSelection TextSelection
       {

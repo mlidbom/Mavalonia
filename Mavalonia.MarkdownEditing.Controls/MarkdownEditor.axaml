@@ -23,6 +23,10 @@
                                         Watermark="{Binding #Root.Watermark}"
                                         StartNewBlockGesture="{Binding #Root.StartNewBlockGesture}"
                                         BreakLineGesture="{Binding #Root.BreakLineGesture}"
+                                        ToggleBoldGesture="{Binding #Root.ToggleBoldGesture}"
+                                        ToggleItalicGesture="{Binding #Root.ToggleItalicGesture}"
+                                        ToggleCodeGesture="{Binding #Root.ToggleCodeGesture}"
+                                        ToggleStrikethroughGesture="{Binding #Root.ToggleStrikethroughGesture}"
                                         PasteTextGesture="{Binding #Root.PasteTextGesture}"
                                         PasteAsQuoteGesture="{Binding #Root.PasteAsQuoteGesture}" />
       </ScrollViewer>

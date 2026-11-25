@@ -55,6 +55,13 @@ class HeadlessWindow
       DoWhatIsPending();
    }
 
+   public void RightClick(Point point)
+   {
+      _window.MouseDown(point, MouseButton.Right);
+      _window.MouseUp(point, MouseButton.Right);
+      DoWhatIsPending();
+   }
+
    public void DragWithTheRightButton(Point from, Point to)
    {
       _window.MouseDown(from, MouseButton.Right);

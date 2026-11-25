@@ -8,6 +8,10 @@ partial class RenderedEditorView
    public static readonly StyledProperty<string?> WatermarkProperty = AvaloniaProperty.Register<RenderedEditorView, string?>(nameof(Watermark));
    public static readonly StyledProperty<KeyGesture?> StartNewBlockGestureProperty = MarkdownEditor.StartNewBlockGestureProperty.AddOwner<RenderedEditorView>();
    public static readonly StyledProperty<KeyGesture?> BreakLineGestureProperty = MarkdownEditor.BreakLineGestureProperty.AddOwner<RenderedEditorView>();
+   public static readonly StyledProperty<KeyGesture?> ToggleBoldGestureProperty = MarkdownEditor.ToggleBoldGestureProperty.AddOwner<RenderedEditorView>();
+   public static readonly StyledProperty<KeyGesture?> ToggleItalicGestureProperty = MarkdownEditor.ToggleItalicGestureProperty.AddOwner<RenderedEditorView>();
+   public static readonly StyledProperty<KeyGesture?> ToggleCodeGestureProperty = MarkdownEditor.ToggleCodeGestureProperty.AddOwner<RenderedEditorView>();
+   public static readonly StyledProperty<KeyGesture?> ToggleStrikethroughGestureProperty = MarkdownEditor.ToggleStrikethroughGestureProperty.AddOwner<RenderedEditorView>();
    public static readonly StyledProperty<KeyGesture?> PasteTextGestureProperty = MarkdownEditor.PasteTextGestureProperty.AddOwner<RenderedEditorView>();
    public static readonly StyledProperty<KeyGesture?> PasteAsQuoteGestureProperty = MarkdownEditor.PasteAsQuoteGestureProperty.AddOwner<RenderedEditorView>();
 
@@ -19,6 +23,18 @@ partial class RenderedEditorView
 
    ///<inheritdoc cref="MarkdownEditor.BreakLineGesture"/>
    public KeyGesture? BreakLineGesture { get => GetValue(BreakLineGestureProperty); set => SetValue(BreakLineGestureProperty, value); }
+
+   ///<inheritdoc cref="MarkdownEditor.ToggleBoldGesture"/>
+   public KeyGesture? ToggleBoldGesture { get => GetValue(ToggleBoldGestureProperty); set => SetValue(ToggleBoldGestureProperty, value); }
+
+   ///<inheritdoc cref="MarkdownEditor.ToggleItalicGesture"/>
+   public KeyGesture? ToggleItalicGesture { get => GetValue(ToggleItalicGestureProperty); set => SetValue(ToggleItalicGestureProperty, value); }
+
+   ///<inheritdoc cref="MarkdownEditor.ToggleCodeGesture"/>
+   public KeyGesture? ToggleCodeGesture { get => GetValue(ToggleCodeGestureProperty); set => SetValue(ToggleCodeGestureProperty, value); }
+
+   ///<inheritdoc cref="MarkdownEditor.ToggleStrikethroughGesture"/>
+   public KeyGesture? ToggleStrikethroughGesture { get => GetValue(ToggleStrikethroughGestureProperty); set => SetValue(ToggleStrikethroughGestureProperty, value); }
 
    ///<inheritdoc cref="MarkdownEditor.PasteTextGesture"/>
    public KeyGesture? PasteTextGesture { get => GetValue(PasteTextGestureProperty); set => SetValue(PasteTextGestureProperty, value); }

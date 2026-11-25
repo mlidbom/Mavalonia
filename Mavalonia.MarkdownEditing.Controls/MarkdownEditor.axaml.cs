@@ -1,53 +1,27 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using AvaloniaEdit.Document;
+using Mavalonia.MarkdownEditing.Controls.Menus;
 using Mavalonia.MarkdownEditing.Controls.Source;
 using Mavalonia.MarkdownEditing.Editing;
+using Mavalonia.MarkdownEditing.Rendering.Texts;
 
 namespace Mavalonia.MarkdownEditing.Controls;
 
 ///<summary>A control in which a person edits a markdown document, as it is rendered or as its source.</summary>
 public partial class MarkdownEditor : UserControl
 {
-   public static readonly StyledProperty<TextDocument> DocumentProperty = AvaloniaProperty.Register<MarkdownEditor, TextDocument>(nameof(Document));
-   public static readonly StyledProperty<bool> ShowsSourceProperty = AvaloniaProperty.Register<MarkdownEditor, bool>(nameof(ShowsSource));
-   public static readonly StyledProperty<string?> WatermarkProperty = AvaloniaProperty.Register<MarkdownEditor, string?>(nameof(Watermark));
-   public static readonly StyledProperty<KeyGesture?> StartNewBlockGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(StartNewBlockGesture), new KeyGesture(Key.Enter));
-   public static readonly StyledProperty<KeyGesture?> BreakLineGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(BreakLineGesture), new KeyGesture(Key.Enter, KeyModifiers.Shift));
-   public static readonly StyledProperty<KeyGesture?> PasteTextGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteTextGesture), new KeyGesture(Key.V, KeyModifiers.Control | KeyModifiers.Shift));
-   public static readonly StyledProperty<KeyGesture?> PasteAsQuoteGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteAsQuoteGesture), new KeyGesture(Key.Q, KeyModifiers.Control | KeyModifiers.Shift));
-
+   readonly SourceInput _source;
    RenderedEditor? _renderedEditor;
 
    public MarkdownEditor()
    {
       InitializeComponent();
       SourceView.Options.AllowScrollBelowDocument = false;
-      _ = new SourceInput(this, SourceView);
+      _source = new SourceInput(this, SourceView);
+      SetCurrentValue(ContextFlyoutProperty, new MenuOfAnEditor(this));
       SetCurrentValue(DocumentProperty, new TextDocument());
    }
-
-   ///<summary>The document. Its text is the markdown, and is all that is edited: the two views show the same text.</summary>
-   public TextDocument Document { get => GetValue(DocumentProperty); set => SetValue(DocumentProperty, value); }
-
-   ///<summary>Whether the source is shown, rather than what it's rendered as.</summary>
-   public bool ShowsSource { get => GetValue(ShowsSourceProperty); set => SetValue(ShowsSourceProperty, value); }
-
-   ///<summary>What is shown while the document is empty.</summary>
-   public string? Watermark { get => GetValue(WatermarkProperty); set => SetValue(WatermarkProperty, value); }
-
-   ///<summary>The keys that start a new block, such as a paragraph or a list item, in the rendered view. Null for none.</summary>
-   public KeyGesture? StartNewBlockGesture { get => GetValue(StartNewBlockGestureProperty); set => SetValue(StartNewBlockGestureProperty, value); }
-
-   ///<summary>The keys that break the line inside a block, in the rendered view. Null for none.</summary>
-   public KeyGesture? BreakLineGesture { get => GetValue(BreakLineGestureProperty); set => SetValue(BreakLineGestureProperty, value); }
-
-   ///<summary>The keys that paste only the text of what is on the clipboard, when that is rich text. Null for none.</summary>
-   public KeyGesture? PasteTextGesture { get => GetValue(PasteTextGestureProperty); set => SetValue(PasteTextGestureProperty, value); }
-
-   ///<summary>The keys that paste what is on the clipboard as a quote. Null for none.</summary>
-   public KeyGesture? PasteAsQuoteGesture { get => GetValue(PasteAsQuoteGestureProperty); set => SetValue(PasteAsQuoteGestureProperty, value); }
 
    ///<summary>What is selected in the view that is shown.</summary>
    public TextSelection Selection
@@ -60,14 +34,53 @@ public partial class MarkdownEditor : UserControl
       }
    }
 
+   public void SelectAll()
+   {
+      if(ShowsSource || _renderedEditor is null) Selection = new TextSelection(0, Document.TextLength);
+      else _renderedEditor.SelectAll();
+   }
+
+   IClipboardInput Clipboard => ShowsSource ? _source.Clipboard : RenderedView.Clipboard;
+
+   ///<summary>Puts what is selected on the clipboard: as markdown, and, from the rendered view, as rich text for programs that take that. Does nothing when nothing is selected.</summary>
+   public Task Copy() => Clipboard.Copy();
+
+   ///<summary>Does what <see cref="Copy"/> does, and deletes what is selected.</summary>
+   public Task Cut() => Clipboard.Cut();
+
+   ///<summary>Pastes what is on the clipboard in place of the selection: rich text as the markdown for it.</summary>
+   public Task Paste() => Clipboard.Paste();
+
+   ///<summary>Pastes only the text of what is on the clipboard, in place of the selection.</summary>
+   public Task PasteText() => Clipboard.PasteText();
+
+   ///<summary>Pastes what is on the clipboard as a quote, in place of the selection.</summary>
+   public Task PasteAsQuote() => Clipboard.PasteAsQuote();
+
    ///<summary>Puts a quote of <paramref name="markdown"/> in place of the selection, and the caret in a paragraph after it.</summary>
-   public void Quote(string markdown)
+   public void Quote(string markdown) => EditInEitherView(it => it.Quote(markdown));
+
+   ///<summary>Formats the selected text, or takes the format away when all of it has it.</summary>
+   ///<remarks>With nothing selected, it's the text typed next in the rendered view that gets or loses the format. In the source view, nothing happens then.</remarks>
+   public void ToggleFormat(TextFormats format)
+   {
+      if(ShowsSource || _renderedEditor is null) EditInEitherView(it => it.Toggle(format));
+      else _renderedEditor.Toggle(format);
+   }
+
+   ///<summary>Edits also while the source is shown, and while the control isn't.</summary>
+   void EditInEitherView(Action<RenderedEditor> edit)
    {
       using var editor = new RenderedEditor(Document, Selection); // Another than that of the rendered view, which there is none of while the control isn't shown.
-      editor.Quote(markdown);
+      edit(editor);
       Selection = editor.Selection;
       BringTheCaretIntoView();
    }
+
+   ///<summary>Just below the caret of the view that is shown, from the corner of the control.</summary>
+   internal Point PlaceBelowTheCaret => ShowsSource
+                                           ? SourceView.TextArea.TextView.TranslatePoint(SourceView.PlaceBelowTheCaret, this)!.Value
+                                           : RenderedView.TranslatePoint(RenderedView.CaretRectangle.BottomLeft, this)!.Value;
 
    void BringTheCaretIntoView()
    {
