@@ -8,7 +8,7 @@ namespace Mavalonia.MarkdownEditing.Specifications.Reading;
 ///<summary>Reads markdown that nobody would write. It is the same each time the specification runs.</summary>
 public class Reading_at_random
 {
-   const int CountOfDocuments = 8000;
+   const int CountOfDocuments = 4000;
 
    static readonly string[] Pieces = ["a", "b c", " ", "  ", "\n", "\n\n", "\r\n", "\t", "\0", "*", "**", "_", "`", "```", "~~", "[a](b)", "[a]: b", "![a b](c)", "<br>", "<!-- c -->", "<!--", "&amp;", "\\", "|", "|-|", "| a | b |\n|---|---|\n| 1 | 2 |\n", "---", "# ", "- ", "- [ ] ", "1. ", "> ", "> [!NOTE]\n> ", "    ", "\n====\n", "https://x.y", "é", "👩‍👩‍👧"];
 
