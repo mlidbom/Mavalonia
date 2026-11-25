@@ -6,7 +6,5 @@ namespace Mavalonia.MarkdownEditing.Rendering;
 /// </remarks>
 readonly record struct PositionByNumbers(int BlockNumber, int Index)
 {
-   //review-naming: this, and RangeByNumbers. They are a RenderedPosition and a RenderedRange that aren't bound to one RenderedMarkdown. Is there a word that says that better than how they are said?
-
    internal static PositionByNumbers AtTheStartOf(int blockNumber) => new(blockNumber, 0);
 }
