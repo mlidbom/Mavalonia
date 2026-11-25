@@ -1,4 +1,5 @@
 using AvaloniaEdit;
+using AvaloniaEdit.Editing;
 using Mavalonia.MarkdownEditing.Editing;
 
 namespace Mavalonia.MarkdownEditing.Controls.Source;
@@ -19,10 +20,8 @@ static class TextEditorEX
          }
          set
          {
-            //bug: TextEditor.Select puts the caret at the end of what it selects, so a selection whose caret is at its start comes out turned around.
-            @this.Select(value.Start, value.End - value.Start);
-            @this.CaretOffset = value.Caret;
-            if(!value.IsEmpty) @this.Select(value.Start, value.End - value.Start);
+            @this.TextArea.Selection = Selection.Create(@this.TextArea, value.Anchor, value.Caret);
+            @this.TextArea.Caret.Offset = value.Caret;
          }
       }
    }

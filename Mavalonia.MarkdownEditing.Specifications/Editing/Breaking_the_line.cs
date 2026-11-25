@@ -12,6 +12,7 @@ public class Breaking_the_line
    [XF] public void adds_a_line_break_at_the_end_of_a_paragraph() => BreakingTheLine("a‸").Must().Be("a\n‸");
    [XF] public void adds_a_line_break_inside_bold_text() => BreakingTheLine("**a‸b**").Must().Be("**a\n‸b**");
    [XF] public void adds_a_line_break_in_a_list_item() => BreakingTheLine("- a‸").Must().Be("- a\n  ‸");
+   [XF] public void adds_a_line_break_in_a_list_item_with_spaces_and_a_tab_after_its_marker() => BreakingTheLine("-  \ta‸").Must().Be("-  \ta\n    ‸");
    [XF] public void adds_a_line_break_in_a_quote() => BreakingTheLine("> a‸").Must().Be("> a\n> ‸");
    [XF] public void adds_a_line_break_to_code() => BreakingTheLine("```\na‸\n```").Must().Be("```\na\n‸\n```");
    [XF] public void starts_a_new_block_in_a_heading() => BreakingTheLine("# a‸").Must().Be("# a\n\n‸");

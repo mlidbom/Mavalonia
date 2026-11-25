@@ -71,15 +71,8 @@ public partial class RenderedMarkdownView : Control
       InvalidateVisual();
    }
 
-   internal DocumentLayout Layout
-   {
-      get
-      {
-         //bug: from a change until the view is measured, this is the layout of what was rendered before the change. An input method asks for CaretRectangle
-         //   as soon as ShowTheChange tells it that the caret has moved, and DocumentLayout.LayoutOf then throws, since the caret's block isn't in that layout.
-         return _latestLayout.Layout ?? LayOut(Bounds.Width);
-      }
-   }
+   ///<summary>The layout of what is rendered now, also when it has changed since the view was measured.</summary>
+   internal DocumentLayout Layout => LayOut(Bounds.Width);
 
    DocumentLayout LayOut(double width) => _latestLayout.LayOut(Rendered, Appearance, width, Padding);
 

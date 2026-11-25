@@ -52,9 +52,8 @@ class DocumentLayoutBuilder
    {
       foreach(var block in _rendered.Blocks)
       {
-         //bug: a table whose header has no cell is never laid out, so that DocumentLayout.LayoutOf throws for its cells, such as of the markdown "|", "-|", "|-", on a line each.
-         if(block is TableCell { Row: 0, Column: 0 } firstCell) LayOut(firstCell.Table);
-         else if(block is not TableCell) LayOut(block);
+         if(block is not TableCell cell) LayOut(block);
+         else if(cell == cell.Table.FirstCell) LayOut(cell.Table);
 
          _previous = block;
       }

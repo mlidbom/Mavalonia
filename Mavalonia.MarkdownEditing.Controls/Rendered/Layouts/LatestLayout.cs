@@ -8,17 +8,17 @@ class LatestLayout
 {
    TextLayouts? _texts;
 
-   ///<summary>The layout that was made last. Null before the first is made, and after it is forgotten.</summary>
-   internal DocumentLayout? Layout { get; private set; }
+   ///<summary>Null before the first layout is made, and after it is forgotten.</summary>
+   DocumentLayout? _layout;
 
-   internal bool IsOf(RenderedMarkdown rendered, double width) => Layout?.IsOf(rendered, width) == true;
+   internal bool IsOf(RenderedMarkdown rendered, double width) => _layout?.IsOf(rendered, width) == true;
 
    internal DocumentLayout LayOut(RenderedMarkdown rendered, MarkdownAppearance appearance, double width, Thickness padding)
    {
-      if(Layout?.IsOf(rendered, width) == true) return Layout;
+      if(_layout?.IsOf(rendered, width) == true) return _layout;
 
       _texts ??= new TextLayouts(appearance);
-      return Layout = _texts.Use(() => DocumentLayoutBuilder.LayOut(rendered, appearance, _texts, width, padding));
+      return _layout = _texts.Use(() => DocumentLayoutBuilder.LayOut(rendered, appearance, _texts, width, padding));
    }
 
    ///<summary>To be done when the appearance or the padding changes.</summary>
@@ -26,6 +26,6 @@ class LatestLayout
    {
       _texts?.Dispose();
       _texts = null;
-      Layout = null;
+      _layout = null;
    }
 }

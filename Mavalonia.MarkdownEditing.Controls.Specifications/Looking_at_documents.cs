@@ -39,6 +39,8 @@ public class Looking_at_documents
    [XFOnUIThread] public void shows_text_differently_in_the_dark_theme() => Show("Some text", ThemeVariant.Dark).Fingerprint.Must().NotBe(Show("Some text").Fingerprint);
    [XFOnUIThread] public void shows_the_source_of_a_message() => Show(Message, showsSource: true).SaveForInspectionAs("The source of a message");
 
+   [XFOnUIThread] public void shows_a_table_whose_header_has_no_cell_and_lets_it_be_written_in() => new EditorInAWindow("|\n-|\n|-‸").Type("x").Markdown.Must().Be("|\n-|\n|-x‸");
+
    [XFOnUIThread] public void shows_every_construct() => Show(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "SampleDocuments", "Every construct.md"))).SaveForInspectionAs("Every construct");
 
    [XFOnUIThread] public void types_in_a_message_of_9_thousand_characters_in_less_than_a_tenth_of_a_second_a_character()

@@ -12,6 +12,7 @@ class MarkdownReader
 {
    readonly string _markdown;
    readonly List<RenderedBlock> _blocks = [];
+   bool _isTheSourceOfATableUnknown;
 
    MarkdownReader(string markdown) => _markdown = markdown;
 
@@ -31,7 +32,7 @@ class MarkdownReader
    IReadOnlyList<RenderedBlock> BlocksWhoseSourceIsKnown()
    {
       var blocks = _blocks.OrderBy(it => it.Text.Source.Start).ToList();
-      return IsSourceKnownOf(blocks) ? blocks : [AsSource(new SourceRange(0, _markdown.Length), BlockContainers.None)];
+      return !_isTheSourceOfATableUnknown && IsSourceKnownOf(blocks) ? blocks : [AsSource(new SourceRange(0, _markdown.Length), BlockContainers.None)];
    }
 
    static bool IsSourceKnownOf(IReadOnlyList<RenderedBlock> blocks) =>
@@ -48,7 +49,7 @@ class MarkdownReader
       {
          case QuoteBlock quote: ReadQuote(quote, place); break;
          case ListBlock list: ReadList(list, place); break;
-         case MarkdigTable table: _blocks.AddRange(new TableReader(_markdown, place.Containers, table).Read()); break;
+         case MarkdigTable table: ReadTable(table, place.Containers); break;
          case HeadingBlock heading: ReadHeading(heading, place.Containers); break;
          case ParagraphBlock paragraph: ReadParagraph(paragraph, place.Containers); break;
          case FencedCodeBlock code: _blocks.Add(new CodeBlockReader(_markdown, place.Containers).Read(code)); break;
@@ -89,6 +90,14 @@ class MarkdownReader
          _blocks.Add(reader.ReadEmpty());
       else
          ReadBlocksIn(item, reader.PlaceOfItsBlocks);
+   }
+
+   void ReadTable(MarkdigTable table, BlockContainers containers)
+   {
+      if(new TableReader(_markdown, containers, table).Read() is {} blocks)
+         _blocks.AddRange(blocks);
+      else
+         _isTheSourceOfATableUnknown = true;
    }
 
    void ReadHeading(HeadingBlock heading, BlockContainers containers)

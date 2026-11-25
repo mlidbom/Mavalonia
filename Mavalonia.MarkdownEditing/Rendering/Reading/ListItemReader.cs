@@ -7,6 +7,9 @@ namespace Mavalonia.MarkdownEditing.Rendering.Reading;
 ///<summary>Reads the marker of a list item, and from it where the blocks in the item are. Those are read as blocks anywhere are.</summary>
 class ListItemReader
 {
+   ///<summary>After the marker and more spaces than this, the item's text starts after the first of them.</summary>
+   const int MostSpacesAfterTheMarker = 4;
+
    readonly string _markdown;
    readonly ListItemBlock _item;
    readonly int? _number;
@@ -41,9 +44,16 @@ class ListItemReader
          ? new Paragraph(_place.Containers, new TextReader(_markdown, _place.Containers).ReadAsText(new SourceRange(_item.Span.Start, EndOfMarker))) // So far, it may be the start of anything, such as of -5.
          : Paragraph.EmptyAt(EndOfLine, InTheItem(ColumnAfterTheSpaceAfterTheMarker).Containers);
 
-   PlaceOfBlocks InTheItem(int column) => _place.In(new ListItem(_marker, _number, width: column - ColumnThatItIsIndentedFrom()), column);
+   PlaceOfBlocks InTheItem(int column) => _place.In(new ListItem(_marker, _number, WidthUpTo(column)), column);
 
-   int ColumnOfItsFirstBlock() => _item[0].Span.Start <= EndOfLine ? _markdown.ColumnAt(_item[0].Span.Start) : ColumnAfterTheSpaceAfterTheMarker;
+   ///<summary>No item is narrower than its marker and a space. That has to be said, since Markdig counts tabs in other ways than as characters.</summary>
+   int WidthUpTo(int column) => Math.Max(_marker.Length + 1, column - ColumnThatItIsIndentedFrom());
+
+   int ColumnOfItsFirstBlock()
+   {
+      var startOfText = _markdown.SkipSpaces(EndOfMarker);
+      return startOfText < EndOfLine && startOfText - EndOfMarker <= MostSpacesAfterTheMarker ? _markdown.ColumnAt(startOfText) : ColumnAfterTheSpaceAfterTheMarker;
+   }
 
    int ColumnAfterTheSpaceAfterTheMarker => _markdown.ColumnAt(EndOfMarker) + 1;
 

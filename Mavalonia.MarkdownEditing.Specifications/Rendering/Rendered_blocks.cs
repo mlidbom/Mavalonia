@@ -32,6 +32,8 @@ public class Rendered_blocks
    [XF] public void are_empty_cells_too() => Rendered("| A |  |\n|---|---|\n|   | 2 |", "header 0,0 \"A\"", "header 0,1 \"\"", "cell 1,0 \"\"", "cell 1,1 \"2\"");
    [XF] public void are_in_order_in_a_table_with_rows_that_are_all_empty() => RenderedMarkdown.Of("a\n\n| A |  |\n|---|---|\n|  |  |\n|  | b |\n|  |  |\n\nc").Blocks.Select(it => it.Text.Source.Start).Must().SequenceEqual([0, 5, 9, 24, 27, 32, 35, 41, 44, 48]);
    [XF] public void are_only_the_cells_that_a_row_of_a_table_has() => Rendered("| A | B |\n|---|---|\n| 1\n\na", "header 0,0 \"A\"", "header 0,1 \"B\"", "cell 1,0 \"1\"", "paragraph \"a\"");
+   [XF] public void show_a_table_with_no_cell_at_all_as_source() => Rendered("a\n\n|\n-|", "paragraph \"a\"", "source \"|\n-|\"");
+   [XF] public void show_all_as_source_when_a_link_goes_on_into_the_header_of_a_table() => Rendered("*[|\n]()-|-", "source \"*[|\n]()-|-\"");
    [XF] public void show_a_table_as_source_when_a_link_goes_on_outside_its_cell() => Rendered("| A | B[**#** |\n|---|---|\n|   | 2](x) |", "source \"| A | B[**#** |\n|---|---|\n|   | 2](x) |\"");
    [XF] public void show_an_escaped_pipe_in_a_cell_without_its_backslash() => Rendered("| A |\n|---|\n| a \\| b |", "header 0,0 \"A\"", "cell 1,0 \"a | b\"");
 

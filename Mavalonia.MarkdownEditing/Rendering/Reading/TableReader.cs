@@ -11,52 +11,60 @@ using TableCell = Mavalonia.MarkdownEditing.Rendering.Blocks.TableCell;
 
 namespace Mavalonia.MarkdownEditing.Rendering.Reading;
 
-///<summary>Reads a table. One whose cells can't be told apart, since the markup in one of them goes on outside it, is read as source.</summary>
+///<summary>Reads a table. One whose cells can't be told apart, since the markup in one of them goes on outside it, or which has no cells, is read as source.</summary>
 ///<remarks>
 /// Where an empty cell is, is worked out here, since Markdig doesn't say. Each row of a table is on a line of its own, with the line that separates the header from the others after the first.
 /// </remarks>
 class TableReader
 {
+   const string CharactersUnderAHeader = "|:- \t";
+
    readonly string _markdown;
    readonly BlockContainers _containers;
    readonly IReadOnlyList<MarkdigTableRow> _rows;
-   readonly int _startOfHeader;
+
+   ///<summary>Where the lines of the table start: first that of the header, then the line that separates it from the other rows, then theirs.</summary>
+   readonly IReadOnlyList<int> _startsOfLines;
 
    internal TableReader(string markdown, BlockContainers containers, MarkdigTable table)
    {
       _markdown = markdown;
       _containers = containers;
       _rows = [..table.Cast<MarkdigTableRow>()];
-      _startOfHeader = markdown.StartOfLineAt(StartOfTheTextOfTheHeader ?? table.Span.Start);
+      _startsOfLines = [..LinesFrom(markdown.StartOfLineAt(StartOfTheTextOfTheHeader ?? table.Span.Start)).Take(_rows.Count + 1)];
    }
 
-   internal IReadOnlyList<RenderedBlock> Read()
+   ///<summary>Null when the table isn't where Markdig says it starts, as when a link goes on into its header, so that its source isn't known.</summary>
+   internal IReadOnlyList<RenderedBlock>? Read()
    {
+      if(!IsWhereMarkdigSays) return null;
+
       var table = new Table(new SourceRange(StartOfTable(), EndOfTable()));
       foreach(var (number, row) in _rows.Index()) ReadRow(table, row, number);
 
-      return AreOneAfterTheOther(table.Cells) ? table.Cells : [new SourceBlock(_containers, new TextReader(_markdown, _containers).ReadAsSource(table.Source))];
+      return table.Cells.Count > 0 && AreOneAfterTheOther(table.Cells) ? table.Cells : [new SourceBlock(_containers, new TextReader(_markdown, _containers).ReadAsSource(table.Source))];
    }
 
    int? StartOfTheTextOfTheHeader => CellsOf(_rows[0]).SelectMany(it => it.OfType<ParagraphBlock>()).Select(it => it.Inline?.FirstChild?.Span.Start).FirstOrDefault(it => it is not null);
 
    int StartOfTable()
    {
-      var firstPipe = _markdown.IndexOf('|', _startOfHeader);
+      var firstPipe = _markdown.IndexOf('|', _startsOfLines[0]);
       return StartOfTheTextOfTheHeader is {} startOfText ? Math.Min(firstPipe, startOfText) : firstPipe;
    }
 
-   int EndOfTable() => _markdown.EndOfLineAt(StartOfLine(_rows.Count));
+   int EndOfTable() => _markdown.EndOfLineAt(_startsOfLines[^1]);
 
-   int StartOfRow(int number) => StartOfLine(number == 0 ? 0 : number + 1);
+   int StartOfRow(int number) => _startsOfLines[number == 0 ? 0 : number + 1];
 
-   ///<summary>Where line number <paramref name="lineNumber"/> of the table starts. The header is on line 0, and the line that separates it from the other rows is line 1.</summary>
-   int StartOfLine(int lineNumber)
+   bool IsWhereMarkdigSays => _startsOfLines.Count == _rows.Count + 1 && IsALineUnderAHeader(_startsOfLines[1]);
+
+   bool IsALineUnderAHeader(int startOfLine) =>
+      _markdown.AsSpan(_containers.EndOfTheirPrefixes(_markdown, startOfLine).._markdown.EndOfLineAt(startOfLine)).IndexOfAnyExcept(CharactersUnderAHeader) < 0;
+
+   IEnumerable<int> LinesFrom(int startOfFirst)
    {
-      var startOfLine = _startOfHeader;
-      //bug: throws when there are too few lines, as in the markdown "*[|", "]()-|-", on a line each, of which Markdig says that the header is on the last line.
-      for(var number = 0; number < lineNumber; number++) startOfLine = _markdown.StartOfLineAfter(startOfLine)!.Value;
-      return startOfLine;
+      for(int? startOfLine = startOfFirst; startOfLine is {} start; startOfLine = _markdown.StartOfLineAfter(start)) yield return start;
    }
 
    static IEnumerable<MarkdigTableCell> CellsOf(MarkdigTableRow row) => row.Cast<MarkdigTableCell>();
