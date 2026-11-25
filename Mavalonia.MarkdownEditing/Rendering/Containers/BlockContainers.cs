@@ -38,6 +38,9 @@ public class BlockContainers
    ///<summary>The offset after the prefixes of the containers on the line that starts at <paramref name="startOfLine"/>, as far as they are there.</summary>
    internal int EndOfTheirPrefixes(string markdown, int startOfLine) => ReadPrefixes(markdown, startOfLine).End;
 
+   ///<summary>The offset at which the text starts on the line after that of <paramref name="offset"/>: after the prefixes of the containers, and the spaces after those.</summary>
+   internal int StartOfTextOnTheLineAfter(string markdown, int offset) => markdown.SkipSpaces(EndOfTheirPrefixes(markdown, markdown.StartOfLineAfter(offset) ?? markdown.Length));
+
    (BlockContainers Containers, int End) ReadPrefixes(string markdown, int startOfLine)
    {
       var (count, end) = (0, startOfLine);

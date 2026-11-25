@@ -7,6 +7,9 @@ public readonly record struct SourceRange(int Start, int End)
 
    public int Length => End - Start;
 
+   ///<summary>What is between the delimiters that the range starts and ends with, such as the <c>**</c> of <c>**bold**</c>, each <paramref name="ofLength"/> long.</summary>
+   internal SourceRange BetweenDelimiters(int ofLength) => new(Start + ofLength, End - ofLength);
+
    ///<summary>Whether <paramref name="offset"/> is in the range or at either end of it.</summary>
    internal bool Touches(int offset) => Start <= offset && offset <= End;
 }

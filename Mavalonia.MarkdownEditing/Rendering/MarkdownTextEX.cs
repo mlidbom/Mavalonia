@@ -35,6 +35,9 @@ static class MarkdownTextEX
          return @this.IsInsideALineBreak(endOfLine + 1) ? endOfLine + 2 : endOfLine + 1;
       }
 
+      ///<summary>How far into its line <paramref name="offset"/> is.</summary>
+      internal int ColumnAt(int offset) => offset - @this.StartOfLineAt(offset);
+
       ///<summary>Whether <paramref name="offset"/> is between the two characters of a line break of Windows.</summary>
       bool IsInsideALineBreak(int offset) => offset > 0 && offset < @this.Length && @this[offset - 1] == '\r' && @this[offset] == '\n';
 

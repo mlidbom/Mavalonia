@@ -19,43 +19,52 @@ class TableReader
 {
    readonly string _markdown;
    readonly BlockContainers _containers;
+   readonly IReadOnlyList<MarkdigTableRow> _rows;
+   readonly int _startOfHeader;
 
-   internal TableReader(string markdown, BlockContainers containers)
+   internal TableReader(string markdown, BlockContainers containers, MarkdigTable table)
    {
       _markdown = markdown;
       _containers = containers;
+      _rows = [..table.Cast<MarkdigTableRow>()];
+      _startOfHeader = markdown.StartOfLineAt(StartOfTheTextOfTheHeader ?? table.Span.Start);
    }
 
-   internal IReadOnlyList<RenderedBlock> Read(MarkdigTable markdigTable)
+   internal IReadOnlyList<RenderedBlock> Read()
    {
-      var rows = markdigTable.Cast<MarkdigTableRow>().ToList();
-      var startOfHeader = _markdown.StartOfLineAt(StartOfTextIn(rows[0]) ?? markdigTable.Span.Start);
-      var table = new Table(new SourceRange(StartOfTable(), _markdown.EndOfLineAt(StartOfLine(startOfHeader, lineNumber: Math.Max(1, rows.Count)))));
-
-      foreach(var (number, row) in rows.Index()) ReadRow(table, row, number, StartOfLine(startOfHeader, lineNumber: number == 0 ? 0 : number + 1));
+      var table = new Table(new SourceRange(StartOfTable(), EndOfTable()));
+      foreach(var (number, row) in _rows.Index()) ReadRow(table, row, number);
 
       return AreOneAfterTheOther(table.Cells) ? table.Cells : [new SourceBlock(_containers, new TextReader(_markdown, _containers).ReadAsSource(table.Source))];
-
-      int StartOfTable() => _containers.EndOfTheirPrefixes(_markdown, startOfHeader) is var end && _markdown.IndexOf('|', end) is var pipe && StartOfTextIn(rows[0]) is {} text ? Math.Min(pipe, text) : _markdown.IndexOf('|', startOfHeader);
    }
 
-   bool AreOneAfterTheOther(IReadOnlyList<TableCell> cells) =>
-      cells.Zip(cells.Skip(1)).All(it => it.First.Text.Source.End <= it.Second.Text.Source.Start) && cells.All(it => it.Text.Source.End <= _markdown.EndOfLineAt(it.Text.Source.Start));
+   int? StartOfTheTextOfTheHeader => CellsOf(_rows[0]).SelectMany(it => it.OfType<ParagraphBlock>()).Select(it => it.Inline?.FirstChild?.Span.Start).FirstOrDefault(it => it is not null);
 
-   static int? StartOfTextIn(MarkdigTableRow row) => row.Cast<MarkdigTableCell>().SelectMany(it => it.OfType<ParagraphBlock>()).Select(it => it.Inline?.FirstChild?.Span.Start).FirstOrDefault(it => it is not null);
-
-   int StartOfLine(int startOfFirst, int lineNumber)
+   int StartOfTable()
    {
-      var startOfLine = startOfFirst;
+      var firstPipe = _markdown.IndexOf('|', _startOfHeader);
+      return StartOfTheTextOfTheHeader is {} startOfText ? Math.Min(firstPipe, startOfText) : firstPipe;
+   }
+
+   int EndOfTable() => _markdown.EndOfLineAt(StartOfLine(_rows.Count));
+
+   int StartOfRow(int number) => StartOfLine(number == 0 ? 0 : number + 1);
+
+   ///<summary>Where line number <paramref name="lineNumber"/> of the table starts. The header is on line 0, and the line that separates it from the other rows is line 1.</summary>
+   int StartOfLine(int lineNumber)
+   {
+      var startOfLine = _startOfHeader;
       for(var number = 0; number < lineNumber; number++) startOfLine = _markdown.StartOfLineAfter(startOfLine)!.Value;
       return startOfLine;
    }
 
-   void ReadRow(Table table, MarkdigTableRow row, int number, int startOfLine)
-   {
-      var endOfPreviousCell = startOfLine;
+   static IEnumerable<MarkdigTableCell> CellsOf(MarkdigTableRow row) => row.Cast<MarkdigTableCell>();
 
-      foreach(var (column, cell) in row.Cast<MarkdigTableCell>().Index())
+   void ReadRow(Table table, MarkdigTableRow row, int number)
+   {
+      var endOfPreviousCell = StartOfRow(number);
+
+      foreach(var (column, cell) in CellsOf(row).Index())
       {
          var text = TextOf(cell) ?? TextOfAnEmptyCellAfter(endOfPreviousCell);
          if(text is null) return; // Markdig adds cells to a row that has too few. They aren't in the markdown.
@@ -77,4 +86,7 @@ class TableReader
 
       return RenderedText.EmptyAt(_markdown[startOfCell] == ' ' ? startOfCell + 1 : startOfCell);
    }
+
+   bool AreOneAfterTheOther(IReadOnlyList<TableCell> cells) =>
+      cells.Zip(cells.Skip(1)).All(it => it.First.Text.Source.End <= it.Second.Text.Source.Start) && cells.All(it => it.Text.Source.End <= _markdown.EndOfLineAt(it.Text.Source.Start));
 }
