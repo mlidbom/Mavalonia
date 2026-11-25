@@ -1,0 +1,7 @@
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.ncrunchsolution.user
+*.ncrunchproject.user
+/.idea/*/.idea/.name
