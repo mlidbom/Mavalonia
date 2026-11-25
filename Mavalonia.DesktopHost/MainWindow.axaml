@@ -4,7 +4,7 @@
         xmlns:host="using:Mavalonia.DesktopHost"
         x:Class="Mavalonia.DesktopHost.MainWindow"
         Title="Mavalonia"
-        Width="1000" Height="700">
+        Width="1400" Height="800">
    <DockPanel>
       <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="8">
          <ComboBox x:Name="SampleDocuments" SelectionChanged="OpenSelectedSampleDocument">
@@ -15,9 +15,19 @@
             </ComboBox.ItemTemplate>
          </ComboBox>
          <ToggleButton IsChecked="{Binding #Editor.ShowsSource, Mode=TwoWay}" HotKey="Ctrl+M" ToolTip.Tip="Ctrl+M">Source</ToggleButton>
+         <Button Click="QuoteWhatIsSelected" HotKey="Ctrl+Shift+E" ToolTip.Tip="Ctrl+Shift+E: quotes in the editor what is selected at the right">Quote</Button>
+         <ToggleButton x:Name="IsDark" IsCheckedChanged="ChangeTheTheme">Dark</ToggleButton>
+         <TextBlock x:Name="ClickedLink" VerticalAlignment="Center" />
       </StackPanel>
-      <Border Margin="8,0,8,8" BorderThickness="1" BorderBrush="{DynamicResource TextControlBorderBrush}" CornerRadius="4">
-         <controls:MarkdownEditor x:Name="Editor" Padding="12,10" Watermark="Write something" />
-      </Border>
+      <Grid ColumnDefinitions="*,*" Margin="8,0,8,8">
+         <Border BorderThickness="1" BorderBrush="{DynamicResource TextControlBorderBrush}" CornerRadius="4" Margin="0,0,4,0">
+            <controls:MarkdownEditor x:Name="Editor" Padding="12,10" Watermark="Write something" />
+         </Border>
+         <Border Grid.Column="1" BorderThickness="1" BorderBrush="{DynamicResource TextControlBorderBrush}" CornerRadius="4" Margin="4,0,0,0">
+            <ScrollViewer>
+               <controls:MarkdownView x:Name="View" Padding="12,10" LinkClicked="TellOfTheClickedLink" />
+            </ScrollViewer>
+         </Border>
+      </Grid>
    </DockPanel>
 </Window>

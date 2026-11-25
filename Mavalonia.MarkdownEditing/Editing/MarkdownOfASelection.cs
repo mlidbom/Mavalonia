@@ -33,18 +33,20 @@ class MarkdownOfASelection
 
       return WithoutPrefixesOf(shared, PrefixOfTheFirstLine() + start + _rendered.Source[startOfSource..endOfSource] + end);
 
-      string PrefixOfTheFirstLine()
-      {
-         var block = _selected.Start.Block;
-         return block.Containers.WithoutTheOutermost(shared.Count).PrefixOfALine(isTheFirstOf: it => _rendered.IsTheFirstBlockInside(it, block));
-      }
+      // What is copied is the start of all the containers it starts in, also when it starts in the middle of a list item.
+      string PrefixOfTheFirstLine() => _selected.Start.Block.Containers.WithoutTheOutermost(shared.Count).PrefixOfALine(isTheFirstOf: _ => true);
    }
 
-   ///<summary>Those that all of the blocks are inside. But the title of an alert isn't one outside the alert.</summary>
+   ///<summary>Those that all of the blocks are inside. But the title of an alert isn't one outside the alert, nor is the box of a task one outside its list.</summary>
    BlockContainers ContainersToLeaveOut()
    {
       var shared = _selected.Blocks.Select(it => it.Containers).Aggregate((all, it) => all.SharedWith(it));
-      return _selected.Start.Block is AlertTitle title ? shared.Around(title.Alert) : shared;
+      return _selected.Start switch
+      {
+         { Block: AlertTitle title } => shared.Around(title.Alert),
+         { Index: 0, Block: { Containers.Innermost: ListItem item, Text: var text } } when text.StartsWithTheBoxOfATask => shared.Around(item),
+         _ => shared
+      };
    }
 
    ///<summary>The markdown of what is selected of the first block, as far as it isn't just its source, and the offset from which it is.</summary>

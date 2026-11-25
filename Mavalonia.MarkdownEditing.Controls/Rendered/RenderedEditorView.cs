@@ -1,6 +1,6 @@
 using Avalonia;
+using Avalonia.Automation.Peers;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Input;
@@ -75,6 +75,8 @@ public partial class RenderedEditorView : RenderedMarkdownView
       _blinkingCaret.Hide();
       InvalidateVisual();
    }
+
+   protected override AutomationPeer OnCreateAutomationPeer() => new RenderedEditorAutomationPeer(this);
 
    protected override void OnTextInput(TextInputEventArgs e) => _keyboard.Type(e);
    protected override void OnKeyDown(KeyEventArgs e) => _keyboard.Press(e);

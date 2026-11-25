@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
@@ -140,6 +141,8 @@ public abstract partial class RenderedMarkdownView : Control
    {
       if(ReferenceEquals(request.TargetObject, this) && request.TargetRect == new Rect(Bounds.Size)) request.Handled = true;
    }
+
+   protected override AutomationPeer OnCreateAutomationPeer() => new RenderedMarkdownAutomationPeer(this);
 
    protected override void OnPointerPressed(PointerPressedEventArgs e) => _pointer.Press(e);
    protected override void OnPointerMoved(PointerEventArgs e) => _pointer.Move(e);

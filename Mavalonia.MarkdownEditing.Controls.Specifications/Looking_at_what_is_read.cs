@@ -49,7 +49,7 @@ public class Looking_at_what_is_read
 
    [XFOnUIThread] public void shows_headings_in_the_sizes_that_are_set()
    {
-      static RenderedFrame Show(params IReadOnlyList<double> sizes) => new HeadlessWindow(new MarkdownView { Markdown = "# a\n\n## b\n\n### c", HeadingFontSizes = sizes }).RenderFrame();
-      Show(30, 20).Fingerprint.Must().NotBe(Show(30, 14).Fingerprint);
+      static RenderedFrame ShowWith(params IReadOnlyList<double> sizes) => new HeadlessWindow(new MarkdownView { Markdown = "# a\n\n## b\n\n### c", HeadingFontSizes = sizes }).RenderFrame();
+      ShowWith(30, 20).Fingerprint.Must().NotBe(ShowWith(30, 14).Fingerprint);
    }
 }

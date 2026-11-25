@@ -6,8 +6,6 @@ namespace Mavalonia.MarkdownEditing.Editing;
 ///<summary>What a markdown text is rendered as, with a selection in it that a person moves.</summary>
 public abstract class SelectableMarkdown
 {
-   TextSelection _selection;
-
    ///<summary>Tells that what is rendered or selected has changed.</summary>
    public event EventHandler? Changed;
 
@@ -15,10 +13,10 @@ public abstract class SelectableMarkdown
 
    public TextSelection Selection
    {
-      get => _selection;
+      get;
       private protected set
       {
-         _selection = value;
+         field = value;
          Changed?.Invoke(this, EventArgs.Empty);
       }
    }

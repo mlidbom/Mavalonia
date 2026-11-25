@@ -1,7 +1,8 @@
 <Project>
    <PropertyGroup>
       <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-      <AvaloniaVersion>12.2.0</AvaloniaVersion>
+      <!-- The lowest that the controls work with, so that applications needn't upgrade to use them. -->
+      <AvaloniaVersion>12.1.5</AvaloniaVersion>
    </PropertyGroup>
    <ItemGroup>
       <PackageVersion Include="AngleSharp" Version="1.11.0" />

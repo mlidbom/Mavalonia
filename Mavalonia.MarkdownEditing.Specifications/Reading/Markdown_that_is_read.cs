@@ -48,6 +48,7 @@ public class Markdown_that_is_read
       [XF] public void formatted_text_copies_its_formatting() => Copied("a ⟦**b** [c](https://d.e)⟧").Must().Be("<p><strong>b</strong> <a href=\"https://d.e\">c</a></p>");
       [XF] public void a_line_break_copies_a_line_break() => Copied("⟦a\nb⟧").Must().Be("<p>a<br />\nb</p>");
       [XF] public void HTML_copies_it_as_text() => Copied("⟦a <b>c⟧").Must().Be("<p>a &lt;b&gt;c</p>");
+      [XF] public void an_alert_copies_its_kind_as_text() => Copied("⟦> [!WARNING]\n> a⟧").Must().Satisfy(it => it.Contains("<strong>Warning</strong>") && !it.Contains("<svg"));
       [XF] public void nothing_but_code_copies_none() => Copied("```\n⟦a⟧\n```").Must().Be("");
       [XF] public void nothing_copies_none() => Copied("a‸").Must().Be("");
    }

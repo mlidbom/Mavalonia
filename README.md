@@ -1,12 +1,18 @@
 # Mavalonia
 
-Controls for Avalonia®. The first is a WYSIWYG markdown editor for writing messages, such as in an AI chat. It switches quickly between showing the markdown source and showing it rendered.
+Controls for Avalonia®, for writing and reading messages in markdown, such as in an AI chat:
+
+- **`MarkdownEditor`**, a WYSIWYG markdown editor that switches quickly between showing the markdown source and showing it rendered.
+- **`MarkdownView`**, which shows markdown to be read. What a person selects in it is copied as markdown.
+
+To use them in an application, see [using the controls in an application](dev_docs/using-the-controls-in-an-application.md). Why `MarkdownView` is as it is: [MarkdownView](dev_docs/markdown-view.md).
 
 | Project | Responsibility |
 | --- | --- |
 | `Mavalonia.MarkdownEditing` | Everything about editing markdown that needs no controls. |
 | `Mavalonia.MarkdownEditing.Controls` | The Avalonia controls |
-| `Mavalonia.DesktopHost` | The application in which to try the controls by hand. Each file in `SampleDocuments` is offered in its list. |
+| `Mavalonia.MarkdownEditing.Controls.Measurements` | Measures how fast the controls are. |
+| `Mavalonia.DesktopHost` | The application in which to try the controls by hand: an editor, and beside it what is written there as it's to be read. Each file in `SampleDocuments` is offered in its list. |
 | `Mavalonia.MarkdownEditing.Specifications` | Run in parallel, without UI. Most specifications belong here. |
 | `Mavalonia.MarkdownEditing.Controls.Specifications` | Use real controls in windows that exist only in memory, one specification at a time. |
 
@@ -15,7 +21,7 @@ Controls for Avalonia®. The first is a WYSIWYG markdown editor for writing mess
 - **The markdown text is the document.** It is an AvaloniaEdit `TextDocument`, which works without a UI, and has undo. The rendered view and the source view edit the same one, so nothing is converted when switching, and markdown that isn't edited stays as it is written.
 - **The rendered view shows no markup.** Each character it shows knows the markdown it stands for (`RenderedChar.Source`).
 - **An edit says what is to be shown,** then finds the least change to the markdown that shows that, and verifies it by rendering the result (`TextReplacement`). Typing a space at the end of bold text must not stop it from being bold, though `**bold **` isn't.
-- **Some markup is turned off** since people type it without meaning to: headings made by underlining, and code made by indenting. Both are shown as ordinary text.
+- **Some markup is turned off in the editor** since people type it without meaning to: headings made by underlining, and code made by indenting. Both are shown as ordinary text. What is only read is in another dialect (`MarkdownDialect`).
 - **A table is made when a new block is started** after a line such as `| a | b |`, or after all the lines of one. Typing makes none: the line under a header would make it when only a part of the line is there. Tab in the last cell adds a row, and starting a new block in an empty last row leaves the table.
 - **Markup that isn't rendered is shown as source:** HTML, images, link definitions.
 - **Rich text is pasted as markdown** (`CopiedHtml`). What has no markdown that we render loses its looks and keeps its text, and text that looks like markup is escaped, as little as possible: what is written is verified by rendering it. What is copied from an editor of code is pasted as its text, since it may be markdown. Only the clipboard of Windows is read for rich text; elsewhere its text is pasted.
@@ -27,6 +33,7 @@ Controls for Avalonia®. The first is a WYSIWYG markdown editor for writing mess
 - **Run the specifications:** `dotnet test --solution Mavalonia.slnx`
 - **Run one project's:** `dotnet test --project Mavalonia.MarkdownEditing.Controls.Specifications`
 - **Try the controls, reloading code changes:** `dotnet watch --project Mavalonia.DesktopHost`
+- **Measure how fast the controls are:** `dotnet run -c Release --project Mavalonia.MarkdownEditing.Controls.Measurements`, with how many messages as arguments, or none for 100 and 1,000
 - **Check that typing works on the real desktop:** `dotnet run --project Mavalonia.DesktopHost -- --check-typing`. The specifications run on the headless platform, which has no input methods. The window is off the screen and doesn't take the focus. The exit code is 0 when typing works.
 
 ## Specifications that use controls

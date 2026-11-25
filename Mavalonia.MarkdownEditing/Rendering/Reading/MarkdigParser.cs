@@ -1,6 +1,8 @@
 using Markdig;
 using Markdig.Extensions.EmphasisExtras;
+using Markdig.Helpers;
 using Markdig.Parsers;
+using Markdig.Renderers;
 using Markdig.Syntax;
 
 namespace Mavalonia.MarkdownEditing.Rendering.Reading;
@@ -13,8 +15,8 @@ static class MarkdigParser
 
    internal static MarkdownDocument Parse(string markdown, MarkdownDialect dialect) => Markdown.Parse(markdown, dialect == MarkdownDialect.ForReading ? PipelineForReading : PipelineForEditing);
 
-   internal static MarkdownPipelineBuilder PipelineBuilderFor(MarkdownDialect dialect) =>
-      dialect == MarkdownDialect.ForReading ? PipelineOfAllDialects().UseAutoLinks().UseTaskLists().UseAlertBlocks() : PipelineWithoutTheMarkupThatPeopleTypeWithoutMeaningTo();
+   internal static MarkdownPipelineBuilder PipelineBuilderFor(MarkdownDialect dialect, Action<HtmlRenderer, StringSlice>? writeTitleOfAnAlert = null) =>
+      dialect == MarkdownDialect.ForReading ? PipelineOfAllDialects().UseAutoLinks().UseTaskLists().UseAlertBlocks(writeTitleOfAnAlert) : PipelineWithoutTheMarkupThatPeopleTypeWithoutMeaningTo();
 
    static MarkdownPipelineBuilder PipelineOfAllDialects() => new MarkdownPipelineBuilder().UsePreciseSourceLocation()
                                                                                          .UsePipeTables()

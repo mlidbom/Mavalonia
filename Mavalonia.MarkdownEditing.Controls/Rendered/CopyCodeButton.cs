@@ -30,7 +30,7 @@ class CopyCodeButton : Button
    protected override Type StyleKeyOverride => typeof(Button);
 
    ///<summary>The block whose code is copied. Null while the button isn't shown.</summary>
-   internal CodeBlock? Block { get; private set; }
+   CodeBlock? Block { get; set; }
 
    internal void ShowFor(CodeBlock block, Rect bounds)
    {

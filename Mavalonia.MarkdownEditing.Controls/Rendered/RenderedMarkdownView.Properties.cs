@@ -74,7 +74,7 @@ partial class RenderedMarkdownView
    ///<summary>Null when there is none to show, or not yet.</summary>
    private protected virtual IImage? ImageOf(InlineImage image) => null;
 
-   private protected bool IsDark => ActualThemeVariant == ThemeVariant.Dark;
+   bool IsDark => ActualThemeVariant == ThemeVariant.Dark;
 
    IBrush FromTheTheme(string key, IBrush otherwise) => this.TryFindResource(key, ActualThemeVariant, out var found)
                                                            ? found switch
