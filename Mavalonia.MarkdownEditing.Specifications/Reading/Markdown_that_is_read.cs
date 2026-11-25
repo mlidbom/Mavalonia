@@ -52,6 +52,9 @@ public class Markdown_that_is_read
       [XF] public void formatted_text_copies_its_markup() => Copied("a **b⟦c** [d](e) `f⟧g`").Must().Be("**c** [d](e) `f`");
       [XF] public void a_bare_URL_copies_it_as_it_is_written() => Copied("a ⟦https://example.org⟧ b").Must().Be("https://example.org");
       [XF] public void an_image_copies_its_markup() => Copied("⟦a ![b c](d.png) e⟧").Must().Be("a ![b c](d.png) e");
+      [XF] public void a_link_that_is_defined_elsewhere_copies_its_definition() => Copied("a ⟦[b][c]⟧ d\n\n[c]: https://e.f").Must().Be("[b][c]\n\n[c]: https://e.f");
+      [XF] public void several_links_that_are_defined_elsewhere_copies_their_definitions() => Copied("⟦[b]\n\n- [c][d] [b]⟧\n\n[b]: https://e.f\n[d]: https://g.h").Must().Be("[b]\n\n- [c][d] [b]\n\n[b]: https://e.f\n[d]: https://g.h");
+      [XF] public void a_link_with_its_definition_copies_that_once() => Copied("⟦[b]\n\n[b]: https://e.f\n\nc⟧").Must().Be("[b]\n\n[b]: https://e.f\n\nc");
       [XF] public void tasks_copies_their_boxes() => Copied("⟦- [ ] a\n- [x] b⟧").Must().Be("- [ ] a\n- [x] b");
       [XF] public void an_alert_copies_its_kind() => Copied("⟦> [!NOTE]\n> a⟧").Must().Be("> [!NOTE]\n> a");
       [XF] public void the_title_of_an_alert_alone_copies_its_text() => Copied("> ⟦[!NOTE]⟧\n> a").Must().Be("Note");
@@ -94,6 +97,9 @@ public class Markdown_that_is_read
       [XF] public void a_br_tag_copies_a_line_break() => Copied("⟦a<br>b⟧").Must().Be("<p>a<br />b</p>");
       [XF] public void comments_copies_none_of_them() => Copied("⟦a\n\n<!-- b -->\n\nc <!-- d --> e⟧").Must().Be("<p>a</p>\n<p>c  e</p>");
       [XF] public void an_alert_copies_its_kind_as_text() => Copied("⟦> [!WARNING]\n> a⟧").Must().Satisfy(it => it.Contains("<strong>Warning</strong>") && !it.Contains("<svg"));
+      [XF] public void an_image_copies_a_link_to_it() => Copied("⟦![b](https://c.d)⟧").Must().Be("<p><a href=\"https://c.d\">b</a></p>");
+      [XF] public void an_image_without_a_description_copies_a_link_to_it() => Copied("⟦![](https://c.d)⟧").Must().Be("<p><a href=\"https://c.d\">image</a></p>");
+      [XF] public void an_image_in_a_link_copies_the_link() => Copied("⟦[![b](https://c.d)](https://e.f)⟧").Must().Be("<p><a href=\"https://e.f\">b</a></p>");
       [XF] public void nothing_but_code_copies_none() => Copied("```\n⟦a⟧\n```").Must().Be("");
       [XF] public void nothing_copies_none() => Copied("a‸").Must().Be("");
       [XF] public void hundreds_of_opening_brackets_that_none_closes_copies_them() => Copied($"⟦{new string('[', 500)}⟧").Must().Be($"<p>{new string('[', 500)}</p>");

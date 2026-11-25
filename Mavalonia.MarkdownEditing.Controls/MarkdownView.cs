@@ -23,6 +23,7 @@ public class MarkdownView : RenderedMarkdownView
    public static readonly StyledProperty<MarkdownDialect> DialectProperty = AvaloniaProperty.Register<MarkdownView, MarkdownDialect>(nameof(Dialect), MarkdownDialect.ForReading, coerce: InsteadOfNull(MarkdownDialect.ForReading));
    public static readonly StyledProperty<IReadOnlyList<TextHighlight>> HighlightsProperty = AvaloniaProperty.Register<MarkdownView, IReadOnlyList<TextHighlight>>(nameof(Highlights), [], coerce: InsteadOfNull<IReadOnlyList<TextHighlight>>([]));
    public static readonly StyledProperty<Func<string, Task<IImage?>>?> LoadImageProperty = AvaloniaProperty.Register<MarkdownView, Func<string, Task<IImage?>>?>(nameof(LoadImage));
+   public static readonly DirectProperty<MarkdownView, bool> IsAnythingSelectedProperty = AvaloniaProperty.RegisterDirect<MarkdownView, bool>(nameof(IsAnythingSelected), it => it.IsAnythingSelected);
    public static readonly RoutedEvent<LinkClickedEventArgs> LinkClickedEvent = RoutedEvent.Register<MarkdownView, LinkClickedEventArgs>(nameof(LinkClicked), RoutingStrategies.Bubble);
 
    readonly ReadingKeys _keys;
@@ -46,7 +47,13 @@ public class MarkdownView : RenderedMarkdownView
    public MarkdownView()
    {
       _keys = new ReadingKeys(this);
-      _read.Changed += (_, _) => InvalidateWhatIsShown();
+      _read.Changed += (_, _) => ShowTheChange();
+   }
+
+   void ShowTheChange()
+   {
+      InvalidateWhatIsShown();
+      IsAnythingSelected = !_read.Selection.IsEmpty;
    }
 
    ///<summary>A binding may give null for what can't be null.</summary>
@@ -59,7 +66,8 @@ public class MarkdownView : RenderedMarkdownView
 
    ///<summary>Loads the image that the markdown says is at a place, or returns null when there is none to show. Null to load none, so that images are shown as their descriptions.</summary>
    ///<remarks>
-   /// What an AI writes can hold an image whose address carries what it knows to somebody else, who gets it as soon as the image is loaded. So load only what can't do that, such as files, or images from places that are known.
+   /// What an AI writes can hold an image whose address carries what it knows to somebody else, who gets it as soon as the image is loaded. So load only what can't do that, such as files, or images from places that are known.<br/>
+   /// An exception in it surfaces on the dispatcher.
    /// </remarks>
    public Func<string, Task<IImage?>>? LoadImage { get => GetValue(LoadImageProperty); set => SetValue(LoadImageProperty, value); }
 
@@ -77,7 +85,8 @@ public class MarkdownView : RenderedMarkdownView
    ///<summary>Where the text of <paramref name="range"/> is shown: a rectangle for each line of it.</summary>
    public IReadOnlyList<Rect> BoundsOf(PlainTextRange range) => [..PlainText.PartsOf(range).SelectMany(Layout.BoundsOf)];
 
-   public bool IsAnythingSelected => !_read.Selection.IsEmpty;
+   ///<summary>Tells when it changes, such as for a command that needs something to be selected.</summary>
+   public bool IsAnythingSelected { get; private set => SetAndRaise(IsAnythingSelectedProperty, ref field, value); }
 
    ///<summary>The markdown of what is selected. Empty when nothing is.</summary>
    public string SelectedMarkdown => _read.SelectedMarkdown;

@@ -91,4 +91,16 @@ public class Selecting
 
       new { view.ScrollViewer.Offset.Y, view.View.SelectedMarkdown }.Must().Satisfy(it => it.Y >= 300 && it.SelectedMarkdown.Contains("line30"));
    }
+
+   [XFOnUIThread] public void tells_that_something_is_selected_and_that_it_no_longer_is()
+   {
+      var view = new ViewInAWindow("one two");
+      var told = new List<bool>();
+      view.View.PropertyChanged += (_, change) =>
+      {
+         if(change.Property == MarkdownView.IsAnythingSelectedProperty) told.Add(change.GetNewValue<bool>());
+      };
+      view.Select("one", to: "two").Press(PhysicalKey.Escape);
+      told.Must().SequenceEqual([true, false]);
+   }
 }

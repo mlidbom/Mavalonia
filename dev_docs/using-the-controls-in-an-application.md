@@ -28,10 +28,10 @@ It is as high as what it shows, and doesn't scroll itself: put it in what scroll
 | `ApplyTextSearch`, named highlights with priorities | `Highlights`, ranges of `PlainText` with a brush each, the uppermost last. Set them again when `Markdown` is. |
 | `GetTextRangeBoundsInControl` of a match | `BoundsOf(range)` |
 | `MarkdownTextBlock` for rows that aren't markdown, so that search paints them alike | `MarkdownView { Dialect = MarkdownDialect.PlainText, Markdown = ... }` |
-| Images not loaded, since `ImageBasePath` isn't set | Nothing: images are shown as their descriptions, unless `LoadImage` is set. **Don't load images from any URL:** one in an AI's reply can carry what it knows to somebody else. |
+| Images not loaded, since `ImageBasePath` isn't set | Nothing: images are shown as their descriptions, unless `LoadImage` is set. **Don't load images from any URL:** one in an AI's reply can carry what it knows to somebody else. The rich text that is copied has links to images instead of them, for the same reason. |
 | Swallowing the request to bring a clicked message into view | Nothing: getting the focus scrolls nothing. Selecting by dragging or with the keyboard brings the end of the selection into view. |
 
-Copying: Ctrl+C in the view, or `CopySelection()`, such as for a menu. `SelectedMarkdown` is there for a "Quote" command:
+Copying: Ctrl+C in the view, or `CopySelection()`, such as for a menu. `SelectedMarkdown` is there for a "Quote" command, and `IsAnythingSelected` can be bound to enable it:
 
 ```csharp
 editor.Quote(view.SelectedMarkdown);

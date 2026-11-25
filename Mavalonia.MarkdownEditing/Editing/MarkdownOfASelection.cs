@@ -17,7 +17,20 @@ class MarkdownOfASelection
       _selected = selected;
    }
 
-   internal string Markdown => _selected.IsInOneBlock ? MarkdownOfTextIn(_selected.Start.Block) : MarkdownOfSeveralBlocks();
+   internal string Markdown => WithDefinitionsOfLinks(_selected.IsInOneBlock ? MarkdownOfTextIn(_selected.Start.Block) : MarkdownOfSeveralBlocks());
+
+   ///<summary>A link whose definition is elsewhere in the text would not be a link without it.</summary>
+   string WithDefinitionsOfLinks(string markdown)
+   {
+      var definitions = _selected.PartInEachBlock.SelectMany(it => it.Start.Block.Text.Chars.Take(it.Start.Index..it.End.Index))
+                                 .Select(it => it.Formatting.Link?.Definition)
+                                 .OfType<string>()
+                                 .Distinct()
+                                 .Where(it => !markdown.Contains(it, StringComparison.Ordinal))
+                                 .ToList();
+
+      return definitions.Count == 0 ? markdown : $"{markdown}\n\n{string.Join('\n', definitions)}";
+   }
 
    string MarkdownOfTextIn(RenderedBlock block)
    {

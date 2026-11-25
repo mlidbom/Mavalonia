@@ -29,6 +29,7 @@ static partial class HtmlOfMarkdown
 
       renderer.ObjectRenderers.FindExact<LineBreakInlineRenderer>()!.RenderAsHardlineBreak = true;
       if(renderer.ObjectRenderers.FindExact<AlertBlockRenderer>() is {} alerts) alerts.RenderKind = WriteTitleOfAnAlert;
+      renderer.ObjectRenderers.Replace<LinkInlineRenderer>(new WriterOfLinks());
       renderer.ObjectRenderers.Replace<HtmlBlockRenderer>(new WriterOfHtmlBlocks(dialect));
       renderer.ObjectRenderers.Replace<HtmlInlineRenderer>(new WriterOfInlineHtml(dialect));
 

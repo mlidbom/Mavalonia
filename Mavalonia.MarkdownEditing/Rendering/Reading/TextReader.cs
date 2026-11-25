@@ -116,7 +116,8 @@ class TextReader
    {
       var range = RangeOf(markdigLink);
       var content = new SourceRange(RangeOf(markdigLink.FirstChild!).Start, RangeOf(markdigLink.LastChild!).End);
-      var link = new Link(markdigLink.GetDynamicUrl?.Invoke() ?? markdigLink.Url ?? "", opening: _markdown[range.Start..content.Start], closing: _markdown[content.End..range.End]);
+      var definition = markdigLink.Reference is { Span.IsEmpty: false } reference ? _markdown[reference.Span.Start..Math.Min(reference.Span.End + 1, _markdown.Length)] : null;
+      var link = new Link(markdigLink.GetDynamicUrl?.Invoke() ?? markdigLink.Url ?? "", opening: _markdown[range.Start..content.Start], closing: _markdown[content.End..range.End], definition);
 
       _text.AddMarkup(range, content, new TextFormatting(TextFormats.None, link), () => ReadAll(markdigLink, formatting with { Link = link }));
    }
