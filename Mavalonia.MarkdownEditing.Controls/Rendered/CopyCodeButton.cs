@@ -53,7 +53,7 @@ class CopyCodeButton : Button
 
    async Task CopyTheCode()
    {
-      await TopLevel.GetTopLevel(this)!.Clipboard!.SetTextAsync(Block!.Text.Value);
+      await this.Clipboard.SetTextAsync(Block!.Text.Value);
       Content = "Copied";
       _untilItSaysCopyAgain.Start();
    }

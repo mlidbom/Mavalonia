@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.VisualTree;
 
 namespace Mavalonia.MarkdownEditing.Controls.Menus;
 
@@ -15,7 +14,7 @@ class MenuOfAnEditor : MenuMadeWhenItOpens
 
    private protected override IEnumerable<Control> MakeItems()
    {
-      var keys = _editor.GetPlatformSettings()!.HotkeyConfiguration;
+      var keys = _editor.Hotkeys;
       var isAnythingSelected = !_editor.Selection.IsEmpty;
 
       yield return new MenuCommand("Cut", _editor.Cut, keys.Cut.FirstOrDefault()) { IsEnabled = isAnythingSelected };

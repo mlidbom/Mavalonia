@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using AvaloniaEdit;
 using AvaloniaEdit.Document;
@@ -17,7 +16,7 @@ class ClipboardInput : IClipboardInput
       _view = view;
    }
 
-   IClipboard Clipboard => TopLevel.GetTopLevel(_view)!.Clipboard!;
+   IClipboard Clipboard => _view.Clipboard;
 
    public Task Copy() => _view.TextSelection.IsEmpty ? Task.CompletedTask : Clipboard.SetTextAsync(_view.SelectedText);
 

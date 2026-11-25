@@ -2,10 +2,8 @@ using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Input.Platform;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
-using Avalonia.VisualTree;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Layouts;
 using Mavalonia.MarkdownEditing.Editing;
@@ -55,8 +53,6 @@ public abstract partial class RenderedMarkdownView : Control
 
    ///<summary>What is shown. Null while nothing is.</summary>
    internal abstract SelectableMarkdown? Shown { get; }
-
-   internal PlatformHotkeyConfiguration Hotkeys => this.GetPlatformSettings()!.HotkeyConfiguration;
 
    RenderedMarkdown Rendered => Shown?.Rendered ?? NothingRendered;
 

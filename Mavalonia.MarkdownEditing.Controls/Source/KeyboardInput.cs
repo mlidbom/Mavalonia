@@ -1,6 +1,5 @@
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.VisualTree;
 using AvaloniaEdit;
 
 namespace Mavalonia.MarkdownEditing.Controls.Source;
@@ -32,7 +31,7 @@ class KeyboardInput
    {
       if(_editor.PasteAsQuoteGesture?.Matches(e) == true) return _clipboardInput.PasteAsQuote;
       if(_editor.PasteTextGesture?.Matches(e) == true) return _clipboardInput.PasteText;
-      if(_view.GetPlatformSettings()!.HotkeyConfiguration.Paste.Any(it => it.Matches(e))) return _clipboardInput.Paste;
+      if(_view.Hotkeys.Paste.Any(it => it.Matches(e))) return _clipboardInput.Paste;
       return null;
    }
 }

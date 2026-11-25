@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using Mavalonia.MarkdownEditing.Editing;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
@@ -12,7 +11,7 @@ class ClipboardInput : IClipboardInput
 
    internal ClipboardInput(RenderedEditorView view) => _view = view;
 
-   IClipboard Clipboard => TopLevel.GetTopLevel(_view)!.Clipboard!;
+   IClipboard Clipboard => _view.Clipboard;
    RenderedEditor Editor => _view.Editor!;
 
    public Task Copy() => Editor.Selection.IsEmpty ? Task.CompletedTask : new CopiedSelection(Editor).PutOn(Clipboard);

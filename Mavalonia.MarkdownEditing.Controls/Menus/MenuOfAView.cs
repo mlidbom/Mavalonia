@@ -20,7 +20,7 @@ class MenuOfAView : MenuMadeWhenItOpens
       var keys = _view.Hotkeys;
 
       yield return new MenuCommand("Copy", _view.CopySelection, keys.Copy.FirstOrDefault()) { IsEnabled = _view.IsAnythingSelected };
-      if(TargetOfTheLink is {} target) yield return new MenuCommand("Copy link", () => TopLevel.GetTopLevel(_view)!.Clipboard!.SetTextAsync(target));
+      if(TargetOfTheLink is {} target) yield return new MenuCommand("Copy link", () => _view.Clipboard.SetTextAsync(target));
       yield return new Separator();
       yield return new MenuCommand("Select all", _view.SelectAll, keys.SelectAll.FirstOrDefault()) { IsEnabled = _view.PlainText.Value.Length > 0 };
    }
