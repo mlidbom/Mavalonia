@@ -19,8 +19,8 @@ partial class MarkdownEditor
    public static readonly StyledProperty<KeyGesture?> ToggleItalicGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(ToggleItalicGesture), new KeyGesture(Key.I, ControlOrCommand));
    public static readonly StyledProperty<KeyGesture?> ToggleCodeGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(ToggleCodeGesture), new KeyGesture(Key.E, ControlOrCommand));
    public static readonly StyledProperty<KeyGesture?> ToggleStrikethroughGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(ToggleStrikethroughGesture), new KeyGesture(Key.X, ControlOrCommand | KeyModifiers.Shift));
-   public static readonly StyledProperty<KeyGesture?> PasteTextGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteTextGesture), new KeyGesture(Key.V, KeyModifiers.Control | KeyModifiers.Shift));
-   public static readonly StyledProperty<KeyGesture?> PasteAsQuoteGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteAsQuoteGesture), new KeyGesture(Key.Q, KeyModifiers.Control | KeyModifiers.Shift));
+   public static readonly StyledProperty<KeyGesture?> PasteTextGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteTextGesture), new KeyGesture(Key.V, ControlOrCommand | KeyModifiers.Shift));
+   public static readonly StyledProperty<KeyGesture?> PasteAsQuoteGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteAsQuoteGesture), new KeyGesture(Key.Q, ControlOrCommand | KeyModifiers.Shift));
 
    public static readonly RoutedEvent<LinkClickedEventArgs> LinkClickedEvent = MarkdownView.LinkClickedEvent;
 
