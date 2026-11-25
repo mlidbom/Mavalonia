@@ -33,7 +33,7 @@ class TableReader
       _markdown = markdown;
       _containers = containers;
       _rows = [..table.Cast<MarkdigTableRow>()];
-      _startsOfLines = [..LinesFrom(markdown.StartOfLineAt(StartOfTheTextOfTheHeader ?? table.Span.Start)).Take(_rows.Count + 1)];
+      _startsOfLines = [..markdown.StartsOfLinesFrom(markdown.StartOfLineAt(StartOfTheTextOfTheHeader ?? table.Span.Start)).Take(_rows.Count + 1)];
    }
 
    ///<summary>Null when the table isn't where Markdig says it starts, as when a link goes on into its header, so that its source isn't known.</summary>
@@ -63,11 +63,6 @@ class TableReader
 
    bool IsALineUnderAHeader(int startOfLine) =>
       _markdown.AsSpan(_containers.EndOfTheirPrefixes(_markdown, startOfLine).._markdown.EndOfLineAt(startOfLine)).IndexOfAnyExcept(CharactersUnderAHeader) < 0;
-
-   IEnumerable<int> LinesFrom(int startOfFirst)
-   {
-      for(int? startOfLine = startOfFirst; startOfLine is {} start; startOfLine = _markdown.StartOfLineAfter(start)) yield return start;
-   }
 
    static IEnumerable<MarkdigTableCell> CellsOf(MarkdigTableRow row) => row.Cast<MarkdigTableCell>();
 

@@ -22,16 +22,11 @@ class IndentedCodeReader
 
    internal CodeBlock Read(MarkdigCodeBlock code)
    {
-      var startsOfLines = LinesFrom(_markdown.StartOfLineAt(code.Span.Start)).Take(code.Lines.Count).ToList();
+      var startsOfLines = _markdown.StartsOfLinesFrom(_markdown.StartOfLineAt(code.Span.Start)).Take(code.Lines.Count).ToList();
       var lines = startsOfLines.Select(CodeOnTheLineAt).ToList();
       var source = new SourceRange(StartOfIndentation(startsOfLines[0]), lines[^1].End);
 
       return new CodeBlock(_place.Containers, TextOfLines.Read(_markdown, lines, Formatting), source, language: "", hasNoLine: false);
-   }
-
-   IEnumerable<int> LinesFrom(int startOfFirst)
-   {
-      for(int? startOfLine = startOfFirst; startOfLine is {} start; startOfLine = _markdown.StartOfLineAfter(start)) yield return start;
    }
 
    SourceRange CodeOnTheLineAt(int startOfLine)

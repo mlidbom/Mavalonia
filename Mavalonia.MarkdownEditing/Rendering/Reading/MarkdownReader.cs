@@ -35,12 +35,8 @@ class MarkdownReader
 
    static IReadOnlyList<RenderedBlock> ReadPlainText(string text)
    {
-      return text.Length == 0 ? [] : [new Paragraph(BlockContainers.None, TextOfLines.Read(text, [..Lines()], TextFormatting.None))];
-
-      IEnumerable<SourceRange> Lines()
-      {
-         for(int? startOfLine = 0; startOfLine is {} start; startOfLine = text.StartOfLineAfter(start)) yield return new SourceRange(start, text.EndOfLineAt(start));
-      }
+      var lines = text.StartsOfLinesFrom(0).Select(it => new SourceRange(it, text.EndOfLineAt(it)));
+      return text.Length == 0 ? [] : [new Paragraph(BlockContainers.None, TextOfLines.Read(text, [..lines], TextFormatting.None))];
    }
 
    IReadOnlyList<RenderedBlock> ReadBlocks()

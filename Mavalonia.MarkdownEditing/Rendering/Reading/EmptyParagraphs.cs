@@ -17,7 +17,7 @@ class EmptyParagraphs
 
    internal IReadOnlyList<RenderedBlock> AddedTo(IReadOnlyList<RenderedBlock> blocks)
    {
-      if(blocks.Count == 0) return [..EveryOther(LinesFrom(0), first: 0).Select(it => EmptyAt(it, BlockContainers.None))];
+      if(blocks.Count == 0) return [..EveryOther(_markdown.StartsOfLinesFrom(0), first: 0).Select(it => EmptyAt(it, BlockContainers.None))];
 
       List<RenderedBlock> all = [..Before(blocks[0])];
       foreach(var (block, next) in blocks.Zip(blocks.Skip(1)))
@@ -32,7 +32,7 @@ class EmptyParagraphs
 
    IEnumerable<RenderedBlock> Before(RenderedBlock first)
    {
-      var blankLines = LinesFrom(0).TakeWhile(it => it < _markdown.StartOfLineAt(first.Source.Start)).ToList();
+      var blankLines = _markdown.StartsOfLinesFrom(0).TakeWhile(it => it < _markdown.StartOfLineAt(first.Source.Start)).ToList();
       return EveryOther(blankLines, first: 0).Take(blankLines.Count / 2).Select(it => EmptyAt(it, first.Containers));
    }
 
@@ -66,11 +66,5 @@ class EmptyParagraphs
 
    static IEnumerable<int> EveryOther(IEnumerable<int> lines, int first) => lines.Where((_, index) => index >= first && (index - first) % 2 == 0);
 
-   IEnumerable<int> LinesAfter(RenderedBlock block) => _markdown.StartOfLineAfter(block.Source.End) is {} startOfLine ? LinesFrom(startOfLine) : [];
-
-   ///<summary>The offsets that the lines start at, from the line that starts at <paramref name="startOfFirst"/>.</summary>
-   IEnumerable<int> LinesFrom(int startOfFirst)
-   {
-      for(int? startOfLine = startOfFirst; startOfLine is {} start; startOfLine = _markdown.StartOfLineAfter(start)) yield return start;
-   }
+   IEnumerable<int> LinesAfter(RenderedBlock block) => _markdown.StartOfLineAfter(block.Source.End) is {} startOfLine ? _markdown.StartsOfLinesFrom(startOfLine) : [];
 }

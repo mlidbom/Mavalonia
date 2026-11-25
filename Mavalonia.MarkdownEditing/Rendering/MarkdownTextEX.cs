@@ -35,6 +35,12 @@ static class MarkdownTextEX
          return @this.IsInsideALineBreak(endOfLine + 1) ? endOfLine + 2 : endOfLine + 1;
       }
 
+      ///<summary>The offsets that the lines start at, from the one that <paramref name="startOfFirst"/> starts.</summary>
+      internal IEnumerable<int> StartsOfLinesFrom(int startOfFirst)
+      {
+         for(int? startOfLine = startOfFirst; startOfLine is {} start; startOfLine = @this.StartOfLineAfter(start)) yield return start;
+      }
+
       ///<summary>The offset after the last character of the line before the one that <paramref name="offset"/> is on, which must not be the first.</summary>
       internal int EndOfLineBefore(int offset) => @this.EndOfLineAt(@this.StartOfLineAt(offset) - 1);
 
