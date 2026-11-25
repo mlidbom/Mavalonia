@@ -41,8 +41,8 @@ public class Using_the_menu
          return new MenuOfAControl(editor.Editor).IsOpen;
       }
 
-      [XFOnUIThread] public void is_done_with_the_right_button_in_the_rendered_view() => Editor("one two‸").Must().Satisfy(it => IsOpenAfterARightClick(it));
-      [XFOnUIThread] public void is_done_with_the_right_button_in_the_source_view() => Editor("one two‸", inTheSource: true).Must().Satisfy(it => IsOpenAfterARightClick(it));
+      [XFOnUIThread] public void is_done_with_the_right_button_in_the_rendered_view() => IsOpenAfterARightClick(Editor("one two‸")).Must().BeTrue();
+      [XFOnUIThread] public void is_done_with_the_right_button_in_the_source_view() => IsOpenAfterARightClick(Editor("one two‸", inTheSource: true)).Must().BeTrue();
       [XFOnUIThread] public void is_done_with_the_menu_key_in_the_rendered_view() => OpenMenuOf(Editor("one‸")).IsOpen.Must().BeTrue();
       [XFOnUIThread] public void is_done_with_the_menu_key_in_the_source_view() => OpenMenuOf(Editor("one‸", inTheSource: true)).IsOpen.Must().BeTrue();
 
