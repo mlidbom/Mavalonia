@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using AvaloniaEdit.Document;
+using Mavalonia.MarkdownEditing.Controls.Clipboards;
 using Mavalonia.MarkdownEditing.Controls.Menus;
 using Mavalonia.MarkdownEditing.Controls.Source;
 using Mavalonia.MarkdownEditing.Editing;

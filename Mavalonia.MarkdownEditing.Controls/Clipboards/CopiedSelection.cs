@@ -3,7 +3,7 @@ using Avalonia.Input.Platform;
 using Mavalonia.MarkdownEditing.Editing;
 using Mavalonia.MarkdownEditing.Html;
 
-namespace Mavalonia.MarkdownEditing.Controls;
+namespace Mavalonia.MarkdownEditing.Controls.Clipboards;
 
 ///<summary>What is selected, to be put on the clipboard: its markdown as text, and rich text for programs that take that.</summary>
 class CopiedSelection

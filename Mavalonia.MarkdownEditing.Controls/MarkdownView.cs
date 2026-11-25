@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Mavalonia.MarkdownEditing.Controls.Clipboards;
 using Mavalonia.MarkdownEditing.Controls.Menus;
 using Mavalonia.MarkdownEditing.Controls.Rendered;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Input;

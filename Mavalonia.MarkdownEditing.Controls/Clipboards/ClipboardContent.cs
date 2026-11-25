@@ -2,7 +2,7 @@ using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Mavalonia.MarkdownEditing.Html;
 
-namespace Mavalonia.MarkdownEditing.Controls;
+namespace Mavalonia.MarkdownEditing.Controls.Clipboards;
 
 ///<summary>What there is on the clipboard to paste: text, and rich text when that was copied too.</summary>
 class ClipboardContent

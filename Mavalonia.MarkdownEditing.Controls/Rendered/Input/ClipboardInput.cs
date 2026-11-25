@@ -1,4 +1,5 @@
 using Avalonia.Input.Platform;
+using Mavalonia.MarkdownEditing.Controls.Clipboards;
 using Mavalonia.MarkdownEditing.Editing;
 using Mavalonia.MarkdownEditing.Rendering.Blocks;
 

@@ -1,6 +1,7 @@
 using Avalonia.Input.Platform;
 using AvaloniaEdit;
 using AvaloniaEdit.Document;
+using Mavalonia.MarkdownEditing.Controls.Clipboards;
 
 namespace Mavalonia.MarkdownEditing.Controls.Source;
 

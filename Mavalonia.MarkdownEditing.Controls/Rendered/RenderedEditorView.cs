@@ -3,6 +3,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
+using Mavalonia.MarkdownEditing.Controls.Clipboards;
 using Mavalonia.MarkdownEditing.Controls.Rendered.Input;
 using Mavalonia.MarkdownEditing.Editing;
 

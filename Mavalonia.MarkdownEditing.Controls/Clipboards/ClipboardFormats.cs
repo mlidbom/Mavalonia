@@ -1,6 +1,6 @@
 using Avalonia.Input;
 
-namespace Mavalonia.MarkdownEditing.Controls;
+namespace Mavalonia.MarkdownEditing.Controls.Clipboards;
 
 ///<summary>The formats that we have on the clipboard besides text.</summary>
 static class ClipboardFormats

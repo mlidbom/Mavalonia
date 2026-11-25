@@ -1,4 +1,4 @@
-namespace Mavalonia.MarkdownEditing.Controls;
+namespace Mavalonia.MarkdownEditing.Controls.Clipboards;
 
 ///<summary>What a person does with the clipboard in one of the views of a <see cref="MarkdownEditor"/>.</summary>
 interface IClipboardInput
