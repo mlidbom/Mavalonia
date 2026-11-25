@@ -18,7 +18,7 @@ public class ListItem : BlockContainer
       Number = number;
    }
 
-   ///<summary>Null when the item has a bullet.</summary>
+   ///<summary>The item's number in its list: that of the first item written, counted on from there. Null when the item has a bullet.</summary>
    public int? Number { get; }
 
    ///<summary>The number as it's shown before the item, such as <c>1.</c>, or <c>1)</c> when it's written so. Null when the item has a bullet.</summary>
