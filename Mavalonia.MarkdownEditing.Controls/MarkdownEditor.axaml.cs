@@ -23,10 +23,13 @@ public partial class MarkdownEditor : UserControl
       SetCurrentValue(DocumentProperty, new TextDocument());
    }
 
+   ///<summary>Edits what the rendered view shows. Null while the source is shown instead, and while the control isn't in a window.</summary>
+   RenderedEditor? RenderedEditorShown => ShowsSource ? null : _renderedEditor;
+
    ///<summary>What is selected in the view that is shown.</summary>
    public TextSelection Selection
    {
-      get => ShowsSource || _renderedEditor is null ? SourceView.TextSelection : _renderedEditor.Selection;
+      get => RenderedEditorShown?.Selection ?? SourceView.TextSelection;
       set
       {
          SourceView.TextSelection = value;
@@ -36,8 +39,8 @@ public partial class MarkdownEditor : UserControl
 
    public void SelectAll()
    {
-      if(ShowsSource || _renderedEditor is null) Selection = new TextSelection(0, Document.TextLength);
-      else _renderedEditor.SelectAll();
+      if(RenderedEditorShown is {} rendered) rendered.SelectAll();
+      else Selection = new TextSelection(0, Document.TextLength);
    }
 
    IClipboardInput ClipboardInputOfTheViewShown => ShowsSource ? _source.ClipboardInput : RenderedView.ClipboardInput;
@@ -64,8 +67,8 @@ public partial class MarkdownEditor : UserControl
    ///<remarks>With nothing selected, it's the text typed next in the rendered view that gets or loses the format. In the source view, nothing happens then.</remarks>
    public void ToggleFormat(TextFormats format)
    {
-      if(ShowsSource || _renderedEditor is null) EditInEitherView(it => it.Toggle(format));
-      else _renderedEditor.Toggle(format);
+      if(RenderedEditorShown is {} rendered) rendered.Toggle(format);
+      else EditInEitherView(it => it.Toggle(format));
    }
 
    ///<summary>Edits also while the source is shown, and while the control isn't.</summary>
@@ -77,8 +80,8 @@ public partial class MarkdownEditor : UserControl
       BringTheCaretIntoView();
    }
 
-   ///<summary>The link that the markdown has at <paramref name="offset"/>. Null when it has none there.</summary>
-   internal Link? LinkWrittenAt(int offset) => _renderedEditor?.Rendered.LinkWrittenAt(offset);
+   ///<summary>The link that the markdown has at <paramref name="offset"/>. Null when it has none there. Only while the control is in a window.</summary>
+   internal Link? LinkWrittenAt(int offset) => _renderedEditor!.Rendered.LinkWrittenAt(offset);
 
    ///<summary>Just below the caret of the view that is shown, from the corner of the control.</summary>
    internal Point PlaceBelowTheCaret => ShowsSource
@@ -88,8 +91,8 @@ public partial class MarkdownEditor : UserControl
    void BringTheCaretIntoView()
    {
       UpdateLayout(); // A view that has just been made visible has no place for the caret before it is laid out.
-      if(ShowsSource) SourceView.TextArea.Caret.BringCaretToView();
-      else if(_renderedEditor is not null) RenderedView.BringTheCaretIntoView();
+      if(RenderedEditorShown is not null) RenderedView.BringTheCaretIntoView();
+      else if(ShowsSource) SourceView.TextArea.Caret.BringCaretToView();
    }
 
    ///<summary>Puts the keyboard focus in the view that is shown.</summary>
