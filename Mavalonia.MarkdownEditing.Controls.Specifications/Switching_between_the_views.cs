@@ -1,4 +1,7 @@
+using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.VisualTree;
+using AvaloniaEdit;
 using Compze.Must;
 using Mavalonia.MarkdownEditing.Controls.Specifications.HeadlessAvalonia;
 using Mavalonia.MarkdownEditing.Editing;
@@ -46,5 +49,32 @@ public class Switching_between_the_views
       var editor = new EditorInAWindow(markdown) { Editor = { ShowsSource = true } };
       editor.Editor.ShowsSource = false;
       return editor.Markdown;
+   }
+
+   public class with_the_caret_at_the_end_of_a_document_that_is_longer_than_the_editor
+   {
+      readonly EditorInAWindow _editor = new(string.Join("\n\n", Enumerable.Repeat("text", 100)) + "‸");
+
+      [XFOnUIThread] public void to_the_source_shows_the_caret_there()
+      {
+         _editor.Editor.ShowsSource = true;
+         var source = _editor.Editor.GetVisualDescendants().OfType<TextEditor>().Single();
+         new { source.VerticalOffset, source.ViewportHeight, source.ExtentHeight }.Must().Satisfy(it => it.VerticalOffset + it.ViewportHeight > it.ExtentHeight - LessThanALine);
+      }
+
+      [XFOnUIThread] public void to_the_rendered_view_shows_the_caret_there()
+      {
+         _editor.Editor.ShowsSource = true;
+         _editor.Press(PhysicalKey.Home, RawInputModifiers.Control);
+         _editor.Editor.ShowsSource = false;
+         _editor.Editor.ShowsSource = true;
+         _editor.Press(PhysicalKey.End, RawInputModifiers.Control);
+         _editor.Editor.ShowsSource = false;
+
+         var scroll = _editor.RenderedView.FindAncestorOfType<ScrollViewer>()!;
+         new { scroll.Offset.Y, scroll.Viewport.Height, HeightOfAll = scroll.Extent.Height }.Must().Satisfy(it => it.Y + it.Height > it.HeightOfAll - 2 * LessThanALine);
+      }
+
+      const double LessThanALine = 15;
    }
 }

@@ -66,7 +66,12 @@ public partial class MarkdownEditor : UserControl
       using var editor = new RenderedEditor(Document, Selection); // Another than that of the rendered view, which there is none of while the control isn't shown.
       editor.Quote(markdown);
       Selection = editor.Selection;
+      BringTheCaretIntoView();
+   }
 
+   void BringTheCaretIntoView()
+   {
+      UpdateLayout(); // A view that has just been made visible has no place for the caret before it is laid out.
       if(ShowsSource) SourceView.TextArea.Caret.BringCaretToView();
       else if(_renderedEditor is not null) RenderedView.BringTheCaretIntoView();
    }
@@ -131,5 +136,6 @@ public partial class MarkdownEditor : UserControl
       SourceView.IsVisible = source;
       ScrollOfTheRenderedView.IsVisible = !source;
       if(hadFocus) FocusTheView();
+      BringTheCaretIntoView();
    }
 }
