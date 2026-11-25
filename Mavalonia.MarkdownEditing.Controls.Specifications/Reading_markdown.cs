@@ -226,6 +226,20 @@ public class Reading_markdown
       [XFOnUIThread] public async Task that_is_loaded_makes_its_line_as_high_as_it_is() => (await Show("a ![b c](d.png) e")).View.DesiredSize.Height.Must().BeGreaterThan(75);
       [XFOnUIThread] public async Task that_is_wider_than_the_view_is_shown_as_wide_as_that() => (await Show("![b](d.png)", width: 5000)).BoundsOf("b").Must().Satisfy(it => Math.Abs(it.Width - 780) < 2);
       [XFOnUIThread] public async Task that_there_is_none_of_is_shown_as_its_description() => (await Show("![b c](missing.png)")).BoundsOf("b c").Height.Must().BeGreaterThan(0);
+      [XFOnUIThread] public async Task that_is_loaded_late_is_not_shown_when_images_are_loaded_otherwise_by_then()
+      {
+         var late = new TaskCompletionSource<IImage?>();
+         var view = new ViewInAWindow("![b](c.png)") { View = { LoadImage = _ => late.Task } };
+         view.Window.RenderFrame();
+         view.View.LoadImage = _ => Task.FromResult<IImage?>(PictureThatIs(50));
+         await Task.Delay(50);
+         late.SetResult(PictureThatIs(200));
+         await Task.Delay(50);
+         view.View.FontSize++; // So that it's laid out anew.
+         view.Window.RenderFrame();
+         view.BoundsOf("b").Width.Must().Be(50.0);
+      }
+
       [XFOnUIThread] public async Task is_copied_as_its_markdown() => (await Show("a ![b c](d.png) e")).Select("a", to: "e").View.SelectedMarkdown.Must().Be("a ![b c](d.png) e");
       [XFOnUIThread] public async Task tells_that_it_is_clicked() => Clicked(await Show("![b c](d.png)"), "b c").ClickedLinks.Must().SequenceEqual(["d.png"]);
       [XFOnUIThread] public async Task in_a_link_tells_that_the_link_is_clicked() => Clicked(await Show("[![b c](d.png)](https://e.f)"), "b c").ClickedLinks.Must().SequenceEqual(["https://e.f"]);
@@ -255,6 +269,20 @@ public class Reading_markdown
          _view.Window.RenderFrame().Fingerprint.Must().Be(before);
       }
 
+      [XFOnUIThread] public void null_as_a_binding_may_shows_it_as_before()
+      {
+         var before = _view.Window.RenderFrame().Fingerprint;
+         _view.View.Highlights = null!;
+         _view.Window.RenderFrame().Fingerprint.Must().Be(before);
+      }
+
+      [XFOnUIThread] public void what_is_beyond_the_text_shows_it_as_before()
+      {
+         var before = _view.Window.RenderFrame().Fingerprint;
+         _view.View.Highlights = [new TextHighlight(new PlainTextRange(1000, 5), Brushes.Yellow), new TextHighlight(new PlainTextRange(-10, 5), Brushes.Yellow)];
+         _view.Window.RenderFrame().Fingerprint.Must().Be(before);
+      }
+
       [XFOnUIThread] public void the_same_text_twice_shows_the_last() => FrameWith(Brushes.Yellow, Brushes.Orange).Must().NotBe(FrameWith(Brushes.Orange, Brushes.Yellow));
       [XFOnUIThread] public void text_across_blocks_says_where_all_of_it_is() => _view.View.BoundsOf(RangeOf("two\na two b\nth")).Must().Satisfy(it => it.Count >= 3 && it.Zip(it.Skip(1)).All(pair => pair.First.Top <= pair.Second.Top));
 
@@ -280,6 +308,13 @@ public class Reading_markdown
 
    public class Setting_the_markdown_again : Reading_markdown
    {
+      [XFOnUIThread] public void to_null_as_a_binding_may_shows_nothing()
+      {
+         var view = new ViewInAWindow("one");
+         view.View.Markdown = null!;
+         view.View.PlainText.Value.Must().Be("");
+      }
+
       [XFOnUIThread] public void leaves_what_is_selected_selected_when_the_text_before_is_the_same()
       {
          var view = new ViewInAWindow("one two").Select("two", to: "two");

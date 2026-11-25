@@ -19,9 +19,9 @@ namespace Mavalonia.MarkdownEditing.Controls;
 /// </remarks>
 public class MarkdownView : RenderedMarkdownView
 {
-   public static readonly StyledProperty<string> MarkdownProperty = AvaloniaProperty.Register<MarkdownView, string>(nameof(Markdown), "");
-   public static readonly StyledProperty<MarkdownDialect> DialectProperty = AvaloniaProperty.Register<MarkdownView, MarkdownDialect>(nameof(Dialect), MarkdownDialect.ForReading);
-   public static readonly StyledProperty<IReadOnlyList<TextHighlight>> HighlightsProperty = AvaloniaProperty.Register<MarkdownView, IReadOnlyList<TextHighlight>>(nameof(Highlights), []);
+   public static readonly StyledProperty<string> MarkdownProperty = AvaloniaProperty.Register<MarkdownView, string>(nameof(Markdown), "", coerce: InsteadOfNull(""));
+   public static readonly StyledProperty<MarkdownDialect> DialectProperty = AvaloniaProperty.Register<MarkdownView, MarkdownDialect>(nameof(Dialect), MarkdownDialect.ForReading, coerce: InsteadOfNull(MarkdownDialect.ForReading));
+   public static readonly StyledProperty<IReadOnlyList<TextHighlight>> HighlightsProperty = AvaloniaProperty.Register<MarkdownView, IReadOnlyList<TextHighlight>>(nameof(Highlights), [], coerce: InsteadOfNull<IReadOnlyList<TextHighlight>>([]));
    public static readonly StyledProperty<Func<string, Task<IImage?>>?> LoadImageProperty = AvaloniaProperty.Register<MarkdownView, Func<string, Task<IImage?>>?>(nameof(LoadImage));
    public static readonly RoutedEvent<LinkClickedEventArgs> LinkClickedEvent = RoutedEvent.Register<MarkdownView, LinkClickedEventArgs>(nameof(LinkClicked), RoutingStrategies.Bubble);
 
@@ -48,6 +48,9 @@ public class MarkdownView : RenderedMarkdownView
       _keys = new ReadingKeys(this);
       _read.Changed += (_, _) => InvalidateWhatIsShown();
    }
+
+   ///<summary>A binding may give null for what can't be null.</summary>
+   static Func<AvaloniaObject, TValue, TValue> InsteadOfNull<TValue>(TValue value) where TValue : class => (_, given) => (TValue?)given ?? value;
 
    public string Markdown { get => GetValue(MarkdownProperty); set => SetValue(MarkdownProperty, value); }
 
@@ -118,7 +121,7 @@ public class MarkdownView : RenderedMarkdownView
    {
       _images[source] = null;
       await Task.Yield(); // It's asked for while what is shown is being laid out.
-      if(await load(source) is not {} image) return;
+      if(await load(source) is not {} image || load != LoadImage) return;
 
       _images[source] = image;
       ShowAnImageThatHasBecomeKnown();
