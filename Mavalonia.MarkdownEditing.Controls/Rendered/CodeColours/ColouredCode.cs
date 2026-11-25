@@ -13,8 +13,8 @@ class ColouredCode
 
    internal IReadOnlyList<ColouredStretch> Stretches { get; }
 
-   ///<summary>How much of <paramref name="other"/> starts as this code does. Nothing, when it's in another language, or for another theme.</summary>
-   internal int LengthInCommonWith(CodeToColour other) => _code.Language == other.Language && _code.IsDark == other.IsDark ? _code.Text.AsSpan().CommonPrefixLength(other.Text) : 0;
+   ///<inheritdoc cref="CodeToColour.LengthInCommonWith"/>
+   internal int LengthInCommonWith(CodeToColour other) => _code.LengthInCommonWith(other);
 
    ///<summary>The colours of <paramref name="other"/>, as far as it starts as this code does.</summary>
    internal ColouredCode AsFarAsInCommonWith(CodeToColour other)

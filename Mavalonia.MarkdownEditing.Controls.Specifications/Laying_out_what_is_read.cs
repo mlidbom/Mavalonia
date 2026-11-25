@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Compze.Must;
@@ -47,6 +48,26 @@ public class Laying_out_what_is_read
          }
 
          frames.Distinct().Must().HaveCount(1);
+      }
+
+      [XFOnUIThread] public async Task gets_its_colours_without_waiting_for_those_of_code_that_was_there_while_it_was_written()
+      {
+         var written = new MarkdownView { FontSize = 60 };
+         var window = new HeadlessWindow(written);
+         var code = "";
+         for(var update = 0; update < 40; update++)
+         {
+            code += string.Concat(Enumerable.Range(0, 10).Select(it => $"   if(some.Value{it}(it => it.Other, \"a string\") > 3) return {update}; // comment\n"));
+            written.Markdown = $"```cs\n{code}```";
+            window.MoveThePointerTo(new Point(700, 500 + update % 2));
+            await Task.Delay(1);
+         }
+
+         var other = new ViewInAWindow("```cs\nint other;\n```");
+         var withoutColours = other.Window.RenderFrame().Fingerprint;
+         var watch = Stopwatch.StartNew();
+         while(other.Window.RenderFrame().Fingerprint == withoutColours && watch.ElapsedMilliseconds < 10_000) await Task.Delay(10);
+         watch.ElapsedMilliseconds.Must().BeLessThan(2500);
       }
 
       static StackPanel PanelOf(IEnumerable<Control> children)

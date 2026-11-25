@@ -21,7 +21,10 @@ class ColoursOfCode
    readonly Dictionary<CodeToColour, LinkedListNode<(CodeToColour Code, ColouredCode Colours)>> _known = [];
    readonly LinkedList<(CodeToColour Code, ColouredCode Colours)> _byWhenAskedFor = [];
 
-   readonly Dictionary<CodeToColour, List<Action>> _waiting = [];
+   ///<summary>The code whose colours aren't known yet, with what to do when they are.</summary>
+   readonly Dictionary<CodeToColour, HashSet<Action>> _waiting = [];
+
+   CodeToColour? _beingWorkedOut;
 
    ///<summary>The work that was started latest. Each piece of it waits for the one before.</summary>
    Task _work = Task.CompletedTask;
@@ -60,9 +63,17 @@ class ColoursOfCode
          return;
       }
 
-      _waiting[code] = [whenKnown];
+      _waiting[code] = [..WhatWaitsForTheStartOf(code), whenKnown];
       _work = WorkOutAfter(_work, code);
       Surface(_work);
+   }
+
+   ///<summary>While code is written, its colours aren't worked out as it was before. What waits for those waits for the colours of what it is now.</summary>
+   IReadOnlyList<Action> WhatWaitsForTheStartOf(CodeToColour code)
+   {
+      var starts = _waiting.Where(it => it.Key != _beingWorkedOut && code.GoesOnFrom(it.Key)).ToList();
+      foreach(var start in starts) _waiting.Remove(start.Key);
+      return [..starts.SelectMany(it => it.Value)];
    }
 
    ///<summary>Has an exception in <paramref name="work"/> surface where all of the application's do.</summary>
@@ -72,6 +83,9 @@ class ColoursOfCode
    async Task WorkOutAfter(Task workBefore, CodeToColour code)
    {
       await Task.WhenAny(workBefore); // Whether or not that failed, which has surfaced.
+      if(!_waiting.ContainsKey(code)) return;
+
+      _beingWorkedOut = code;
       var colourer = code.IsDark ? _dark : _light;
       Keep(code, new ColouredCode(code, await Task.Run(() => colourer.Value.StretchesOf(code))));
 
