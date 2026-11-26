@@ -47,6 +47,7 @@ partial class RenderedMarkdownView
    public FontFamily MonospaceFontFamily { get => GetValue(MonospaceFontFamilyProperty); set => SetValue(MonospaceFontFamilyProperty, value); }
 
    ///<summary>The font sizes of headings, from the first level on. Levels that it has none for get the last. Null for sizes in proportion to <see cref="FontSize"/>.</summary>
+   [PublicAPI]
    public IReadOnlyList<double>? HeadingFontSizes { get => GetValue(HeadingFontSizesProperty); set => SetValue(HeadingFontSizesProperty, value); }
 
    ///<summary>What bullets, numbers and markdown shown as source are drawn with. Null for what the theme has.</summary>
