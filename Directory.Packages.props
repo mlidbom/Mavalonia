@@ -13,6 +13,7 @@
       <PackageVersion Include="Avalonia.Headless" Version="$(AvaloniaVersion)" />
       <PackageVersion Include="Avalonia.Skia" Version="$(AvaloniaVersion)" />
       <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+      <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" />
       <PackageVersion Include="Markdig" Version="1.6.0" />
       <PackageVersion Include="MinVer" Version="8.0.0" />
       <PackageVersion Include="Compze.Must" Version="0.9.2-alpha" />

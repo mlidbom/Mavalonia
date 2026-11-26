@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Input;
+using JetBrains.Annotations;
 
 namespace Mavalonia.Markdown.Controls.Rendered;
 
@@ -19,26 +20,34 @@ partial class RenderedEditorView
    public string? Watermark { get => GetValue(WatermarkProperty); set => SetValue(WatermarkProperty, value); }
 
    ///<inheritdoc cref="MarkdownEditor.StartNewBlockGesture"/>
+   [PublicAPI]
    public KeyGesture? StartNewBlockGesture { get => GetValue(StartNewBlockGestureProperty); set => SetValue(StartNewBlockGestureProperty, value); }
 
    ///<inheritdoc cref="MarkdownEditor.BreakLineGesture"/>
+   [PublicAPI]
    public KeyGesture? BreakLineGesture { get => GetValue(BreakLineGestureProperty); set => SetValue(BreakLineGestureProperty, value); }
 
    ///<inheritdoc cref="MarkdownEditor.ToggleBoldGesture"/>
+   [PublicAPI]
    public KeyGesture? ToggleBoldGesture { get => GetValue(ToggleBoldGestureProperty); set => SetValue(ToggleBoldGestureProperty, value); }
 
    ///<inheritdoc cref="MarkdownEditor.ToggleItalicGesture"/>
+   [PublicAPI]
    public KeyGesture? ToggleItalicGesture { get => GetValue(ToggleItalicGestureProperty); set => SetValue(ToggleItalicGestureProperty, value); }
 
    ///<inheritdoc cref="MarkdownEditor.ToggleCodeGesture"/>
+   [PublicAPI]
    public KeyGesture? ToggleCodeGesture { get => GetValue(ToggleCodeGestureProperty); set => SetValue(ToggleCodeGestureProperty, value); }
 
    ///<inheritdoc cref="MarkdownEditor.ToggleStrikethroughGesture"/>
+   [PublicAPI]
    public KeyGesture? ToggleStrikethroughGesture { get => GetValue(ToggleStrikethroughGestureProperty); set => SetValue(ToggleStrikethroughGestureProperty, value); }
 
    ///<inheritdoc cref="MarkdownEditor.PasteTextGesture"/>
+   [PublicAPI]
    public KeyGesture? PasteTextGesture { get => GetValue(PasteTextGestureProperty); set => SetValue(PasteTextGestureProperty, value); }
 
    ///<inheritdoc cref="MarkdownEditor.PasteAsQuoteGesture"/>
+   [PublicAPI]
    public KeyGesture? PasteAsQuoteGesture { get => GetValue(PasteAsQuoteGestureProperty); set => SetValue(PasteAsQuoteGestureProperty, value); }
 }

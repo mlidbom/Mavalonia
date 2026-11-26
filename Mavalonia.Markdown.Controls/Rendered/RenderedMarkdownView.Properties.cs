@@ -4,6 +4,7 @@ using Avalonia.Controls.Documents;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Styling;
+using JetBrains.Annotations;
 using Mavalonia.Markdown.Controls.Rendered.CodeColours;
 using Mavalonia.Markdown.Rendering.Blocks;
 using Mavalonia.Markdown.Rendering.Texts;
@@ -12,23 +13,34 @@ namespace Mavalonia.Markdown.Controls.Rendered;
 
 partial class RenderedMarkdownView
 {
+   [PublicAPI]
    public static readonly StyledProperty<FontFamily> FontFamilyProperty = TextElement.FontFamilyProperty.AddOwner<RenderedMarkdownView>();
+   [PublicAPI]
    public static readonly StyledProperty<double> FontSizeProperty = TextElement.FontSizeProperty.AddOwner<RenderedMarkdownView>();
    public static readonly StyledProperty<IBrush?> ForegroundProperty = TextElement.ForegroundProperty.AddOwner<RenderedMarkdownView>();
    public static readonly StyledProperty<FontFamily> MonospaceFontFamilyProperty = AvaloniaProperty.Register<RenderedMarkdownView, FontFamily>(nameof(MonospaceFontFamily), new FontFamily("Cascadia Mono, Consolas, Menlo, monospace"));
+   [PublicAPI]
    public static readonly StyledProperty<IReadOnlyList<double>?> HeadingFontSizesProperty = AvaloniaProperty.Register<RenderedMarkdownView, IReadOnlyList<double>?>(nameof(HeadingFontSizes));
+   [PublicAPI]
    public static readonly StyledProperty<IBrush?> FaintForegroundProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush?>(nameof(FaintForeground));
+   [PublicAPI]
    public static readonly StyledProperty<IBrush?> LinkForegroundProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush?>(nameof(LinkForeground));
+   [PublicAPI]
    public static readonly StyledProperty<IBrush> CodeBackgroundProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush>(nameof(CodeBackground), new ImmutableSolidColorBrush(Colors.Gray, 0.15));
+   [PublicAPI]
    public static readonly StyledProperty<IBrush> LineBrushProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush>(nameof(LineBrush), new ImmutableSolidColorBrush(Colors.Gray, 0.5));
+   [PublicAPI]
    public static readonly StyledProperty<IBrush> SelectionBrushProperty = AvaloniaProperty.Register<RenderedMarkdownView, IBrush>(nameof(SelectionBrush), new ImmutableSolidColorBrush(Colors.DodgerBlue, 0.4));
+   [PublicAPI]
    public static readonly StyledProperty<bool> ColoursCodeProperty = AvaloniaProperty.Register<RenderedMarkdownView, bool>(nameof(ColoursCode), true);
    public static readonly StyledProperty<Thickness> PaddingProperty = Decorator.PaddingProperty.AddOwner<RenderedMarkdownView>();
 
    static readonly AvaloniaProperty[] PropertiesThatTheLayoutDependsOn = [FontFamilyProperty, FontSizeProperty, ForegroundProperty, MonospaceFontFamilyProperty, HeadingFontSizesProperty, FaintForegroundProperty, LinkForegroundProperty, CodeBackgroundProperty, LineBrushProperty, SelectionBrushProperty, PaddingProperty];
 
+   [PublicAPI]
    public FontFamily FontFamily { get => GetValue(FontFamilyProperty); set => SetValue(FontFamilyProperty, value); }
    public double FontSize { get => GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
+   [PublicAPI]
    public IBrush? Foreground { get => GetValue(ForegroundProperty); set => SetValue(ForegroundProperty, value); }
 
    ///<summary>The font of code.</summary>

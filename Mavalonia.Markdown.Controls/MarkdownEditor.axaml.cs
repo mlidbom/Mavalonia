@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using AvaloniaEdit.Document;
+using JetBrains.Annotations;
 using Mavalonia.Markdown.Controls.Clipboards;
 using Mavalonia.Markdown.Controls.Menus;
 using Mavalonia.Markdown.Controls.Source;
@@ -57,6 +58,7 @@ public partial class MarkdownEditor : UserControl
       }
    }
 
+   [PublicAPI]
    public void SelectAll()
    {
       if(RenderedEditorShown is {} rendered) rendered.SelectAll();
@@ -66,18 +68,23 @@ public partial class MarkdownEditor : UserControl
    IClipboardInput ClipboardInputOfTheViewShown => ShowsSource ? _source.ClipboardInput : RenderedView.ClipboardInput;
 
    ///<summary>Puts what is selected on the clipboard: as markdown, and, from the rendered view, as rich text for programs that take that. Does nothing when nothing is selected.</summary>
+   [PublicAPI]
    public Task Copy() => ClipboardInputOfTheViewShown.Copy();
 
    ///<summary>Does what <see cref="Copy"/> does, and deletes what is selected.</summary>
+   [PublicAPI]
    public Task Cut() => ClipboardInputOfTheViewShown.Cut();
 
    ///<summary>Pastes what is on the clipboard in place of the selection: rich text as the markdown for it.</summary>
+   [PublicAPI]
    public Task Paste() => ClipboardInputOfTheViewShown.Paste();
 
    ///<summary>Pastes only the text of what is on the clipboard, in place of the selection.</summary>
+   [PublicAPI]
    public Task PasteText() => ClipboardInputOfTheViewShown.PasteText();
 
    ///<summary>Pastes what is on the clipboard as a quote, in place of the selection.</summary>
+   [PublicAPI]
    public Task PasteAsQuote() => ClipboardInputOfTheViewShown.PasteAsQuote();
 
    ///<summary>Puts a quote of <paramref name="markdown"/> in place of the selection, and the caret in a paragraph after it.</summary>

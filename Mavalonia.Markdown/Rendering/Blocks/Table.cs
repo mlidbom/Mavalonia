@@ -1,3 +1,5 @@
+using JetBrains.Annotations;
+
 namespace Mavalonia.Markdown.Rendering.Blocks;
 
 ///<summary>A table. Its cells are the blocks: a table as such has no text.</summary>
@@ -11,11 +13,14 @@ public class Table
    internal SourceRange Source { get; }
 
    ///<summary>The cells, row by row.</summary>
+   [PublicAPI]
    public IReadOnlyList<TableCell> Cells => _cells;
 
+   [PublicAPI]
    public TableCell FirstCell => _cells[0];
    internal TableCell LastCell => _cells[^1];
 
+   [PublicAPI]
    public int ColumnCount => _cells.Max(it => it.Column) + 1;
 
    internal void Add(TableCell cell) => _cells.Add(cell);

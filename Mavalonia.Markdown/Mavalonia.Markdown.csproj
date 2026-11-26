@@ -4,6 +4,8 @@
       <PackageReference Include="AngleSharp" />
       <PackageReference Include="Avalonia.AvaloniaEdit" />
       <PackageReference Include="Markdig" />
+      <!-- [PublicAPI] tells inspections that a member is the package's API: used outside this solution. Not a dependency of the package: the attributes are compiled away. -->
+      <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
    </ItemGroup>
    <ItemGroup>
       <InternalsVisibleTo Include="Mavalonia.Markdown.Controls" />

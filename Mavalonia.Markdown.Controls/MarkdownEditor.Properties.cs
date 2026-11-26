@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using AvaloniaEdit.Document;
+using JetBrains.Annotations;
 
 namespace Mavalonia.Markdown.Controls;
 
@@ -10,6 +11,7 @@ partial class MarkdownEditor
    ///<summary>The modifier key of commands on the platform. <see cref="Avalonia.Input.Platform.PlatformHotkeyConfiguration.CommandModifiers"/> says it too, but only of a control in a window, and a default value is the same for every control.</summary>
    static readonly KeyModifiers ControlOrCommand = OperatingSystem.IsMacOS() ? KeyModifiers.Meta : KeyModifiers.Control;
 
+   [PublicAPI]
    public static readonly StyledProperty<TextDocument> DocumentProperty = AvaloniaProperty.Register<MarkdownEditor, TextDocument>(nameof(Document));
    public static readonly StyledProperty<bool> ShowsSourceProperty = AvaloniaProperty.Register<MarkdownEditor, bool>(nameof(ShowsSource));
    public static readonly StyledProperty<string?> WatermarkProperty = AvaloniaProperty.Register<MarkdownEditor, string?>(nameof(Watermark));
@@ -22,7 +24,9 @@ partial class MarkdownEditor
    public static readonly StyledProperty<KeyGesture?> PasteTextGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteTextGesture), new KeyGesture(Key.V, ControlOrCommand | KeyModifiers.Shift));
    public static readonly StyledProperty<KeyGesture?> PasteAsQuoteGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteAsQuoteGesture), new KeyGesture(Key.Q, ControlOrCommand | KeyModifiers.Shift));
 
+   [PublicAPI]
    public static readonly RoutedEvent<LinkClickedEventArgs> LinkClickedEvent = MarkdownView.LinkClickedEvent;
+   [PublicAPI]
    public static readonly RoutedEvent<PastedEventArgs> PastedEvent = RoutedEvent.Register<MarkdownEditor, PastedEventArgs>(nameof(Pasted), RoutingStrategies.Bubble);
 
    ///<summary>The document. Its text is the markdown, and is all that is edited: the two views show the same text.</summary>

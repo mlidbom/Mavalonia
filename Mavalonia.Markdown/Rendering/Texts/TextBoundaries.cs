@@ -1,4 +1,5 @@
 using System.Globalization;
+using JetBrains.Annotations;
 
 namespace Mavalonia.Markdown.Rendering.Texts;
 
@@ -16,6 +17,7 @@ public partial class TextBoundaries
    public int EndOfCharacterAfter(int index) => index + StringInfo.GetNextTextElementLength(_text.AsSpan(index));
 
    ///<summary>The index that the word starts at that is before <paramref name="index"/>, or, where there is no word, the punctuation.</summary>
+   [PublicAPI]
    public int StartOfWordBefore(int index)
    {
       var end = index;
@@ -35,6 +37,7 @@ public partial class TextBoundaries
    }
 
    ///<summary>The index after the word that is at <paramref name="index"/>, or, where there is no word, the punctuation or the white space.</summary>
+   [PublicAPI]
    public int EndOfWordWithoutSpacesAfter(int index)
    {
       var end = index;

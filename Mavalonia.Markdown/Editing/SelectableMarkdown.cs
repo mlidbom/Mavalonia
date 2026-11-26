@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Mavalonia.Markdown.Html;
 using Mavalonia.Markdown.Rendering;
 
@@ -66,6 +67,7 @@ public abstract class SelectableMarkdown
    }
 
    ///<summary>Selects all of the block that <paramref name="position"/> is in.</summary>
+   [PublicAPI]
    public void SelectTheBlockAt(RenderedPosition position) => Select(RenderedPosition.AtTheStartOf(position.Block), RenderedPosition.AtTheEndOf(position.Block));
 
    void Select(RenderedPosition start, RenderedPosition end)

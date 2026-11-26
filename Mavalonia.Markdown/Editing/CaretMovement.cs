@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Mavalonia.Markdown.Rendering;
 using Mavalonia.Markdown.Rendering.Texts;
 
@@ -15,7 +16,9 @@ public class CaretMovement
    public static readonly CaretMovement ToTheStart = new(selectable => selectable.Rendered.Start);
    public static readonly CaretMovement ToTheEnd = new(selectable => selectable.Rendered.End);
 
+   [PublicAPI]
    public static readonly CaretMovement ToTheStartOfTheSelection = new(selectable => selectable.Selected.Start);
+   [PublicAPI]
    public static readonly CaretMovement ToTheEndOfTheSelection = new(selectable => selectable.Selected.End);
 
    readonly Func<SelectableMarkdown, RenderedPosition> _move;

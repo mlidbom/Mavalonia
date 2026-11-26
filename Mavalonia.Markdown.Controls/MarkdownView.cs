@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using JetBrains.Annotations;
 using Mavalonia.Markdown.Controls.Clipboards;
 using Mavalonia.Markdown.Controls.Menus;
 using Mavalonia.Markdown.Controls.Rendered;
@@ -20,10 +21,15 @@ namespace Mavalonia.Markdown.Controls;
 /// </remarks>
 public class MarkdownView : RenderedMarkdownView
 {
+   [PublicAPI]
    public static readonly StyledProperty<string> MarkdownProperty = AvaloniaProperty.Register<MarkdownView, string>(nameof(Markdown), "", coerce: InsteadOfNull(""));
+   [PublicAPI]
    public static readonly StyledProperty<MarkdownDialect> DialectProperty = AvaloniaProperty.Register<MarkdownView, MarkdownDialect>(nameof(Dialect), MarkdownDialect.ForReading, coerce: InsteadOfNull(MarkdownDialect.ForReading));
+   [PublicAPI]
    public static readonly StyledProperty<IReadOnlyList<TextHighlight>> HighlightsProperty = AvaloniaProperty.Register<MarkdownView, IReadOnlyList<TextHighlight>>(nameof(Highlights), [], coerce: InsteadOfNull<IReadOnlyList<TextHighlight>>([]));
+   [PublicAPI]
    public static readonly StyledProperty<IReadOnlyList<TextLink>> LinksProperty = AvaloniaProperty.Register<MarkdownView, IReadOnlyList<TextLink>>(nameof(Links), [], coerce: InsteadOfNull<IReadOnlyList<TextLink>>([]));
+   [PublicAPI]
    public static readonly StyledProperty<Func<string, Task<IImage?>>?> LoadImageProperty = AvaloniaProperty.Register<MarkdownView, Func<string, Task<IImage?>>?>(nameof(LoadImage));
    public static readonly DirectProperty<MarkdownView, bool> IsAnythingSelectedProperty = AvaloniaProperty.RegisterDirect<MarkdownView, bool>(nameof(IsAnythingSelected), it => it.IsAnythingSelected);
    public static readonly RoutedEvent<LinkClickedEventArgs> LinkClickedEvent = RoutedEvent.Register<MarkdownView, LinkClickedEventArgs>(nameof(LinkClicked), RoutingStrategies.Bubble);
@@ -116,9 +122,11 @@ public class MarkdownView : RenderedMarkdownView
       _read.SelectAll();
    }
 
+   [PublicAPI]
    public void SelectNothing() => _read.SelectNothing();
 
    ///<summary>Puts what is selected on the clipboard: as markdown, and as rich text for programs that take that. Does nothing when nothing is selected.</summary>
+   [PublicAPI]
    public Task Copy() => IsAnythingSelected ? new CopiedSelection(_read).PutOn(this.Clipboard) : Task.CompletedTask;
 
    internal override SelectableMarkdown Shown => _read;

@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Mavalonia.Markdown.Rendering.Blocks;
 
 namespace Mavalonia.Markdown.Rendering;
@@ -9,6 +10,7 @@ public readonly record struct RenderedPosition(RenderedBlock Block, int Index)
    public static RenderedPosition AtTheEndOf(RenderedBlock block) => new(block, block.Text.Length);
 
    internal bool IsAtTheStartOfItsBlock => Index == 0;
+   [PublicAPI]
    public bool IsAtTheEndOfItsBlock => Index == Block.Text.Length;
 
    ///<summary>The offset in the markdown at which text typed at the position goes: it continues what is before the position.</summary>

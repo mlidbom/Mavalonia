@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Mavalonia.Markdown.Rendering.Containers;
 using Mavalonia.Markdown.Rendering.Texts;
 
@@ -14,6 +15,7 @@ public class TableCell : RenderedBlock
       IsInTheHeader = isInTheHeader;
    }
 
+   [PublicAPI]
    public Table Table { get; }
    public int Row { get; }
    public int Column { get; }

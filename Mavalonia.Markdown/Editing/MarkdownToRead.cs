@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Mavalonia.Markdown.Rendering;
 
 namespace Mavalonia.Markdown.Editing;
@@ -21,5 +22,6 @@ public sealed class MarkdownToRead : SelectableMarkdown
    }
 
    ///<summary>Selects nothing.</summary>
+   [PublicAPI]
    public void SelectNothing() => MoveTo(CaretPosition);
 }

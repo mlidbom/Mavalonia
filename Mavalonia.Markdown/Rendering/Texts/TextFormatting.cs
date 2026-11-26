@@ -1,3 +1,5 @@
+using JetBrains.Annotations;
+
 namespace Mavalonia.Markdown.Rendering.Texts;
 
 ///<summary>How a char is formatted.</summary>
@@ -12,6 +14,7 @@ public readonly record struct TextFormatting(TextFormats Formats, Link? Link = n
    ///<summary>Whether text formatted so looks the same as text formatted as <paramref name="other"/>.</summary>
    internal bool LooksLike(TextFormatting other) => Formats == other.Formats && Link?.Target == other.Link?.Target && IsShownAsSource == other.IsShownAsSource && Image?.Source == other.Image?.Source;
 
+   [PublicAPI]
    public bool Has(TextFormats format) => Formats.HasFlag(format);
 
    internal TextFormatting With(TextFormats format) => this with { Formats = Formats | format };

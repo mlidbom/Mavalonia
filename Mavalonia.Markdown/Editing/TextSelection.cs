@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Mavalonia.Markdown.Rendering;
 
 namespace Mavalonia.Markdown.Editing;
@@ -14,6 +15,7 @@ public readonly record struct TextSelection(int Anchor, int Caret)
    public int End => Math.Max(Anchor, Caret);
 
    ///<summary>All of what is selected.</summary>
+   [PublicAPI]
    public SourceRange Range => new(Start, End);
 
    ///<summary>Whether anything is selected, and <paramref name="offset"/> is in it or at either end of it.</summary>

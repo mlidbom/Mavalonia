@@ -21,6 +21,8 @@
       <!-- Mavalonia.Markdown's own packages: referenced here so that the package depends on them, as it holds Mavalonia.Markdown. -->
       <PackageReference Include="AngleSharp" />
       <PackageReference Include="Markdig" />
+      <!-- [PublicAPI] tells inspections that a member is the package's API: used outside this solution. Not a dependency of the package: the attributes are compiled away. -->
+      <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
       <!-- Private, so that the package holds it instead of depending on a package of it. So it doesn't reach the projects
            that reference this one either: those that use its types reference it themselves. -->
       <ProjectReference Include="..\Mavalonia.Markdown\Mavalonia.Markdown.csproj" PrivateAssets="all" />

@@ -3,6 +3,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
+using JetBrains.Annotations;
 using Mavalonia.Markdown.Controls.Clipboards;
 using Mavalonia.Markdown.Controls.Rendered.Input;
 using Mavalonia.Markdown.Editing;
@@ -22,6 +23,7 @@ public partial class RenderedEditorView : RenderedMarkdownView
       TextInputMethodClientRequestedEvent.AddClassHandler<RenderedEditorView>((view, request) => request.Client = view._inputMethod);
    }
 
+   [PublicAPI]
    public RenderedEditorView()
    {
       _blinkingCaret = new BlinkingCaret(InvalidateVisual);
@@ -31,6 +33,7 @@ public partial class RenderedEditorView : RenderedMarkdownView
    }
 
    ///<summary>Edits the document that is shown. Null while none is.</summary>
+   [PublicAPI]
    public RenderedEditor? Editor
    {
       get;

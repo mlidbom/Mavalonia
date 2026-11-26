@@ -1,3 +1,5 @@
+using JetBrains.Annotations;
+
 namespace Mavalonia.Markdown.Rendering.Texts;
 
 ///<summary>The text that is shown of a block, each char knowing the markdown it stands for.</summary>
@@ -24,6 +26,7 @@ public class RenderedText
    public string Value { get; }
 
    public int Length => Chars.Count;
+   [PublicAPI]
    public bool IsEmpty => Length == 0;
 
    ///<summary>The link that is written at <paramref name="offset"/>: its label, or the markup around that. Null when none is.</summary>
