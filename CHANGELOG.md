@@ -9,8 +9,6 @@ here: see [releasing](dev_docs/releasing.md).
 
 ## [0.8.0] - 2026-11-26
 
-The first release.
-
 ### Added
 - `MarkdownEditor`, a WYSIWYG markdown editor whose document is the markdown text. It switches quickly between showing
   the markdown's source and showing it rendered (`ShowsSource`). Enter starts a paragraph and Shift+Enter breaks the
