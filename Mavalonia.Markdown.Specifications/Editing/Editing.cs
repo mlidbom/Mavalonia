@@ -1,5 +1,6 @@
 using AvaloniaEdit.Document;
 using Mavalonia.Markdown.Editing;
+using Mavalonia.Markdown.Rendering;
 
 namespace Mavalonia.Markdown.Specifications.Editing;
 
@@ -12,6 +13,14 @@ static class Editing
       using var editor = EditorOf(markdown);
       foreach(var edit in edits) edit(editor);
       return new MarkdownWithSelection(editor.Document.Text, editor.Selection).ToString();
+   }
+
+   ///<summary>The markdown after doing <paramref name="edit"/> to <paramref name="markdown"/>, with the stretch that the edit says it wrote written as selected.</summary>
+   internal static string WrittenBy(Func<RenderedEditor, SourceRange> edit, string markdown)
+   {
+      using var editor = EditorOf(markdown);
+      var written = edit(editor);
+      return new MarkdownWithSelection(editor.Document.Text, new TextSelection(written.Start, written.End)).ToString();
    }
 
    internal static RenderedEditor EditorOf(string markdown)

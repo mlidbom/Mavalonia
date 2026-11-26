@@ -2,6 +2,7 @@ using Avalonia.Input.Platform;
 using AvaloniaEdit;
 using AvaloniaEdit.Document;
 using Mavalonia.Markdown.Controls.Clipboards;
+using Mavalonia.Markdown.Rendering;
 
 namespace Mavalonia.Markdown.Controls.Source;
 
@@ -37,12 +38,17 @@ class ClipboardInput : IClipboardInput
    public async Task PasteAsQuote()
    {
       var content = await ClipboardContent.ReadFrom(Clipboard);
-      if(content.Markdown.Length > 0) _editor.Quote(content.Markdown);
+      if(content.Markdown.Length > 0) _editor.TellOfAPaste(_editor.Quote(content.Markdown));
    }
 
    void Insert(string markdown)
    {
-      if(markdown.Length > 0) ReplaceTheSelectionWith(TextUtilities.NormalizeNewLines(markdown, TextUtilities.GetNewLineFromDocument(_view.Document, _view.TextArea.Caret.Line)));
+      if(markdown.Length == 0) return;
+
+      var inserted = TextUtilities.NormalizeNewLines(markdown, TextUtilities.GetNewLineFromDocument(_view.Document, _view.TextArea.Caret.Line));
+      var start = _view.SelectionStart;
+      ReplaceTheSelectionWith(inserted);
+      _editor.TellOfAPaste(new SourceRange(start, start + inserted.Length));
    }
 
    void ReplaceTheSelectionWith(string markdown)

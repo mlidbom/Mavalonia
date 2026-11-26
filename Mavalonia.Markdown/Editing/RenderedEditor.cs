@@ -88,14 +88,16 @@ public sealed class RenderedEditor : SelectableMarkdown, IDisposable
    public void DeleteWordAfter() => DeleteTheSelectionOr(it => it.TheWordAfter());
 
    ///<summary>Puts markdown, which may be of several blocks, in place of the selection.</summary>
-   public void Paste(string markdown) => Edit(() => new Pasting(Caret).Of(markdown));
+   ///<returns>The stretch of the markdown afterwards that the paste wrote. It may hold markup around what is pasted that is written anew, such as where bold text is split by a list.</returns>
+   public SourceRange Paste(string markdown) => Edit(() => new Pasting(Caret).Of(markdown));
 
    ///<summary>Puts a quote of markdown in place of the selection, and the caret in a paragraph after it.</summary>
-   public void Quote(string markdown) => AsOneUndo(() =>
+   ///<returns>The stretch of the markdown afterwards that the quote wrote.</returns>
+   public SourceRange Quote(string markdown) => AsOneUndo(() =>
    {
       DeleteTheSelection();
       if(new Quoting(Caret) is { IsPossible: false } elsewhere) Make(elsewhere.GoToWhereItIsPossible());
-      Make(new Quoting(Caret).Of(markdown));
+      return Make(new Quoting(Caret).Of(markdown));
    });
 
    ///<summary>Formats the selected text, or takes the format away when all of it has it. With nothing selected, it's the text typed next that gets or loses the format.</summary>
@@ -155,10 +157,11 @@ public sealed class RenderedEditor : SelectableMarkdown, IDisposable
       Selection = TextSelection.CaretAt(selected.ByNumbers.In(Rendered).Start.Offset);
    }
 
-   void Edit(Func<SourceChange> change) => AsOneUndo(() =>
+   ///<returns>The stretch of the markdown afterwards that <paramref name="change"/> wrote.</returns>
+   SourceRange Edit(Func<SourceChange> change) => AsOneUndo(() =>
    {
       DeleteTheSelection();
-      Make(change());
+      return Make(change());
    });
 
    void MakeAll(IEnumerable<Func<RenderedMarkdown, SourceChange?>> changes)
@@ -167,16 +170,24 @@ public sealed class RenderedEditor : SelectableMarkdown, IDisposable
          if(change(Rendered) is {} toMake) Make(toMake);
    }
 
-   void Make(SourceChange change)
+   ///<returns>The stretch of the markdown afterwards that <paramref name="change"/> wrote.</returns>
+   SourceRange Make(SourceChange change)
    {
       _document.Make(change);
       Selection = TextSelection.CaretAt(change.Caret);
+      return change.Written;
    }
 
    void AsOneUndo(Action action)
    {
       _formattingToType = null;
       _undoSteps.AsOneStep(action);
+   }
+
+   TResult AsOneUndo<TResult>(Func<TResult> action)
+   {
+      _formattingToType = null;
+      return _undoSteps.AsOneStep(action);
    }
 
    private protected override void WhenASelectionIsMade() => StopTyping();

@@ -23,6 +23,7 @@ partial class MarkdownEditor
    public static readonly StyledProperty<KeyGesture?> PasteAsQuoteGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteAsQuoteGesture), new KeyGesture(Key.Q, ControlOrCommand | KeyModifiers.Shift));
 
    public static readonly RoutedEvent<LinkClickedEventArgs> LinkClickedEvent = MarkdownView.LinkClickedEvent;
+   public static readonly RoutedEvent<PastedEventArgs> PastedEvent = RoutedEvent.Register<MarkdownEditor, PastedEventArgs>(nameof(Pasted), RoutingStrategies.Bubble);
 
    ///<summary>The document. Its text is the markdown, and is all that is edited: the two views show the same text.</summary>
    public TextDocument Document { get => GetValue(DocumentProperty); set => SetValue(DocumentProperty, value); }
@@ -39,6 +40,10 @@ partial class MarkdownEditor
    /// Links are those that markdown has, and, in the source view, URLs too, wherever they are.
    /// </remarks>
    public event EventHandler<LinkClickedEventArgs>? LinkClicked { add => AddHandler(LinkClickedEvent, value); remove => RemoveHandler(LinkClickedEvent, value); }
+
+   ///<summary>A person has pasted, in either view, by a key, the menu, or <see cref="Paste"/>, <see cref="PasteText"/> or <see cref="PasteAsQuote"/>. Not when nothing was pasted.</summary>
+   ///<remarks>Such as for an application that sends what was pasted apart from what was typed.</remarks>
+   public event EventHandler<PastedEventArgs>? Pasted { add => AddHandler(PastedEvent, value); remove => RemoveHandler(PastedEvent, value); }
 
    ///<summary>The keys that start a new block, such as a paragraph or a list item, in the rendered view. Null for none.</summary>
    public KeyGesture? StartNewBlockGesture { get => GetValue(StartNewBlockGestureProperty); set => SetValue(StartNewBlockGestureProperty, value); }

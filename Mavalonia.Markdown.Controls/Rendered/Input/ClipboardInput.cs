@@ -1,6 +1,7 @@
 using Avalonia.Input.Platform;
 using Mavalonia.Markdown.Controls.Clipboards;
 using Mavalonia.Markdown.Editing;
+using Mavalonia.Markdown.Rendering;
 using Mavalonia.Markdown.Rendering.Blocks;
 
 namespace Mavalonia.Markdown.Controls.Rendered.Input;
@@ -46,11 +47,13 @@ class ClipboardInput : IClipboardInput
       Insert((await ClipboardContent.ReadFrom(Clipboard)).Markdown, editor.Quote);
    }
 
-   void Insert(string markdown, Action<string> insert)
+   ///<summary>Inserts <paramref name="markdown"/> with <paramref name="insert"/>, which returns the stretch of the markdown afterwards that it wrote, and tells of it.</summary>
+   void Insert(string markdown, Func<string, SourceRange> insert)
    {
       if(markdown.Length == 0) return;
 
-      insert(markdown);
+      var written = insert(markdown);
       _view.BringTheCaretIntoView();
+      _view.RaiseEvent(new PastedEventArgs(written));
    }
 }

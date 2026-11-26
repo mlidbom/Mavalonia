@@ -5,6 +5,7 @@ using Mavalonia.Markdown.Controls.Clipboards;
 using Mavalonia.Markdown.Controls.Menus;
 using Mavalonia.Markdown.Controls.Source;
 using Mavalonia.Markdown.Editing;
+using Mavalonia.Markdown.Rendering;
 using Mavalonia.Markdown.Rendering.Texts;
 
 namespace Mavalonia.Markdown.Controls;
@@ -21,6 +22,7 @@ public partial class MarkdownEditor : UserControl
       SourceView.Options.AllowScrollBelowDocument = false;
       _source = new SourceInput(this, SourceView);
       RenderedView.AddHandler(MarkdownView.LinkClickedEvent, TellOfALinkClickedInTheRenderedView);
+      RenderedView.AddHandler(PastedEvent, TellOfAPasteInTheRenderedView);
       SetCurrentValue(ContextFlyoutProperty, new MenuOfAMarkdownEditor(this));
       SetCurrentValue(DocumentProperty, new TextDocument());
    }
@@ -31,6 +33,15 @@ public partial class MarkdownEditor : UserControl
       click.Handled = true;
       RaiseEvent(new LinkClickedEventArgs(click.Target, click.KeyModifiers));
    }
+
+   ///<summary>The application is told by the editor, as of a paste in the source view: the views are parts of the editor.</summary>
+   void TellOfAPasteInTheRenderedView(object? sender, PastedEventArgs paste)
+   {
+      paste.Handled = true;
+      TellOfAPaste(paste.Written);
+   }
+
+   internal void TellOfAPaste(SourceRange written) => RaiseEvent(new PastedEventArgs(written));
 
    ///<summary>Edits what the rendered view shows. Null while the source is shown instead, and while the control isn't in a window.</summary>
    RenderedEditor? RenderedEditorShown => ShowsSource ? null : _renderedEditor;
@@ -70,7 +81,8 @@ public partial class MarkdownEditor : UserControl
    public Task PasteAsQuote() => ClipboardInputOfTheViewShown.PasteAsQuote();
 
    ///<summary>Puts a quote of <paramref name="markdown"/> in place of the selection, and the caret in a paragraph after it.</summary>
-   public void Quote(string markdown) => EditInEitherView(it => it.Quote(markdown));
+   ///<returns>The stretch of the markdown of <see cref="Document"/> that the quote wrote.</returns>
+   public SourceRange Quote(string markdown) => EditInEitherView(it => it.Quote(markdown));
 
    ///<summary>Formats the selected text, or takes the format away when all of it has it.</summary>
    ///<remarks>With nothing selected, it's the text typed next in the rendered view that gets or loses the format. In the source view, nothing happens then.</remarks>
@@ -87,6 +99,17 @@ public partial class MarkdownEditor : UserControl
       edit(editor);
       Selection = editor.Selection;
       BringTheCaretIntoView();
+   }
+
+   ///<summary>Edits also while the source is shown, and while the control isn't.</summary>
+   ///<returns>What <paramref name="edit"/> returns.</returns>
+   TResult EditInEitherView<TResult>(Func<RenderedEditor, TResult> edit)
+   {
+      using var editor = new RenderedEditor(Document, Selection); // Another than that of the rendered view, which there is none of while the control isn't shown.
+      var result = edit(editor);
+      Selection = editor.Selection;
+      BringTheCaretIntoView();
+      return result;
    }
 
    ///<summary>The link that the markdown has at <paramref name="offset"/>. Null when it has none there. Only while the control is in a window.</summary>

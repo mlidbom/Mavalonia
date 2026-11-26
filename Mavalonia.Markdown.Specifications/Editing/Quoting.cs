@@ -21,7 +21,8 @@ public class Quoting
    [XF] public void in_a_list_item_puts_the_quote_in_the_item() => Quote("x", into: "- a‸\n- b").Must().Be("- a\n\n  > x\n\n  ‸\n\n- b");
    [XF] public void in_code_adds_the_quote_after_the_code() => Quote("x", into: "```\na‸b\n```").Must().Be("```\nab\n```\n\n> x\n\n‸");
    [XF] public void in_a_table_adds_the_quote_after_the_table() => Quote("x", into: "| a‸ |\n|---|\n| b |").Must().Be("| a |\n|---|\n| b |\n\n> x\n\n‸");
-   [XF] public void is_undone_at_once() => Of("a⟦b⟧c", it => it.Quote("x"), it => it.Undo()).Must().Satisfy(it => it.Replace("‸", "") == "abc");
+   [XF] public void tells_what_it_wrote() => WrittenBy(it => it.Quote("x"), "a‸b").Must().Be("a⟦\n\n> x\n\n⟧b");
+   [XF] public void is_undone_at_once() =>Of("a⟦b⟧c", it => it.Quote("x"), it => it.Undo()).Must().Satisfy(it => it.Replace("‸", "") == "abc");
 
    [XF] public void anywhere_adds_a_quote_with_nothing_else_in_it_and_puts_the_caret_outside_of_it_and_keeps_how_all_other_text_looks()
    {

@@ -19,6 +19,14 @@ class UndoSteps
       using(_document.RunUpdate()) makeChanges();
    }
 
+   ///<summary>Has the changes that <paramref name="makeChanges"/> makes undone together.</summary>
+   ///<returns>What <paramref name="makeChanges"/> returns.</returns>
+   internal TResult AsOneStep<TResult>(Func<TResult> makeChanges)
+   {
+      EndTyping();
+      using(_document.RunUpdate()) return makeChanges();
+   }
+
    ///<summary>Has the changes that <paramref name="makeChanges"/> makes undone together with those made by typing just before.</summary>
    internal void AsPartOfTyping(Action makeChanges)
    {

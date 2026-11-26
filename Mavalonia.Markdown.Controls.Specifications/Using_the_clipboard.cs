@@ -3,6 +3,8 @@ using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Compze.Must;
 using Mavalonia.Markdown.Controls.Specifications.HeadlessAvalonia;
+using Mavalonia.Markdown.Editing;
+using Mavalonia.Markdown.Specifications;
 
 namespace Mavalonia.Markdown.Controls.Specifications;
 
@@ -73,6 +75,35 @@ public class Using_the_clipboard
       [XFOnUIThread] public async Task pastes_text_as_a_quote() => (await PasteAsQuote("a‸", "b\n\nc")).Must().Be("a\n\n> b\n>\n> c\n\n‸");
       [XFOnUIThread] public async Task pastes_rich_text_as_a_quote() => (await PasteAsQuote("‸", "b c", "<p><b>b</b></p><ul><li>c</li></ul>")).Must().Be("> **b**\n>\n> - c\n\n‸");
       [XFOnUIThread] public async Task changes_nothing_when_there_is_nothing_on_the_clipboard() => (await PasteAsQuote("a‸", "")).Must().Be("a‸");
+   }
+
+   public class Telling_the_application_what_a_paste_wrote : Using_the_clipboard
+   {
+      ///<summary>The markdown afterwards, with what the <see cref="MarkdownEditor.Pasted"/> event says was written by the paste written as selected. Null when it isn't raised.</summary>
+      static async Task<string?> WrittenByPressing(PhysicalKey key, RawInputModifiers modifiers, string into, string text, string? html = null, bool inTheSource = false)
+      {
+         var editor = new EditorInAWindow(into) { Editor = { ShowsSource = inTheSource } };
+         editor.Editor.FocusTheView();
+         await PutOnTheClipboard(editor.Window.Clipboard, text, html);
+         var pastes = new List<PastedEventArgs>();
+         editor.Editor.Pasted += (_, paste) => pastes.Add(paste);
+
+         editor.Press(key, modifiers);
+         await Task.Yield();
+         return pastes switch
+         {
+            [] => null,
+            [{ Source: MarkdownEditor, Written: var written }] => new MarkdownWithSelection(editor.Editor.Document.Text, new TextSelection(written.Start, written.End)).ToString(),
+            _ => throw new InvalidOperationException($"Told of {pastes.Count} pastes, one of them by {pastes[0].Source}.")
+         };
+      }
+
+      [XFOnUIThread] public async Task with_Ctrl_and_V() => (await WrittenByPressing(PhysicalKey.V, Ctrl, "a ‸", "b", "<b>b</b>")).Must().Be("a ⟦**b**⟧");
+      [XFOnUIThread] public async Task with_Ctrl_and_Shift_and_V() => (await WrittenByPressing(PhysicalKey.V, CtrlShift, "a ‸", "b", "<b>b</b>")).Must().Be("a ⟦b⟧");
+      [XFOnUIThread] public async Task with_Ctrl_and_Shift_and_Q() => (await WrittenByPressing(PhysicalKey.Q, CtrlShift, "a‸", "b")).Must().Be("a⟦\n\n> b\n\n⟧");
+      [XFOnUIThread] public async Task with_Ctrl_and_V_in_the_source_view() => (await WrittenByPressing(PhysicalKey.V, Ctrl, "a ⟦x⟧", "b", "<b>b</b>", inTheSource: true)).Must().Be("a ⟦**b**⟧");
+      [XFOnUIThread] public async Task with_Ctrl_and_Shift_and_Q_in_the_source_view() => (await WrittenByPressing(PhysicalKey.Q, CtrlShift, "a‸", "b", inTheSource: true)).Must().Be("a⟦\n\n> b\n\n⟧");
+      [XFOnUIThread] public async Task but_not_when_there_is_nothing_on_the_clipboard() => (await WrittenByPressing(PhysicalKey.V, Ctrl, "a‸", "")).Must().BeNull();
    }
 
    public class In_the_source_view : Using_the_clipboard
