@@ -12,13 +12,14 @@ class ViewInAWindow
    internal ViewInAWindow(string markdown)
    {
       View = new MarkdownView { Markdown = markdown, Padding = new Thickness(10) };
-      View.LinkClicked += (_, click) => ClickedLinks.Add(click.Target);
+      View.LinkClicked += (_, click) => Clicks.Add(click);
       Window = new HeadlessWindow(new ScrollViewer { Content = View });
    }
 
    internal MarkdownView View { get; }
    internal HeadlessWindow Window { get; }
-   internal List<string> ClickedLinks { get; } = [];
+   internal List<LinkClickedEventArgs> Clicks { get; } = [];
+   internal IReadOnlyList<string> ClickedLinks => [..Clicks.Select(it => it.Target)];
 
    internal ScrollViewer ScrollViewer => (ScrollViewer)View.Parent!;
 
@@ -31,7 +32,17 @@ class ViewInAWindow
    ///<summary>Just after <paramref name="text"/> where it's first shown.</summary>
    internal Point EndOf(string text) => Window.PointOf(View, new Point(BoundsOf(text).Right - 0.5, BoundsOf(text).Center.Y));
 
-   internal Rect BoundsOf(string text) => View.BoundsOf(new PlainTextRange(View.PlainText.Value.IndexOf(text, StringComparison.Ordinal), text.Length)).First();
+   internal Rect BoundsOf(string text) => View.BoundsOf(RangeOf(text)).First();
+
+   ///<summary>Where <paramref name="text"/> is first in the <see cref="MarkdownView.PlainText"/> of the view.</summary>
+   internal PlainTextRange RangeOf(string text) => new(View.PlainText.Value.IndexOf(text, StringComparison.Ordinal), text.Length);
+
+   ///<summary>The pixels of a frame of the window that the first line of <paramref name="text"/> is drawn on, where it's first shown.</summary>
+   internal PixelRect PixelsOf(string text)
+   {
+      var bounds = BoundsOf(text);
+      return PixelRect.FromRect(new Rect(Window.PointOf(View, bounds.TopLeft), bounds.Size), scale: 1);
+   }
 
    ///<summary>Where each occurrence of <paramref name="text"/> starts to be shown.</summary>
    internal IReadOnlyList<Rect> BoundsOfEach(string text)

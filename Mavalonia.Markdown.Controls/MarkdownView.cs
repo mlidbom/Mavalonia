@@ -23,6 +23,7 @@ public class MarkdownView : RenderedMarkdownView
    public static readonly StyledProperty<string> MarkdownProperty = AvaloniaProperty.Register<MarkdownView, string>(nameof(Markdown), "", coerce: InsteadOfNull(""));
    public static readonly StyledProperty<MarkdownDialect> DialectProperty = AvaloniaProperty.Register<MarkdownView, MarkdownDialect>(nameof(Dialect), MarkdownDialect.ForReading, coerce: InsteadOfNull(MarkdownDialect.ForReading));
    public static readonly StyledProperty<IReadOnlyList<TextHighlight>> HighlightsProperty = AvaloniaProperty.Register<MarkdownView, IReadOnlyList<TextHighlight>>(nameof(Highlights), [], coerce: InsteadOfNull<IReadOnlyList<TextHighlight>>([]));
+   public static readonly StyledProperty<IReadOnlyList<TextLink>> LinksProperty = AvaloniaProperty.Register<MarkdownView, IReadOnlyList<TextLink>>(nameof(Links), [], coerce: InsteadOfNull<IReadOnlyList<TextLink>>([]));
    public static readonly StyledProperty<Func<string, Task<IImage?>>?> LoadImageProperty = AvaloniaProperty.Register<MarkdownView, Func<string, Task<IImage?>>?>(nameof(LoadImage));
    public static readonly DirectProperty<MarkdownView, bool> IsAnythingSelectedProperty = AvaloniaProperty.RegisterDirect<MarkdownView, bool>(nameof(IsAnythingSelected), it => it.IsAnythingSelected);
    public static readonly RoutedEvent<LinkClickedEventArgs> LinkClickedEvent = RoutedEvent.Register<MarkdownView, LinkClickedEventArgs>(nameof(LinkClicked), RoutingStrategies.Bubble);
@@ -42,7 +43,7 @@ public class MarkdownView : RenderedMarkdownView
    static MarkdownView()
    {
       IsTabStopProperty.OverrideDefaultValue<MarkdownView>(false);
-      AffectsRender<MarkdownView>(HighlightsProperty);
+      AffectsRender<MarkdownView>(HighlightsProperty, LinksProperty);
    }
 
    public MarkdownView()
@@ -73,7 +74,7 @@ public class MarkdownView : RenderedMarkdownView
    /// </remarks>
    public Func<string, Task<IImage?>>? LoadImage { get => GetValue(LoadImageProperty); set => SetValue(LoadImageProperty, value); }
 
-   ///<summary>A person has clicked a link, or an image. The view itself opens nothing.</summary>
+   ///<summary>A person has clicked a link, of the markdown or of <see cref="Links"/>, or an image. The view itself opens nothing.</summary>
    public event EventHandler<LinkClickedEventArgs>? LinkClicked { add => AddHandler(LinkClickedEvent, value); remove => RemoveHandler(LinkClickedEvent, value); }
 
    ///<summary>All the text that is shown, such as to search in.</summary>
@@ -84,11 +85,24 @@ public class MarkdownView : RenderedMarkdownView
 
    private protected override IReadOnlyList<TextHighlight> HighlightsToDraw => Highlights;
 
+   ///<summary>
+   /// Text that is shown as links where the markdown has none, such as names that the application knows. They are drawn as the markdown's links are, in
+   /// <see cref="RenderedMarkdownView.LinkForeground"/> and underlined, in code too, and are clicked as they are: see <see cref="LinkClicked"/>.
+   ///</summary>
+   ///<remarks>
+   /// The markdown stays as it is, as does what is copied of it. Where one overlaps a link of the markdown, that of the markdown is clicked. Where they overlap
+   /// one another, the last is. They are of the text that is there now: when that changes, set them anew.<br/>
+   /// Setting them lays out nothing anew: they change no sizes, nor where lines end.
+   ///</remarks>
+   public IReadOnlyList<TextLink> Links { get => GetValue(LinksProperty); set => SetValue(LinksProperty, value); }
+
+   private protected override IReadOnlyList<TextLink> TextLinks => Links;
+
    ///<summary>Where the text of <paramref name="range"/> is shown: a rectangle for each line of it.</summary>
    public IReadOnlyList<Rect> BoundsOf(PlainTextRange range) => [..PlainText.PartsOf(range).SelectMany(Layout.BoundsOf)];
 
-   ///<summary>Where the link at <paramref name="point"/> of the view leads, as the markdown says it, or else the image there. Null when none is there.</summary>
-   public string? TargetOfTheLinkAt(Point point) => Layout.TargetAt(point);
+   ///<summary>Where the link at <paramref name="point"/> of the view leads, as the markdown says it, or else the image there, or else the last of <see cref="Links"/> there. Null when none is there.</summary>
+   public string? TargetOfTheLinkAt(Point point) => TargetAt(point);
 
    ///<summary>Tells when it changes, such as for a command that needs something to be selected.</summary>
    public bool IsAnythingSelected { get; private set => SetAndRaise(IsAnythingSelectedProperty, ref field, value); }
@@ -155,7 +169,7 @@ public class MarkdownView : RenderedMarkdownView
    ///<summary>Shows what can be done with what is at <paramref name="point"/>: that a link can be clicked, and the button to copy code.</summary>
    void ShowWhatIsAt(Point point, DocumentLayout layout)
    {
-      Cursor = layout.TargetAt(point) is null ? Cursors.OfText : Cursors.OfALink;
+      Cursor = layout.TargetAt(point, Links) is null ? Cursors.OfText : Cursors.OfALink;
 
       if(layout.CodeAt(point) is {} code) ShowTheCopyButton(code.Block, code.Bounds);
       else _copyCode?.Hide();

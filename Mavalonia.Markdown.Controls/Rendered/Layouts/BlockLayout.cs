@@ -59,8 +59,9 @@ class BlockLayout
       foreach(var rectangle in BoundsOf(part)) context.DrawRectangle(background, null, rectangle, _appearance.Scaled(2), _appearance.Scaled(2));
    }
 
-   ///<summary>Draws what is in <paramref name="viewport"/> of the text.</summary>
-   internal void DrawText(DrawingContext context, Rect viewport) => _text.Draw(context, _originOfText, Block is CodeBlock code ? _appearance.ColoursOf(code) : null, viewport);
+   ///<summary>Draws what is in <paramref name="viewport"/> of the text, with <paramref name="links"/> drawn as links.</summary>
+   internal void DrawText(DrawingContext context, Rect viewport, LinkedStretches links) =>
+      _text.Draw(context, _originOfText, new ColoursOfAText(Block is CodeBlock code ? _appearance.ColoursOf(code) : null, links), viewport);
 
    ///<summary>Where a caret is drawn that is before the character at <paramref name="index"/>.</summary>
    internal Rect CaretAt(int index) => _text.BoundsAt(index).Translate(_originOfText).WithWidth(1.5);
@@ -86,9 +87,12 @@ class BlockLayout
    ///<summary>The line that a caret before the character at <paramref name="index"/> is on.</summary>
    internal LineLayout LineOf(int index) => Lines.ElementAt(_text.NumberOfTheLineAt(index));
 
-   ///<summary>Where what can be clicked at <paramref name="point"/> leads: a link, or else an image. Null when none is there.</summary>
+   ///<summary>Whether <paramref name="point"/> is on <paramref name="part"/> of the block.</summary>
+   internal bool Shows(PartOfABlock part, Point point) => BoundsOf(part).Any(it => it.Contains(point));
+
+   ///<summary>Where what the markdown makes clickable at <paramref name="point"/> leads: a link, or else an image. Null when none is there.</summary>
    internal string? TargetAt(Point point) =>
-      Block.Text.StretchesOfTheSameFormatting.Where(it => TargetOf(it.Formatting) is not null && BoundsOf(new PartOfABlock(Block, it.Start, it.Start + it.Length)).Any(bounds => bounds.Contains(point)))
+      Block.Text.StretchesOfTheSameFormatting.Where(it => TargetOf(it.Formatting) is not null && Shows(new PartOfABlock(Block, it.Start, it.Start + it.Length), point))
            .Select(it => TargetOf(it.Formatting))
            .FirstOrDefault();
 

@@ -9,7 +9,7 @@ public class Highlighting
 {
    readonly ViewInAWindow _view = new("# one two\n\na **two** b\n\n- three");
 
-   PlainTextRange RangeOf(string text) => new(_view.View.PlainText.Value.IndexOf(text, StringComparison.Ordinal), text.Length);
+   PlainTextRange RangeOf(string text) => _view.RangeOf(text);
 
    [XFOnUIThread] public void some_text_shows_it_otherwise()
    {

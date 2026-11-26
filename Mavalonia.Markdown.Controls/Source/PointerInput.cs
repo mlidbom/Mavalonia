@@ -48,7 +48,7 @@ class PointerInput
       var clicked = TargetClickedBy(e);
 
       _pressedOnALink = null;
-      if(clicked is not null) _editor.RaiseEvent(new LinkClickedEventArgs(clicked, e.KeyModifiers));
+      if(clicked is not null) _editor.RaiseEvent(new LinkClickedEventArgs(clicked, e.KeyModifiers, _view, e.GetPosition(_view)));
    }
 
    string? TargetClickedBy(PointerReleasedEventArgs e) => _pressedOnALink is {} press && press.IsClickedBy(e.GetPosition(_view), TargetOfTheLinkAt(e)) ? press.Target : null;

@@ -37,10 +37,12 @@ class RunsOfABlock
    internal TextParagraphProperties PropertiesOfTheParagraph(TextWrapping wrapping) =>
       new GenericTextParagraphProperties(FlowDirection.LeftToRight, TextAlignment.Left, firstLineInParagraph: true, alwaysCollapsible: false, PropertiesOfPlainText, wrapping, lineHeight: double.NaN, indent: 0, letterSpacing: 0);
 
-   internal TextOfABlock Text => TextOf(FormattedRuns().SelectMany(WithWhatIsDrawn));
+   internal TextOfABlock Text => TextOf(Runs);
 
-   ///<summary>The text of code in its colours.</summary>
-   internal TextOfABlock TextIn(ColouredCode colours) => TextOf(RunsIn(colours));
+   IEnumerable<TextOfABlock.Run> Runs => FormattedRuns().SelectMany(WithWhatIsDrawn);
+
+   ///<summary>The text in <paramref name="colours"/>: code in its own, and the links that the application shows in the colour of links, underlined.</summary>
+   internal TextOfABlock TextIn(ColoursOfAText colours) => TextOf((colours.OfCode is {} code ? RunsIn(code) : Runs).SelectMany(it => WithTheLinksIn(it, colours.Links)));
 
    TextOfABlock TextOf(IEnumerable<TextOfABlock.Run> runs)
    {
@@ -93,6 +95,33 @@ class RunsOfABlock
 
       if(run.End > start) yield return run with { Start = start, Length = run.End - start };
    }
+
+   ///<summary>The run, cut where <paramref name="links"/> start and end in it, and drawn as a link where they are. What is drawn instead of chars, such as an image, stays as it is.</summary>
+   IEnumerable<TextOfABlock.Run> WithTheLinksIn(TextOfABlock.Run run, LinkedStretches links)
+   {
+      if(run.Drawn is not null)
+      {
+         yield return run;
+         yield break;
+      }
+
+      var start = run.Start;
+      foreach(var link in links.Between(run.Start, run.End))
+      {
+         if(link.Start > start) yield return run with { Start = start, Length = link.Start - start };
+         yield return run with { Start = link.Start, Length = link.End - link.Start, Properties = AsALink(run.Properties) };
+         start = link.End;
+      }
+
+      if(run.End > start) yield return run with { Start = start, Length = run.End - start };
+   }
+
+   ///<summary>Chars that look as <paramref name="properties"/> say, but in the colour of links, and underlined, as the markdown's links are.</summary>
+   TextRunProperties AsALink(TextRunProperties properties) =>
+      new GenericTextRunProperties(properties.Typeface, properties.FontRenderingEmSize, Underlined(properties.TextDecorations), _appearance.LinkForeground, properties.BackgroundBrush, properties.BaselineAlignment, properties.CultureInfo);
+
+   static TextDecorationCollection Underlined(TextDecorationCollection? decorations) =>
+      decorations?.Any(it => it.Location == TextDecorationLocation.Underline) == true ? decorations : [..decorations ?? [], ..TextDecorations.Underline];
 
    TextRunProperties PropertiesOf(TextFormatting formatting)
    {

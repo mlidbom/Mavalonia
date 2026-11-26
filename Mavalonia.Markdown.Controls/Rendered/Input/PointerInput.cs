@@ -64,7 +64,7 @@ class PointerInput
       _view.SelectingStarts();
       _isPressed = true;
       _pressedAt = point;
-      _pressedOnALink = _view.Layout.TargetAt(point) is {} target ? new PressOnALink(point, target) : null;
+      _pressedOnALink = _view.TargetAt(point) is {} target ? new PressOnALink(point, target) : null;
 
       var position = _view.Layout.PositionNearestTo(point);
       switch(e.ClickCount)
@@ -108,7 +108,7 @@ class PointerInput
 
       e.Pointer.Capture(null);
       EndSelecting();
-      if(clicked is not null) _view.RaiseEvent(new LinkClickedEventArgs(clicked, e.KeyModifiers));
+      if(clicked is not null) _view.RaiseEvent(new LinkClickedEventArgs(clicked, e.KeyModifiers, _view, e.GetPosition(_view)));
    }
 
    ///<summary>A link, or an image, is clicked when the button is pressed and released on it, with nothing selected by that.</summary>
@@ -116,7 +116,7 @@ class PointerInput
    {
       var isAClick = e.InitialPressMouseButton == MouseButton.Left && _pressedAt is not null && _view.Shown?.Selection.IsEmpty == true;
       var point = e.GetPosition(_view);
-      return isAClick && _pressedOnALink is {} press && press.IsClickedBy(point, _view.Layout.TargetAt(point)) ? press.Target : null;
+      return isAClick && _pressedOnALink is {} press && press.IsClickedBy(point, _view.TargetAt(point)) ? press.Target : null;
    }
 
    internal void EndSelecting()

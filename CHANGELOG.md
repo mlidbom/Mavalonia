@@ -7,6 +7,13 @@ here: see [releasing](dev_docs/releasing.md).
 
 ## [Unreleased]
 
+### Added
+- `MarkdownView.Links`, text that the application shows as links where the markdown has none, such as the names of
+  things in its code: ranges of `PlainText`, each with where it leads. They look as the markdown's links do, in the
+  colour of links and underlined, in code too, and a click on one raises `LinkClicked`. The markdown, and what is copied
+  of it, stay as they are. Setting them again, as the application learns of more, lays nothing out anew.
+- `LinkClickedEventArgs.GetPosition`, where the link was clicked, such as to show a menu there.
+
 ## [0.8.0] - 2026-11-26
 
 ### Added

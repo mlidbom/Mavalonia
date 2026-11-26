@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Media;
+using Mavalonia.Markdown.Controls.Rendered.Layouts.Texts;
 using Mavalonia.Markdown.Rendering;
 using Mavalonia.Markdown.Rendering.Blocks;
 using Mavalonia.Markdown.Rendering.Texts;
@@ -26,7 +27,7 @@ class DocumentLayout
    internal bool IsOf(RenderedMarkdown rendered, double width) => _rendered == rendered && Size.Width.Equals(width);
 
    ///<summary>Draws what is in <paramref name="viewport"/>.</summary>
-   internal void Draw(DrawingContext context, SourceRange? selected, IReadOnlyList<TextHighlight> highlights, Rect viewport)
+   internal void Draw(DrawingContext context, SourceRange? selected, IReadOnlyList<TextHighlight> highlights, IReadOnlyList<TextLink> links, Rect viewport)
    {
       var visible = _blocks.Where(it => it.Bounds.Intersects(viewport)).ToList();
 
@@ -37,7 +38,8 @@ class DocumentLayout
       if(selected is {} range)
          foreach(var block in visible) block.DrawSelection(context, range);
 
-      foreach(var block in visible) block.DrawText(context, viewport);
+      var linked = links.SelectMany(it => _rendered.PlainText.PartsOf(it.Range)).ToLookup(it => it.Block);
+      foreach(var block in visible) block.DrawText(context, viewport, LinkedStretches.Of(linked[block.Block]));
    }
 
    BlockLayout LayoutOf(RenderedBlock block) => _blocks.First(it => it.Block == block);
@@ -54,8 +56,15 @@ class DocumentLayout
    ///<summary>The code at <paramref name="point"/>, and where its block is. Null when no code is there.</summary>
    internal (CodeBlock Block, Rect Bounds)? CodeAt(Point point) => _blocks.FirstOrDefault(it => it.Bounds.Contains(point)) is { Block: CodeBlock code } layout ? (code, layout.Bounds) : null;
 
-   ///<summary>Where what can be clicked at <paramref name="point"/> leads: a link, or else an image. Null when none is there.</summary>
-   internal string? TargetAt(Point point) => _blocks.FirstOrDefault(it => it.Bounds.Contains(point))?.TargetAt(point);
+   ///<summary>
+   /// Where what can be clicked at <paramref name="point"/> leads: a link of the markdown, or else an image, or else the last of <paramref name="links"/> there.
+   /// Null when none is there.
+   ///</summary>
+   internal string? TargetAt(Point point, IReadOnlyList<TextLink> links) =>
+      _blocks.FirstOrDefault(it => it.Bounds.Contains(point)) is {} block ? block.TargetAt(point) ?? TargetOfTheLinkAt(point, block, links) : null;
+
+   string? TargetOfTheLinkAt(Point point, BlockLayout block, IReadOnlyList<TextLink> links) =>
+      links.Where(link => _rendered.PlainText.PartsOf(link.Range).Any(part => part.Block == block.Block && block.Shows(part, point))).Select(it => it.Target).LastOrDefault();
 
    ///<summary>What is to the left or right of a point is nearer to it than what is above or below.</summary>
    static double DistanceBetween(Rect bounds, Point point)

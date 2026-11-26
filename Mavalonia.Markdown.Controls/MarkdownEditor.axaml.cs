@@ -31,7 +31,7 @@ public partial class MarkdownEditor : UserControl
    void TellOfALinkClickedInTheRenderedView(object? sender, LinkClickedEventArgs click)
    {
       click.Handled = true;
-      RaiseEvent(new LinkClickedEventArgs(click.Target, click.KeyModifiers));
+      RaiseEvent(new LinkClickedEventArgs(click));
    }
 
    ///<summary>The application is told by the editor, as of a paste in the source view: the views are parts of the editor.</summary>

@@ -1,13 +1,13 @@
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
-using Mavalonia.Markdown.Controls.Rendered.CodeColours;
 
 namespace Mavalonia.Markdown.Controls.Rendered.Layouts.Texts;
 
-///<summary>The text of a block, laid out in lines. Code is drawn in its colours on the lines that it's laid out in without them, so that colours change no sizes.</summary>
+///<summary>The text of a block, laid out in lines. Its <see cref="ColoursOfAText"/>, those of code and of the links that the application shows, are drawn on the lines that it's laid out in without them, so that they change no sizes.</summary>
 ///<remarks>
 /// Laid out in its colours, code would be wrapped elsewhere: Avalonia looks for where a line may end inside each stretch of one colour alone.
+/// And links that the application shows anew, as it learns of more, would move where the lines of text end.
 /// </remarks>
 class LaidOutText : IDisposable
 {
@@ -42,17 +42,17 @@ class LaidOutText : IDisposable
    internal Rect BoundsAt(int index) => _layout.HitTestTextPosition(index);
 
    ///<summary>Draws the lines that are in <paramref name="viewport"/>, in <paramref name="colours"/> when there are any.</summary>
-   internal void Draw(DrawingContext context, Point origin, ColouredCode? colours, Rect viewport)
+   internal void Draw(DrawingContext context, Point origin, ColoursOfAText colours, Rect viewport)
    {
       var top = origin.Y;
       foreach(var (number, line) in Lines.Index())
       {
-         if(top < viewport.Bottom && top + line.Height > viewport.Top) (colours is null ? line : LinesIn(colours)[number])?.Draw(context, new Point(origin.X, top));
+         if(top < viewport.Bottom && top + line.Height > viewport.Top) (colours.AreAny ? LinesIn(colours)[number] : line)?.Draw(context, new Point(origin.X, top));
          top += line.Height;
       }
    }
 
-   LinesInColours LinesIn(ColouredCode colours)
+   LinesInColours LinesIn(ColoursOfAText colours)
    {
       if(_linesInColours is not null && _linesInColours.Colours == colours) return _linesInColours;
 

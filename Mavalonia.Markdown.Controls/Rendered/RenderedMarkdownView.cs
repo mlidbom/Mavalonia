@@ -120,12 +120,18 @@ public abstract partial class RenderedMarkdownView : Control
       _drawn = _viewport.Inflate(new Thickness(0, HeightDrawnBeyondWhatIsSeen));
       if(Shown is not {} shown) return;
 
-      Layout.Draw(context, shown.Selection.IsEmpty ? null : shown.Selection.Range, HighlightsToDraw, _drawn);
+      Layout.Draw(context, shown.Selection.IsEmpty ? null : shown.Selection.Range, HighlightsToDraw, TextLinks, _drawn);
       DrawOver(context);
    }
 
    ///<summary>What is highlighted, the uppermost last.</summary>
    private protected virtual IReadOnlyList<TextHighlight> HighlightsToDraw => [];
+
+   ///<summary>The text that is shown as links where the markdown has none, the uppermost last.</summary>
+   private protected virtual IReadOnlyList<TextLink> TextLinks => [];
+
+   ///<summary>Where what can be clicked at <paramref name="point"/> leads: a link, or else an image. Null when none is there.</summary>
+   internal string? TargetAt(Point point) => Layout.TargetAt(point, TextLinks);
 
    ///<summary>Draws what is to be over the text.</summary>
    private protected virtual void DrawOver(DrawingContext context) {}

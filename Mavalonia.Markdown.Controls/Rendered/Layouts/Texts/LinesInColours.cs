@@ -1,10 +1,9 @@
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
-using Mavalonia.Markdown.Controls.Rendered.CodeColours;
 
 namespace Mavalonia.Markdown.Controls.Rendered.Layouts.Texts;
 
-///<summary>The lines that some code is laid out in, as they are drawn in its colours. Each is made when it's first drawn.</summary>
+///<summary>The lines that a text is laid out in, as they are drawn in its <see cref="ColoursOfAText"/>. Each is made when it's first drawn.</summary>
 class LinesInColours : IDisposable
 {
    readonly TextOfABlock _text;
@@ -12,7 +11,7 @@ class LinesInColours : IDisposable
    readonly IReadOnlyList<TextLine> _linesWithoutColours;
    readonly TextLine?[] _lines;
 
-   internal LinesInColours(RunsOfABlock runs, ColouredCode colours, IReadOnlyList<TextLine> linesWithoutColours)
+   internal LinesInColours(RunsOfABlock runs, ColoursOfAText colours, IReadOnlyList<TextLine> linesWithoutColours)
    {
       Colours = colours;
       _text = runs.TextIn(colours);
@@ -21,7 +20,7 @@ class LinesInColours : IDisposable
       _lines = new TextLine?[linesWithoutColours.Count];
    }
 
-   internal ColouredCode Colours { get; }
+   internal ColoursOfAText Colours { get; }
 
    ///<summary>Null when there is no text on the line.</summary>
    internal TextLine? this[int number] => _lines[number] ??= InColours(_linesWithoutColours[number]);
