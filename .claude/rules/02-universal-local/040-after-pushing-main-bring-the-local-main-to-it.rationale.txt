@@ -1,0 +1,12 @@
+# Why: after pushing to main, bring the local main to the same commit
+
+- **The need (2026-11-26):** a session in the worktree `code-selection-issue` (Opus 5.5, `claude-opus-5-5`) released
+  Mavalonia 0.10.1 by pushing its branch to `origin/main`, and left the local `main` in `C:\Dev\Mavalonia` two commits
+  behind. Magnus: "When you merge to and push main, please make sure that the local main branch and the the remote
+  share a commit, point at the same commit. It is really confusing to me when origin/main is ahead of the only place
+  where I develop, and the tooling will not let me remove this worktree and archive this chat, because it is out of sync
+  with main." He asked for it as a rule of this project.
+- **What kind of rule:** his workflow, which an agent can't derive, more than a correction: the session didn't know
+  where he develops, nor that the tooling checks the worktree's branch against the local `main`.
+- **Untested:** sessions with no main checkout beside them, such as a cloud session, where there is nothing to bring
+  along.
