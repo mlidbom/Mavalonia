@@ -7,6 +7,11 @@ here: see [releasing](dev_docs/releasing.md).
 
 ## [Unreleased]
 
+### Changed
+- `MarkdownView` asks for no more width than what it shows needs, as a `TextBlock` does. Aligned to a side rather
+  than stretched, such as in the bubble of a message, it's no wider than its widest line; its lines end where they do
+  stretched. `MarkdownEditor` still takes all the width it's given.
+
 ### Removed
 - `LinkClickedEventArgs.GetPosition`, which nothing used: an application shows what belongs at a click at the pointer.
 

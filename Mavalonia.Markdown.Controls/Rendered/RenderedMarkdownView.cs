@@ -98,8 +98,12 @@ public abstract partial class RenderedMarkdownView : Control
    protected override Size MeasureOverride(Size availableSize)
    {
       var width = double.IsInfinity(availableSize.Width) ? WidthWhenAnyIsAvailable : availableSize.Width;
-      return LayOut(width).Size;
+      var layout = LayOut(width);
+      return new Size(WidthToAskFor(layout), layout.Size.Height);
    }
+
+   ///<summary>The width that the view asks for, of the <paramref name="layout"/> at the width it's offered: all of it, as an editor's view does, which has room to the right to write more in.</summary>
+   private protected virtual double WidthToAskFor(DocumentLayout layout) => layout.Size.Width;
 
    protected override Size ArrangeOverride(Size finalSize)
    {

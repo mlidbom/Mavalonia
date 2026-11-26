@@ -37,8 +37,10 @@ class DocumentLayoutBuilder
    {
       var builder = new DocumentLayoutBuilder(rendered, appearance, texts, width, padding);
       builder.LayOutBlocks();
-      return new DocumentLayout(rendered, builder._blocks, builder._decorations, new Size(width, builder._top + padding.Bottom));
+      return new DocumentLayout(rendered, builder._blocks, builder._decorations, new Size(width, builder._top + padding.Bottom), builder.RightOfWhatIsShown + padding.Right);
    }
+
+   double RightOfWhatIsShown => _blocks.Select(it => it.RightOfWhatItShows).DefaultIfEmpty(_area.Left).Max();
 
    double SpaceBetweenBlocks => _appearance.Scaled(8);
    double SpaceAboveAHeading => _appearance.Scaled(12);

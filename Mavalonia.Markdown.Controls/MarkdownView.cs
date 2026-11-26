@@ -104,6 +104,10 @@ public class MarkdownView : RenderedMarkdownView
 
    private protected override IReadOnlyList<TextLink> TextLinks => Links;
 
+   ///<summary>No more than what it shows needs, as a <see cref="Avalonia.Controls.TextBlock"/> asks for: aligned to a side rather than stretched, such as in the bubble of a message, it's no wider than its widest line.</summary>
+   ///<remarks>Laid out again at that width, its lines end where they did, since each of them fits in it and the next word didn't fit in the width that it was offered.</remarks>
+   private protected override double WidthToAskFor(DocumentLayout layout) => layout.WidthOfWhatItShows;
+
    ///<summary>Where the text of <paramref name="range"/> is shown: a rectangle for each line of it.</summary>
    public IReadOnlyList<Rect> BoundsOf(PlainTextRange range) => [..PlainText.PartsOf(range).SelectMany(Layout.BoundsOf)];
 

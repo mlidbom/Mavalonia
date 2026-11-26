@@ -28,6 +28,9 @@ class BlockLayout
    internal RenderedBlock Block { get; }
    internal Rect Bounds { get; }
 
+   ///<summary>How far to the right what the block shows reaches: the borders of a cell of a table, or else its widest line, with as much space after it as code has before it.</summary>
+   internal double RightOfWhatItShows => Block is TableCell ? Bounds.Right : _originOfText.X + _text.WidthIncludingTrailingWhitespace + (_originOfText.X - Bounds.Left);
+
    internal void DrawBackground(DrawingContext context)
    {
       var pen = new Pen(_appearance.LineBrush, ThicknessOfLines);

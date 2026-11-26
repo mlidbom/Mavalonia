@@ -14,15 +14,19 @@ class DocumentLayout
    readonly IReadOnlyList<BlockLayout> _blocks;
    readonly IReadOnlyList<ContainerDecoration> _decorations;
 
-   internal DocumentLayout(RenderedMarkdown rendered, IReadOnlyList<BlockLayout> blocks, IReadOnlyList<ContainerDecoration> decorations, Size size)
+   internal DocumentLayout(RenderedMarkdown rendered, IReadOnlyList<BlockLayout> blocks, IReadOnlyList<ContainerDecoration> decorations, Size size, double widthOfWhatItShows)
    {
       _rendered = rendered;
       _blocks = blocks;
       _decorations = decorations;
       Size = size;
+      WidthOfWhatItShows = Math.Min(size.Width, widthOfWhatItShows);
    }
 
    internal Size Size { get; }
+
+   ///<summary>How wide it needs to be to show what it shows as it does: as wide as it's laid out, or less when none of its lines is that long.</summary>
+   internal double WidthOfWhatItShows { get; }
 
    internal bool IsOf(RenderedMarkdown rendered, double width) => _rendered == rendered && Size.Width.Equals(width);
 
