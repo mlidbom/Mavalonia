@@ -5,6 +5,8 @@ Controls for Avalonia®, for writing and reading messages in markdown, such as i
 - **`MarkdownEditor`**, a WYSIWYG markdown editor that switches quickly between showing the markdown source and showing it rendered.
 - **`MarkdownView`**, which shows markdown to be read. What a person selects in it is copied as markdown.
 
+![The desktop host: the MarkdownEditor on the left, and a MarkdownView on the right showing what is written in it](https://raw.githubusercontent.com/mlidbom/Mavalonia/main/images/desktop-host.png)
+
 They are on nuget.org as the package `Mavalonia`. To use them in an application, see [using the controls in an application](https://github.com/mlidbom/Mavalonia/blob/main/dev_docs/using-the-controls-in-an-application.md). Why `MarkdownView` is as it is: [MarkdownView](https://github.com/mlidbom/Mavalonia/blob/main/dev_docs/markdown-view.md). What each version changed: [CHANGELOG.md](https://github.com/mlidbom/Mavalonia/blob/main/CHANGELOG.md).
 
 The links are whole URLs, as this file is the package's page on nuget.org too.
@@ -37,6 +39,7 @@ The links are whole URLs, as this file is the package's page on nuget.org too.
 - **Try the controls, reloading code changes:** `dotnet watch --project Mavalonia.DesktopHost`
 - **CI:** GitHub Actions builds the solution from a clean checkout and runs all the specifications on every push, on Windows: `.github/workflows/build-and-test.yml`. The build fails on any warning.
 - **Measure how fast the controls are:** `dotnet run -c Release --project Mavalonia.Markdown.Controls.Measurements`, with how many messages as arguments, or none for 100 and 1,000
+- **Make the picture above again:** `dotnet run --project Mavalonia.DesktopHost -- --screenshot images/desktop-host.png`. It draws the window off the screen, at twice its size.
 - **Check that typing works on the real desktop:** `dotnet run --project Mavalonia.DesktopHost -- --check-typing`. The specifications run on the headless platform, which has no input methods. The window is off the screen and doesn't take the focus. The exit code is 0 when typing works.
 
 ## Specifications that use controls
