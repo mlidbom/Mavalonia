@@ -17,6 +17,7 @@ class App : Application
          var window = new MainWindow();
          desktop.MainWindow = window;
          if(desktop.Args?.Contains(TypingCheck.Argument) == true) new TypingCheck(window, desktop).RunWhenTheWindowOpens();
+         Screenshot.AskedForBy(desktop.Args ?? [], window, desktop)?.TakeWhenTheWindowOpens();
       }
 
       base.OnFrameworkInitializationCompleted();
