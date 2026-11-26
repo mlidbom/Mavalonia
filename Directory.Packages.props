@@ -14,6 +14,7 @@
       <PackageVersion Include="Avalonia.Skia" Version="$(AvaloniaVersion)" />
       <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
       <PackageVersion Include="Markdig" Version="1.6.0" />
+      <PackageVersion Include="MinVer" Version="8.0.0" />
       <PackageVersion Include="Compze.Must" Version="0.9.2-alpha" />
       <PackageVersion Include="Compze.xUnitBDD" Version="0.8.0-beta" />
       <PackageVersion Include="TextMateSharp.Grammars" Version="2.0.5" />

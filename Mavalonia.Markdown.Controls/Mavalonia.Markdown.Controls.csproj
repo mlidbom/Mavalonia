@@ -1,8 +1,37 @@
 <Project Sdk="Microsoft.NET.Sdk">
+   <!-- Packed as the package Mavalonia, with Mavalonia.Markdown inside it rather than a package of its own: the controls use
+        what is internal to it, so they must always come with the very build of it they were built with. -->
+   <PropertyGroup>
+      <IsPackable>true</IsPackable>
+      <PackageId>Mavalonia</PackageId>
+      <Description>Controls for Avalonia for writing and reading messages in markdown, such as in an AI chat: MarkdownEditor, a WYSIWYG markdown editor that switches quickly between the markdown's source and the markdown rendered, and MarkdownView, which shows markdown to be read and copies what is selected in it as markdown.</Description>
+      <Authors>MagnusLidbom</Authors>
+      <Copyright>Copyright (c) Lidbom Solutions AB. All rights reserved.</Copyright>
+      <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+      <PackageReadmeFile>README.md</PackageReadmeFile>
+      <PackageProjectUrl>https://github.com/mlidbom/Mavalonia</PackageProjectUrl>
+      <RepositoryUrl>https://github.com/mlidbom/Mavalonia</RepositoryUrl>
+      <PackageTags>avalonia;markdown;editor;wysiwyg;viewer;controls</PackageTags>
+      <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);PutMavaloniaMarkdownInThePackage</TargetsForTfmSpecificBuildOutput>
+   </PropertyGroup>
    <ItemGroup>
       <PackageReference Include="Avalonia" />
       <PackageReference Include="Avalonia.AvaloniaEdit" />
       <PackageReference Include="TextMateSharp.Grammars" />
-      <ProjectReference Include="..\Mavalonia.Markdown\Mavalonia.Markdown.csproj" />
+      <!-- Mavalonia.Markdown's own packages: referenced here so that the package depends on them, as it holds Mavalonia.Markdown. -->
+      <PackageReference Include="AngleSharp" />
+      <PackageReference Include="Markdig" />
+      <!-- Private, so that the package holds it instead of depending on a package of it. So it doesn't reach the projects
+           that reference this one either: those that use its types reference it themselves. -->
+      <ProjectReference Include="..\Mavalonia.Markdown\Mavalonia.Markdown.csproj" PrivateAssets="all" />
    </ItemGroup>
+   <ItemGroup>
+      <None Include="..\README.md" Pack="true" PackagePath="\" />
+   </ItemGroup>
+   <!-- Puts Mavalonia.Markdown's assembly and its documentation in the package, beside the controls'. -->
+   <Target Name="PutMavaloniaMarkdownInThePackage" DependsOnTargets="ResolveReferences">
+      <ItemGroup>
+         <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+      </ItemGroup>
+   </Target>
 </Project>

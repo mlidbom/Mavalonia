@@ -8,5 +8,10 @@
       <!-- Generate the XML doc file so that the build validates the crefs in doc comments: CS1574 flags a broken or stale one. CS1591 ("missing doc on a public member") isn't our policy. -->
       <GenerateDocumentationFile>true</GenerateDocumentationFile>
       <NoWarn>$(NoWarn);CS1591</NoWarn>
+      <!-- The version of every assembly and of the package is the latest tag such as v0.8.0, by MinVer: pushing that tag publishes it (dev_docs/releasing.md). -->
+      <MinVerTagPrefix>v</MinVerTagPrefix>
    </PropertyGroup>
+   <ItemGroup>
+      <PackageReference Include="MinVer" PrivateAssets="all" />
+   </ItemGroup>
 </Project>

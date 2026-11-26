@@ -12,6 +12,7 @@
       <PackageReference Include="Compze.xUnitBDD" />
       <PackageReference Include="xunit.v3" />
       <ProjectReference Include="..\Mavalonia.Markdown.Controls\Mavalonia.Markdown.Controls.csproj" />
+      <ProjectReference Include="..\Mavalonia.Markdown\Mavalonia.Markdown.csproj" />
    </ItemGroup>
    <ItemGroup>
       <Compile Include="..\Mavalonia.Markdown.Specifications\MarkdownWithSelection.cs" Link="MarkdownWithSelection.cs" />

@@ -4,7 +4,8 @@ Written for the sessions that put them into Cloyd, and for any other application
 
 ## Getting them
 
-- Reference the project `Mavalonia.Markdown.Controls`. It brings `Mavalonia.Markdown`. Nothing is published as a package.
+- Reference the package `Mavalonia`, on nuget.org. It holds both `Mavalonia.Markdown.Controls` and `Mavalonia.Markdown`.
+- In this repository, reference the project `Mavalonia.Markdown.Controls`, and `Mavalonia.Markdown` too where its types are used: the controls' reference to it is private, so that the package holds it.
 - They target `net11.0` and need at least: Avalonia 12.1.5, Avalonia.AvaloniaEdit 12.0.0, Markdig 1.6.0, AngleSharp 1.11.0, TextMateSharp.Grammars 2.0.5. Where an application pins a lower version centrally, raise it: Cloyd has Markdig 1.1.2.
 - Any theme works. Where a brush isn't set, it's the one that the Fluent theme has, or else a fixed one.
 

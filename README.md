@@ -5,7 +5,9 @@ Controls for Avalonia®, for writing and reading messages in markdown, such as i
 - **`MarkdownEditor`**, a WYSIWYG markdown editor that switches quickly between showing the markdown source and showing it rendered.
 - **`MarkdownView`**, which shows markdown to be read. What a person selects in it is copied as markdown.
 
-To use them in an application, see [using the controls in an application](dev_docs/using-the-controls-in-an-application.md). Why `MarkdownView` is as it is: [MarkdownView](dev_docs/markdown-view.md).
+They are on nuget.org as the package `Mavalonia`. To use them in an application, see [using the controls in an application](https://github.com/mlidbom/Mavalonia/blob/main/dev_docs/using-the-controls-in-an-application.md). Why `MarkdownView` is as it is: [MarkdownView](https://github.com/mlidbom/Mavalonia/blob/main/dev_docs/markdown-view.md). What each version changed: [CHANGELOG.md](https://github.com/mlidbom/Mavalonia/blob/main/CHANGELOG.md).
+
+The links are whole URLs, as this file is the package's page on nuget.org too.
 
 | Project | Responsibility |
 | --- | --- |
