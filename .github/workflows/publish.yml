@@ -33,12 +33,14 @@ jobs:
           TAG="${GITHUB_REF_NAME}"
           echo "version=${TAG#v}" >> $GITHUB_OUTPUT
 
+      # It fails when CHANGELOG.md has no section for the version, whatever the validation level. Its other checks only
+      # warn: one of them takes a Removed section to need a major version, which before 1.0 a minor version may be.
       - name: Extract changelog for this version
         id: changelog
         uses: mindsers/changelog-reader-action@v2
         with:
           version: ${{ steps.version.outputs.version }}
-          validation_level: error
+          validation_level: warn
 
       - name: Pack
         run: |
