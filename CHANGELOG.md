@@ -7,6 +7,8 @@ here: see [releasing](dev_docs/releasing.md).
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-11-26
+
 ### Fixed
 - The selection and highlights show over code in a line of text, such as `` `code` ``. Its background was drawn over
   them, so an opaque `CodeBackground` hid them. The background is now as high as the line, as the selection is.
