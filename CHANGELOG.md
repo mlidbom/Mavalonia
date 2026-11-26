@@ -7,6 +7,8 @@ here: see [releasing](dev_docs/releasing.md).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-26
+
 ### Added
 - `MarkdownView.Links`, text that the application shows as links where the markdown has none, such as the names of
   things in its code: ranges of `PlainText`, each with where it leads. They look as the markdown's links do, in the
