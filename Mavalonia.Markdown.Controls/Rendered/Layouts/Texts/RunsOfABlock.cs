@@ -130,11 +130,7 @@ class RunsOfABlock
                                   formatting.Has(TextFormats.Italic) ? FontStyle.Italic : FontStyle.Normal,
                                   IsAllBold || formatting.Has(TextFormats.Bold) ? FontWeight.Bold : FontWeight.Normal);
 
-      return new GenericTextRunProperties(typeface,
-                                          isMonospace ? FontSize * SizeOfMonospace : FontSize,
-                                          DecorationsOf(formatting),
-                                          ForegroundOf(formatting),
-                                          backgroundBrush: formatting.Has(TextFormats.Code) && _block is not CodeBlock ? _appearance.CodeBackground : null);
+      return new GenericTextRunProperties(typeface, isMonospace ? FontSize * SizeOfMonospace : FontSize, DecorationsOf(formatting), ForegroundOf(formatting));
    }
 
    ///<summary>An image that isn't shown, since there's none to show, can be clicked as a link can.</summary>
