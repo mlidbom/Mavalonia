@@ -4,7 +4,7 @@ Written for the sessions that put them into Cloyd, and for any other application
 
 ## Getting them
 
-- Reference the project `Mavalonia.MarkdownEditing.Controls`. It brings `Mavalonia.MarkdownEditing`. Nothing is published as a package.
+- Reference the project `Mavalonia.Markdown.Controls`. It brings `Mavalonia.Markdown`. Nothing is published as a package.
 - They target `net11.0` and need at least: Avalonia 12.1.5, Avalonia.AvaloniaEdit 12.0.0, Markdig 1.6.0, AngleSharp 1.11.0, TextMateSharp.Grammars 2.0.5. Where an application pins a lower version centrally, raise it: Cloyd has Markdig 1.1.2.
 - Any theme works. Where a brush isn't set, it's the one that the Fluent theme has, or else a fixed one.
 
@@ -41,7 +41,7 @@ Something is selected in one `MarkdownView` of a window at a time. A selection d
 
 It shows what GitHub does: tables, task lists, alerts, bare URLs, strikethrough. HTML is shown as its source, except `<br>` and comments. Footnotes, math and diagrams are shown as they're written. Code and wide tables wrap: there's no horizontal scrolling.
 
-**How many to show at a time:** 100 messages of 700 characters take 0.4 s to show and 15 MB; LiveMarkdown takes 1.5 s and 44 MB for the same. 15,000 would take half a minute and well over a gigabyte, so keep drawing the latest 100 and more on scrolling up, as Cloyd does. `Mavalonia.MarkdownEditing.Controls.Measurements` measures it.
+**How many to show at a time:** 100 messages of 700 characters take 0.4 s to show and 15 MB; LiveMarkdown takes 1.5 s and 44 MB for the same. 15,000 would take half a minute and well over a gigabyte, so keep drawing the latest 100 and more on scrolling up, as Cloyd does. `Mavalonia.Markdown.Controls.Measurements` measures it.
 
 ## Links
 

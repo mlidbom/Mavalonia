@@ -8,11 +8,11 @@
       <File Path="README.md" />
    </Folder>
    <Folder Name="/Specifications/">
-      <Project Path="Mavalonia.MarkdownEditing.Controls.Specifications/Mavalonia.MarkdownEditing.Controls.Specifications.csproj" />
-      <Project Path="Mavalonia.MarkdownEditing.Specifications/Mavalonia.MarkdownEditing.Specifications.csproj" />
+      <Project Path="Mavalonia.Markdown.Controls.Specifications/Mavalonia.Markdown.Controls.Specifications.csproj" />
+      <Project Path="Mavalonia.Markdown.Specifications/Mavalonia.Markdown.Specifications.csproj" />
    </Folder>
    <Project Path="Mavalonia.DesktopHost/Mavalonia.DesktopHost.csproj" />
-   <Project Path="Mavalonia.MarkdownEditing.Controls.Measurements/Mavalonia.MarkdownEditing.Controls.Measurements.csproj" />
-   <Project Path="Mavalonia.MarkdownEditing.Controls/Mavalonia.MarkdownEditing.Controls.csproj" />
-   <Project Path="Mavalonia.MarkdownEditing/Mavalonia.MarkdownEditing.csproj" />
+   <Project Path="Mavalonia.Markdown.Controls.Measurements/Mavalonia.Markdown.Controls.Measurements.csproj" />
+   <Project Path="Mavalonia.Markdown.Controls/Mavalonia.Markdown.Controls.csproj" />
+   <Project Path="Mavalonia.Markdown/Mavalonia.Markdown.csproj" />
 </Solution>

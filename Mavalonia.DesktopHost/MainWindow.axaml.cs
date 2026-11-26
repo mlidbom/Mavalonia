@@ -4,7 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
 using AvaloniaEdit.Document;
-using Mavalonia.MarkdownEditing.Controls;
+using Mavalonia.Markdown.Controls;
 
 namespace Mavalonia.DesktopHost;
 

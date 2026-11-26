@@ -9,12 +9,12 @@ To use them in an application, see [using the controls in an application](dev_do
 
 | Project | Responsibility |
 | --- | --- |
-| `Mavalonia.MarkdownEditing` | Everything about editing markdown that needs no controls. |
-| `Mavalonia.MarkdownEditing.Controls` | The Avalonia controls |
-| `Mavalonia.MarkdownEditing.Controls.Measurements` | Measures how fast the controls are. |
+| `Mavalonia.Markdown` | Everything about markdown that needs no controls: reading it, rendering it and editing it. |
+| `Mavalonia.Markdown.Controls` | The Avalonia controls |
+| `Mavalonia.Markdown.Controls.Measurements` | Measures how fast the controls are. |
 | `Mavalonia.DesktopHost` | The application in which to try the controls by hand: an editor that starts with a sample of all it does, and beside it tabs of what is written there as it's to be read and of sample documents to copy from. Each file in `Samples/Tabs` is a tab. |
-| `Mavalonia.MarkdownEditing.Specifications` | Run in parallel, without UI. Most specifications belong here. |
-| `Mavalonia.MarkdownEditing.Controls.Specifications` | Use real controls in windows that exist only in memory, one specification at a time. |
+| `Mavalonia.Markdown.Specifications` | Run in parallel, without UI. Most specifications belong here. |
+| `Mavalonia.Markdown.Controls.Specifications` | Use real controls in windows that exist only in memory, one specification at a time. |
 
 ## How editing works
 
@@ -31,10 +31,10 @@ To use them in an application, see [using the controls in an application](dev_do
 ## Working with it
 
 - **Run the specifications:** `dotnet test --solution Mavalonia.slnx`
-- **Run one project's:** `dotnet test --project Mavalonia.MarkdownEditing.Controls.Specifications`
+- **Run one project's:** `dotnet test --project Mavalonia.Markdown.Controls.Specifications`
 - **Try the controls, reloading code changes:** `dotnet watch --project Mavalonia.DesktopHost`
 - **CI:** GitHub Actions builds the solution from a clean checkout and runs all the specifications on every push, on Windows: `.github/workflows/build-and-test.yml`. The build fails on any warning.
-- **Measure how fast the controls are:** `dotnet run -c Release --project Mavalonia.MarkdownEditing.Controls.Measurements`, with how many messages as arguments, or none for 100 and 1,000
+- **Measure how fast the controls are:** `dotnet run -c Release --project Mavalonia.Markdown.Controls.Measurements`, with how many messages as arguments, or none for 100 and 1,000
 - **Check that typing works on the real desktop:** `dotnet run --project Mavalonia.DesktopHost -- --check-typing`. The specifications run on the headless platform, which has no input methods. The window is off the screen and doesn't take the focus. The exit code is 0 when typing works.
 
 ## Specifications that use controls

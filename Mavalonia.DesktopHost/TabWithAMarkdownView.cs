@@ -1,6 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
-using Mavalonia.MarkdownEditing.Controls;
+using Mavalonia.Markdown.Controls;
 
 namespace Mavalonia.DesktopHost;
 

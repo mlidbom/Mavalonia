@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rendered="using:Mavalonia.Markdown.Controls.Rendered"
+             xmlns:edit="using:AvaloniaEdit"
+             xmlns:editRendering="using:AvaloniaEdit.Rendering"
+             x:Class="Mavalonia.Markdown.Controls.MarkdownEditor"
+             x:Name="Root">
+   <UserControl.Styles>
+      <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+      <Style Selector="rendered|RenderedEditorView">
+         <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+         <Setter Property="Padding" Value="{Binding #Root.Padding}" />
+      </Style>
+      <!-- Otherwise URLs are blue in any theme, which can't be read on a dark one. -->
+      <Style Selector="edit|TextEditor editRendering|TextView">
+         <Setter Property="LinkTextForegroundBrush" Value="{Binding $parent[edit:TextEditor].Foreground}" />
+      </Style>
+   </UserControl.Styles>
+   <UserControl.Template>
+      <!-- The views apply the padding, so that they can be clicked in it, and scroll to the edge. -->
+      <ControlTemplate>
+         <ContentPresenter Name="PART_ContentPresenter" Background="{TemplateBinding Background}" Content="{TemplateBinding Content}" />
+      </ControlTemplate>
+   </UserControl.Template>
+   <Panel>
+      <ScrollViewer x:Name="ScrollOfTheRenderedView" Focusable="False">
+         <rendered:RenderedEditorView x:Name="RenderedView"
+                                        Watermark="{Binding #Root.Watermark}"
+                                        StartNewBlockGesture="{Binding #Root.StartNewBlockGesture}"
+                                        BreakLineGesture="{Binding #Root.BreakLineGesture}"
+                                        ToggleBoldGesture="{Binding #Root.ToggleBoldGesture}"
+                                        ToggleItalicGesture="{Binding #Root.ToggleItalicGesture}"
+                                        ToggleCodeGesture="{Binding #Root.ToggleCodeGesture}"
+                                        ToggleStrikethroughGesture="{Binding #Root.ToggleStrikethroughGesture}"
+                                        PasteTextGesture="{Binding #Root.PasteTextGesture}"
+                                        PasteAsQuoteGesture="{Binding #Root.PasteAsQuoteGesture}" />
+      </ScrollViewer>
+      <edit:TextEditor x:Name="SourceView"
+                       IsVisible="False"
+                       WordWrap="True"
+                       Background="Transparent"
+                       FontSize="{Binding #Root.FontSize}"
+                       FontFamily="{Binding #RenderedView.MonospaceFontFamily}"
+                       Padding="{Binding #Root.Padding}"
+                       HorizontalScrollBarVisibility="Disabled"
+                       VerticalScrollBarVisibility="Auto" />
+   </Panel>
+</UserControl>

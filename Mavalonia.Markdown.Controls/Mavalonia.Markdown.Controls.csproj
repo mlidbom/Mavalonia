@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+   <ItemGroup>
+      <PackageReference Include="Avalonia" />
+      <PackageReference Include="Avalonia.AvaloniaEdit" />
+      <PackageReference Include="TextMateSharp.Grammars" />
+      <ProjectReference Include="..\Mavalonia.Markdown\Mavalonia.Markdown.csproj" />
+   </ItemGroup>
+</Project>
