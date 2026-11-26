@@ -8,8 +8,6 @@ namespace Mavalonia.Markdown.Controls.Rendered.Layouts.Texts;
 ///</remarks>
 sealed partial class LinkedStretches : IEquatable<LinkedStretches>
 {
-   internal static readonly LinkedStretches None = new([]);
-
    readonly IReadOnlyList<Stretch> _stretches;
 
    LinkedStretches(IReadOnlyList<Stretch> stretches) => _stretches = stretches;
@@ -24,7 +22,7 @@ sealed partial class LinkedStretches : IEquatable<LinkedStretches>
          else stretches.Add(new Stretch(part.Start, part.End));
       }
 
-      return stretches.Count == 0 ? None : new LinkedStretches(stretches);
+      return new LinkedStretches(stretches);
    }
 
    internal bool AreAny => _stretches.Count > 0;

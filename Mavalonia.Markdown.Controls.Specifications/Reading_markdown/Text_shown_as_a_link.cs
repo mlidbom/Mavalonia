@@ -1,4 +1,3 @@
-using Avalonia;
 using Avalonia.Media;
 using Compze.Must;
 using Mavalonia.Markdown.Controls.Specifications.HeadlessAvalonia;
