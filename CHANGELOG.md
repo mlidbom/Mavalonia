@@ -7,6 +7,8 @@ here: see [releasing](dev_docs/releasing.md).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-26
+
 ### Changed
 - `MarkdownView` asks for no more width than what it shows needs, as a `TextBlock` does. Aligned to a side rather
   than stretched, such as in the bubble of a message, it's no wider than its widest line; its lines end where they do
