@@ -18,9 +18,6 @@ public class Clicking_links_in_the_editor
    readonly List<KeyModifiers> _modifiers = [];
    readonly List<string?> _sources = [];
 
-   ///<summary>Where each click was, in the window.</summary>
-   readonly List<Point> _positions = [];
-
    EditorInAWindow Editor(string markdown, bool inTheSource = false)
    {
       var editor = new EditorInAWindow(markdown) { Editor = { ShowsSource = inTheSource } };
@@ -29,7 +26,6 @@ public class Clicking_links_in_the_editor
          _clicked.Add(click.Target);
          _modifiers.Add(click.KeyModifiers);
          _sources.Add(click.Source?.GetType().Name);
-         _positions.Add(editor.Window.PointOf(editor.Editor, click.GetPosition(editor.Editor)));
       };
       editor.Editor.FocusTheView();
       return editor;
@@ -68,12 +64,6 @@ public class Clicking_links_in_the_editor
       {
          _editor.Window.Click(_link);
          _modifiers.Must().SequenceEqual([KeyModifiers.None]);
-      }
-
-      [XFOnUIThread] public void tells_where_it_is_clicked()
-      {
-         _editor.Window.Click(_link);
-         _positions.Must().SequenceEqual([_link]);
       }
 
       [XFOnUIThread] public void with_Ctrl_tells_where_the_link_leads()
@@ -243,12 +233,6 @@ public class Clicking_links_in_the_editor
       {
          _editor.Window.Click(_link);
          _modifiers.Must().SequenceEqual([KeyModifiers.None]);
-      }
-
-      [XFOnUIThread] public void tells_where_it_is_clicked()
-      {
-         _editor.Window.Click(_link);
-         _positions.Must().SequenceEqual([_link]);
       }
 
       [XFOnUIThread] public void with_Ctrl_tells_where_the_link_leads()

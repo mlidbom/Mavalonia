@@ -12,14 +12,13 @@ class ViewInAWindow
    internal ViewInAWindow(string markdown)
    {
       View = new MarkdownView { Markdown = markdown, Padding = new Thickness(10) };
-      View.LinkClicked += (_, click) => Clicks.Add(click);
+      View.LinkClicked += (_, click) => ClickedLinks.Add(click.Target);
       Window = new HeadlessWindow(new ScrollViewer { Content = View });
    }
 
    internal MarkdownView View { get; }
    internal HeadlessWindow Window { get; }
-   internal List<LinkClickedEventArgs> Clicks { get; } = [];
-   internal IReadOnlyList<string> ClickedLinks => [..Clicks.Select(it => it.Target)];
+   internal List<string> ClickedLinks { get; } = [];
 
    internal ScrollViewer ScrollViewer => (ScrollViewer)View.Parent!;
 

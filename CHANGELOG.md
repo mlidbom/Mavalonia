@@ -7,6 +7,9 @@ here: see [releasing](dev_docs/releasing.md).
 
 ## [Unreleased]
 
+### Removed
+- `LinkClickedEventArgs.GetPosition`, which nothing used: an application shows what belongs at a click at the pointer.
+
 ## [0.9.0] - 2026-11-26
 
 ### Added

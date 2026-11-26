@@ -77,12 +77,6 @@ public class Text_shown_as_a_link
       view.Click("two").ClickedLinks.Must().SequenceEqual(["last"]);
    }
 
-   [XFOnUIThread] public void tells_where_it_is_clicked()
-   {
-      var view = ViewWithALink("a two b", "two").Click("two");
-      (view.Clicks.Single().GetPosition(view.View) - view.BoundsOf("two").Center).Must().Satisfy(it => Math.Abs(it.X) < 0.5 && Math.Abs(it.Y) < 0.5);
-   }
-
    [XFOnUIThread] public void has_the_pointer_look_like_a_hand()
    {
       var view = ViewWithALink("a two b", "two");

@@ -108,7 +108,7 @@ class PointerInput
 
       e.Pointer.Capture(null);
       EndSelecting();
-      if(clicked is not null) _view.RaiseEvent(new LinkClickedEventArgs(clicked, e.KeyModifiers, _view, e.GetPosition(_view)));
+      if(clicked is not null) _view.RaiseEvent(new LinkClickedEventArgs(clicked, e.KeyModifiers));
    }
 
    ///<summary>A link, or an image, is clicked when the button is pressed and released on it, with nothing selected by that.</summary>
