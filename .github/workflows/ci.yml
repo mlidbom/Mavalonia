@@ -1,0 +1,17 @@
+# Builds and tests every push to any branch, and every pull request. A tag such as v0.8.0 is built by publish.yml instead.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+    tags-ignore: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    uses: ./.github/workflows/build-and-test.yml

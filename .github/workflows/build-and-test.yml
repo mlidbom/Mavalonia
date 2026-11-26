@@ -1,15 +1,10 @@
-# Builds the solution from a clean checkout and runs all the specifications, on every push.
+# Builds the solution from a clean checkout, runs all the specifications, and packs the package to see that it packs:
+# for every push (ci.yml), and before the package is published (publish.yml).
 # On Windows, as the controls are developed and used there, and the specifications that look at what is drawn depend on its fonts.
 name: Build and test
 
 on:
-  push:
-  pull_request:
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 jobs:
   build-and-test:
@@ -17,6 +12,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # MinVer takes the version from the tags
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -27,6 +24,9 @@ jobs:
 
       - name: Run the specifications
         run: dotnet test --solution Mavalonia.slnx --no-build
+
+      - name: Pack the package (to see that it packs)
+        run: dotnet pack Mavalonia.Markdown.Controls/Mavalonia.Markdown.Controls.csproj --configuration Release --output ./artifacts/package
 
       - name: Keep the frames that the specifications saved
         if: failure()
