@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Media;
 using Mavalonia.Markdown.Controls.Rendered.Layouts.Texts;
+using Mavalonia.Markdown.Editing;
 using Mavalonia.Markdown.Rendering;
 using Mavalonia.Markdown.Rendering.Blocks;
 using Mavalonia.Markdown.Rendering.Texts;
@@ -78,16 +79,21 @@ class BlockLayout
       _text.Draw(context, _originOfText, new ColoursOfAText(Block is CodeBlock code ? _appearance.ColoursOf(code) : null, links), viewport);
 
    ///<summary>
-   /// Where a caret is drawn that is before the character at <paramref name="index"/>: over the start of that character,
-   /// or, <paramref name="onTheSideOfTheCharBefore"/>, over the end of the one before it, as inside code where it ends.
+   /// Where <paramref name="caret"/> is drawn: over the start of the char after it, or, <see cref="Caret.IsOnTheSideOfTheCharBefore"/>, over the end of the one before it, as inside code where it ends.<br/>
+   /// Inside code in a line of text it's drawn wider, so a person sees whether what they type will be code.
    ///</summary>
-   internal Rect CaretAt(int index, bool onTheSideOfTheCharBefore = false)
+   internal Rect CaretAt(Caret caret)
    {
-      var caret = _text.BoundsAt(index).Translate(_originOfText).WithWidth(WidthOfTheCaret);
-      return onTheSideOfTheCharBefore ? caret.Translate(new Vector(-WidthOfTheCaret, 0)) : caret;
+      var width = caret.IsInCode ? WidthOfACaretInCode : WidthOfACaret;
+      var drawn = CaretAt(caret.Index).WithWidth(width);
+      return caret.IsOnTheSideOfTheCharBefore ? drawn.Translate(new Vector(-width, 0)) : drawn;
    }
 
-   const double WidthOfTheCaret = 1.5;
+   ///<summary>Where a caret is drawn that is before the char at <paramref name="index"/>: over the start of that char.</summary>
+   internal Rect CaretAt(int index) => _text.BoundsAt(index).Translate(_originOfText).WithWidth(WidthOfACaret);
+
+   const double WidthOfACaret = 1.5;
+   const double WidthOfACaretInCode = 3;
 
    internal double BaselineOfTheFirstLine => _originOfText.Y + _text.Baseline;
 

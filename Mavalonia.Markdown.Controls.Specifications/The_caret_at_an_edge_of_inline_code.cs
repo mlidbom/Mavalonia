@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Input;
 using Compze.Must;
@@ -7,7 +8,7 @@ namespace Mavalonia.Markdown.Controls.Specifications;
 
 ///<summary>
 /// The caret where inline code ends or starts: it can be inside the code there or outside it, which decides whether what is typed is code.<br/>
-/// The arrow keys move it from one to the other, and it's drawn on the side it's on: over the edge of the code's background when it's inside, beside it when it's outside.
+/// The arrow keys move it from one to the other, and it's drawn on the side it's on: wider and over the edge of the code's background when it's inside, beside it when it's outside.
 ///</summary>
 public class The_caret_at_an_edge_of_inline_code
 {
@@ -23,5 +24,14 @@ public class The_caret_at_an_edge_of_inline_code
    [XFOnUIThread] public void outside_the_start_of_the_code_is_drawn_left_of_where_it_is_drawn_inside_it() =>
       new { Outside = WhereTheCaretIsDrawnIn("a ‸`code`"), Inside = WhereTheCaretIsDrawnIn("a `‸code`") }.Must().Satisfy(it => it.Outside.Right <= it.Inside.Left);
 
-   static Rect WhereTheCaretIsDrawnIn(string markdown) => new EditorInAWindow(markdown).InputMethodClient.CursorRectangle;
+   [XFOnUIThread] public void inside_the_code_is_drawn_wider_than_outside_it() =>
+      new { Inside = WhereTheCaretIsDrawnIn("`co‸de` b"), Outside = WhereTheCaretIsDrawnIn("`code` ‸b") }.Must().Satisfy(it => it.Inside.Width > it.Outside.Width);
+
+   ///<summary>Where the caret is drawn with the caret where <paramref name="markdown"/> says, as the view tells an input method. The frame is saved for inspection, named after <paramref name="specification"/> and <paramref name="markdown"/>.</summary>
+   static Rect WhereTheCaretIsDrawnIn(string markdown, [CallerMemberName] string specification = "")
+   {
+      var editor = new EditorInAWindow(markdown);
+      editor.Window.RenderFrame().SaveForInspectionAs($"The caret at an edge of inline code, {specification}, {markdown}");
+      return editor.InputMethodClient.CursorRectangle;
+   }
 }

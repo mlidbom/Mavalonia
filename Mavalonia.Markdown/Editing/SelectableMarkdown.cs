@@ -22,7 +22,7 @@ public abstract class SelectableMarkdown
       }
    }
 
-   private protected Caret Caret => new(Rendered, Selection.Caret);
+   internal Caret Caret => new(Rendered, Selection.Caret);
 
    ///<summary>The end of the selection that moves.</summary>
    public RenderedPosition CaretPosition => Caret.Position;
@@ -68,9 +68,6 @@ public abstract class SelectableMarkdown
 
    ///<summary>Whether text is typed where the caret is, so that which of the offsets shown at its position it is at matters: whether text typed there is code.</summary>
    private protected virtual bool TextIsTypedAtTheCaret => false;
-
-   ///<summary>Whether the caret is at the first of several <see cref="RenderedPosition.CaretStops"/>, as inside code where it ends, or outside it where it starts. Text typed there goes with the char before, so the caret is drawn on its side.</summary>
-   internal bool IsTheCaretOnTheSideOfTheCharBefore => CaretPosition.CaretStops is { Count: > 1 } stops && stops[0] == Selection.Caret;
 
    public void SelectAll() => Select(Rendered.Start, Rendered.End);
 

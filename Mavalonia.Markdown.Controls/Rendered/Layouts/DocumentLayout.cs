@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Media;
 using Mavalonia.Markdown.Controls.Rendered.Layouts.Texts;
+using Mavalonia.Markdown.Editing;
 using Mavalonia.Markdown.Rendering;
 using Mavalonia.Markdown.Rendering.Blocks;
 using Mavalonia.Markdown.Rendering.Texts;
@@ -48,8 +49,8 @@ class DocumentLayout
 
    BlockLayout LayoutOf(RenderedBlock block) => _blocks.First(it => it.Block == block);
 
-   ///<summary>Where a caret is drawn that is at <paramref name="position"/>: see <see cref="BlockLayout.CaretAt"/>.</summary>
-   internal Rect CaretAt(RenderedPosition position, bool onTheSideOfTheCharBefore) => LayoutOf(position.Block).CaretAt(position.Index, onTheSideOfTheCharBefore);
+   ///<inheritdoc cref="BlockLayout.CaretAt(Caret)"/>
+   internal Rect CaretAt(Caret caret) => LayoutOf(caret.Block).CaretAt(caret);
 
    internal Point StartOfTheFirstLine => _blocks[0].StartOfFirstLine;
 
