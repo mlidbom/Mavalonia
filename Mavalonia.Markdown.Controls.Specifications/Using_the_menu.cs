@@ -111,14 +111,14 @@ public class Using_the_menu
 
    public class The_items : Using_the_menu
    {
-      [XFOnUIThread] public void tell_the_keys_that_do_the_same() =>
-         OpenMenuOf(Editor("⟦one⟧")).Shown.Must().SequenceEqual([
-            "Cut (Ctrl+X)", "Copy (Ctrl+C)", "Paste (Ctrl+V)", "Paste as text (Ctrl+Shift+V)", "Paste as quote (Ctrl+Shift+Q)", "Select all (Ctrl+A)",
-            "Bold (Ctrl+B)", "Italic (Ctrl+I)", "Code (Ctrl+E)", "Strikethrough (Ctrl+Shift+X)", "Bulleted list (Ctrl+Shift+8)", "Numbered list (Ctrl+Shift+7)"
-         ]);
+      static readonly string[] TheItemsWithTheKeysThatDoTheSame =
+      [
+         "Cut (Ctrl+X)", "Copy (Ctrl+C)", "Paste (Ctrl+V)", "Paste as text (Ctrl+Shift+V)", "Paste as quote (Ctrl+Shift+Q)", "Select all (Ctrl+A)",
+         "Bold (Ctrl+B)", "Italic (Ctrl+I)", "Code (Ctrl+E)", "Strikethrough (Ctrl+Shift+X)", "Bulleted list (Ctrl+Shift+8)", "Numbered list (Ctrl+Shift+7)"
+      ];
 
-      [XFOnUIThread] public void tell_no_keys_for_formats_and_lists_in_the_source_view_where_the_keys_do_nothing() =>
-         OpenMenuOf(Editor("⟦one⟧", inTheSource: true)).Shown.Must().Satisfy(it => it.Contains("Bold") && it.Contains("Bulleted list") && it.Contains("Paste as quote (Ctrl+Shift+Q)"));
+      [XFOnUIThread] public void tell_the_keys_that_do_the_same() => OpenMenuOf(Editor("⟦one⟧")).Shown.Must().SequenceEqual(TheItemsWithTheKeysThatDoTheSame);
+      [XFOnUIThread] public void tell_the_keys_that_do_the_same_in_the_source_view() => OpenMenuOf(Editor("⟦one⟧", inTheSource: true)).Shown.Must().SequenceEqual(TheItemsWithTheKeysThatDoTheSame);
 
       [XFOnUIThread] public void tell_the_keys_that_the_application_has_chosen()
       {

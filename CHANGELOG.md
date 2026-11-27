@@ -8,16 +8,19 @@ here: see [releasing](dev_docs/releasing.md).
 ## [Unreleased]
 
 ### Added
-- `MarkdownEditor.ToggleList(ListKind)`, and the keys for it in the rendered view, `ToggleBulletedListGesture`
-  (Ctrl+Shift+8) and `ToggleNumberedListGesture` (Ctrl+Shift+7): they make each paragraph and heading that is selected,
+- `MarkdownEditor.ToggleList(ListKind)`, and the keys for it, `ToggleBulletedListGesture` (Ctrl+Shift+8) and
+  `ToggleNumberedListGesture` (Ctrl+Shift+7): they make each paragraph and heading that is selected,
   or that the caret is in, an item of a bulleted or a numbered list, or take them out of their lists when each is an item
   of such a list already. An item of a list of the other kind turns its whole list into one of the kind, and a
   paragraph after a list of the kind becomes its next item. The keys are those of the digits, whatever Shift and the
   digit type on the keyboard's layout, such as `(` for Shift+8 on a Swedish one.
 - The menu of `MarkdownEditor` has bold, italic, code and strikethrough, and bulleted list and numbered list. Each has a
-  check mark when what is selected, or what is typed next, has it, and, in the rendered view, the keys that do the same.
+  check mark when what is selected, or what is typed next, has it, and the keys that do the same.
 
 ### Changed
+- In the source view of `MarkdownEditor`, the keys for formats, such as Ctrl+B, format what is selected, as they do in
+  the rendered view. With nothing selected they do nothing there, and the application gets them, since the source view
+  has no format of what is typed next. Before, they did nothing in the source view.
 - In `MarkdownEditor`, the caret moved with the arrow keys stops on both sides of the backticks where code in a line of
   text starts or ends: inside the code, what is typed is code; outside it, it isn't. Inside code, the caret is drawn
   wider, and at an edge over the code's background; outside, it's drawn as before, beside it. Before, it was always

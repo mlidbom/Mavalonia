@@ -38,11 +38,8 @@ class MenuOfAMarkdownEditor : MenuMadeWhenItOpens
    }
 
    MenuToggle ToggleOf(string header, TextFormats format, KeyGesture? gesture) =>
-      new(header, () => _editor.ToggleFormat(format), WhereTheyWork(gesture), _editor.HasFormat(format)) { IsEnabled = _editor.CanToggleAFormat };
+      new(header, () => _editor.ToggleFormat(format), gesture, _editor.HasFormat(format)) { IsEnabled = _editor.CanToggleAFormat };
 
    MenuToggle ToggleOf(string header, ListKind kind, KeyGesture? gesture) =>
-      new(header, () => _editor.ToggleList(kind), WhereTheyWork(gesture), _editor.IsInAList(kind)) { IsEnabled = _editor.CanToggleAList };
-
-   ///<summary>The keys for formats and lists, which work in the rendered view only. Null while the source is shown.</summary>
-   KeyGesture? WhereTheyWork(KeyGesture? gesture) => _editor.ShowsSource ? null : gesture;
+      new(header, () => _editor.ToggleList(kind), gesture, _editor.IsInAList(kind)) { IsEnabled = _editor.CanToggleAList };
 }

@@ -48,6 +48,49 @@ public class Using_the_keyboard
       new { received, editor.Markdown }.Must().Satisfy(it => it.received.SequenceEqual(new[] { Key.B, Key.I, Key.E, Key.X }) && it.Markdown == "⟦a⟧");
    }
 
+   static EditorInAWindow InTheSourceView(string markdown)
+   {
+      var editor = new EditorInAWindow(markdown) { Editor = { ShowsSource = true } };
+      editor.Editor.FocusTheView();
+      return editor;
+   }
+
+   static string PressInTheSourceView(PhysicalKey key, string markdown, RawInputModifiers modifiers = None) => InTheSourceView(markdown).Press(key, modifiers).Markdown;
+
+   ///<summary>The keys that reach the application, as the editor's <see cref="Avalonia.Input.InputElement.KeyDown"/>, when <paramref name="key"/> is pressed in the source view, and the markdown afterwards.</summary>
+   static (Key[] Received, string Markdown) WhatReachesTheApplicationFromTheSourceView(PhysicalKey key, string markdown, RawInputModifiers modifiers)
+   {
+      var editor = InTheSourceView(markdown);
+      var received = new List<Key>();
+      editor.Editor.KeyDown += (_, press) => received.Add(press.Key);
+      editor.Press(key, modifiers);
+      return ([..received], editor.Markdown);
+   }
+
+   [XFOnUIThread] public void makes_text_bold_with_Ctrl_and_B_in_the_source_view() => PressInTheSourceView(PhysicalKey.B, "a ⟦b⟧ c", Ctrl).Must().Be("a ⟦**b⟧** c");
+   [XFOnUIThread] public void makes_text_italic_with_Ctrl_and_I_in_the_source_view() => PressInTheSourceView(PhysicalKey.I, "a ⟦b⟧ c", Ctrl).Must().Be("a ⟦*b⟧* c");
+   [XFOnUIThread] public void makes_text_code_with_Ctrl_and_E_in_the_source_view() => PressInTheSourceView(PhysicalKey.E, "a ⟦b⟧ c", Ctrl).Must().Be("a ⟦`b⟧` c");
+   [XFOnUIThread] public void strikes_text_through_with_Ctrl_Shift_and_X_in_the_source_view() => PressInTheSourceView(PhysicalKey.X, "a ⟦b⟧ c", Ctrl | Shift).Must().Be("a ⟦~~b⟧~~ c");
+   [XFOnUIThread] public void takes_bold_away_with_Ctrl_and_B_in_the_source_view() => PressInTheSourceView(PhysicalKey.B, "a **⟦b⟧** c", Ctrl).Must().Be("a ⟦b⟧ c");
+   [XFOnUIThread] public void makes_a_bulleted_list_with_Ctrl_Shift_and_8_in_the_source_view() => PressInTheSourceView(PhysicalKey.Digit8, "a‸", Ctrl | Shift).Must().Be("- a‸");
+   [XFOnUIThread] public void makes_a_numbered_list_with_Ctrl_Shift_and_7_in_the_source_view() => PressInTheSourceView(PhysicalKey.Digit7, "a‸", Ctrl | Shift).Must().Be("1. a‸");
+
+   [XFOnUIThread] public void makes_text_bold_with_the_keys_that_the_application_chooses_in_the_source_view()
+   {
+      var editor = InTheSourceView("a ⟦b⟧ c");
+      editor.Editor.ToggleBoldGesture = new KeyGesture(Key.F2);
+      editor.Press(PhysicalKey.F2).Markdown.Must().Be("a ⟦**b⟧** c");
+   }
+
+   [XFOnUIThread] public void undoes_making_text_bold_with_Ctrl_and_Z_in_the_source_view() =>
+      InTheSourceView("a ⟦b⟧ c").Press(PhysicalKey.B, Ctrl).Press(PhysicalKey.Z, Ctrl).Editor.Document.Text.Must().Be("a b c");
+
+   [XFOnUIThread] public void leaves_the_keys_for_formats_to_the_application_in_the_source_view_when_nothing_is_selected() =>
+      WhatReachesTheApplicationFromTheSourceView(PhysicalKey.B, "a‸", Ctrl).Must().Satisfy(it => it.Received.SequenceEqual(new[] { Key.B }) && it.Markdown == "a‸");
+
+   [XFOnUIThread] public void leaves_the_keys_for_lists_to_the_application_in_the_source_view_when_the_caret_is_in_a_code_block() =>
+      WhatReachesTheApplicationFromTheSourceView(PhysicalKey.Digit8, "```\na‸\n```", Ctrl | Shift).Must().Satisfy(it => it.Received.SequenceEqual(new[] { Key.D8 }) && it.Markdown == "```\na‸\n```");
+
    [XFOnUIThread] public void leaves_keys_to_the_application_that_it_does_not_use()
    {
       var editor = new EditorInAWindow("a‸");

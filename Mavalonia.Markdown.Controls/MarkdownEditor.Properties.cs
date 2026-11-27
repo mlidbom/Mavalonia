@@ -57,23 +57,23 @@ partial class MarkdownEditor
    ///<summary>The keys that break the line inside a block, in the rendered view. Null for none.</summary>
    public KeyGesture? BreakLineGesture { get => GetValue(BreakLineGestureProperty); set => SetValue(BreakLineGestureProperty, value); }
 
-   ///<summary>The keys that make text bold, or no longer bold, in the rendered view. Null for none.</summary>
+   ///<summary>The keys that make text bold, or no longer bold, in either view. Null for none.</summary>
    public KeyGesture? ToggleBoldGesture { get => GetValue(ToggleBoldGestureProperty); set => SetValue(ToggleBoldGestureProperty, value); }
 
-   ///<summary>The keys that make text italic, or no longer italic, in the rendered view. Null for none.</summary>
+   ///<summary>The keys that make text italic, or no longer italic, in either view. Null for none.</summary>
    public KeyGesture? ToggleItalicGesture { get => GetValue(ToggleItalicGestureProperty); set => SetValue(ToggleItalicGestureProperty, value); }
 
-   ///<summary>The keys that make text code, or no longer code, in the rendered view. Null for none.</summary>
+   ///<summary>The keys that make text code, or no longer code, in either view. Null for none.</summary>
    public KeyGesture? ToggleCodeGesture { get => GetValue(ToggleCodeGestureProperty); set => SetValue(ToggleCodeGestureProperty, value); }
 
-   ///<summary>The keys that strike text through, or no longer do, in the rendered view. Null for none.</summary>
+   ///<summary>The keys that strike text through, or no longer do, in either view. Null for none.</summary>
    public KeyGesture? ToggleStrikethroughGesture { get => GetValue(ToggleStrikethroughGestureProperty); set => SetValue(ToggleStrikethroughGestureProperty, value); }
 
-   ///<summary>The keys that make the paragraphs and headings that are selected, or that the caret is in, items of a bulleted list, or no longer so, in the rendered view. Null for none.</summary>
+   ///<summary>The keys that make the paragraphs and headings that are selected, or that the caret is in, items of a bulleted list, or no longer so, in either view. Null for none.</summary>
    ///<remarks>The key is the one that types 8 without Shift, whatever Shift+8 types: <c>(</c> on a Swedish keyboard, for one.</remarks>
    public KeyGesture? ToggleBulletedListGesture { get => GetValue(ToggleBulletedListGestureProperty); set => SetValue(ToggleBulletedListGestureProperty, value); }
 
-   ///<summary>The keys that make the paragraphs and headings that are selected, or that the caret is in, items of a numbered list, or no longer so, in the rendered view. Null for none.</summary>
+   ///<summary>The keys that make the paragraphs and headings that are selected, or that the caret is in, items of a numbered list, or no longer so, in either view. Null for none.</summary>
    ///<remarks>The key is the one that types 7 without Shift, whatever Shift+7 types.</remarks>
    public KeyGesture? ToggleNumberedListGesture { get => GetValue(ToggleNumberedListGestureProperty); set => SetValue(ToggleNumberedListGestureProperty, value); }
 
