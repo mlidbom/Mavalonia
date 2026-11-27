@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -111,7 +112,13 @@ public class Using_the_menu
    public class The_items : Using_the_menu
    {
       [XFOnUIThread] public void tell_the_keys_that_do_the_same() =>
-         OpenMenuOf(Editor("⟦one⟧")).Shown.Must().SequenceEqual(["Cut (Ctrl+X)", "Copy (Ctrl+C)", "Paste (Ctrl+V)", "Paste as text (Ctrl+Shift+V)", "Paste as quote (Ctrl+Shift+Q)", "Select all (Ctrl+A)"]);
+         OpenMenuOf(Editor("⟦one⟧")).Shown.Must().SequenceEqual([
+            "Cut (Ctrl+X)", "Copy (Ctrl+C)", "Paste (Ctrl+V)", "Paste as text (Ctrl+Shift+V)", "Paste as quote (Ctrl+Shift+Q)", "Select all (Ctrl+A)",
+            "Bold (Ctrl+B)", "Italic (Ctrl+I)", "Code (Ctrl+E)", "Strikethrough (Ctrl+Shift+X)", "Bulleted list (Ctrl+Shift+8)", "Numbered list (Ctrl+Shift+7)"
+         ]);
+
+      [XFOnUIThread] public void tell_no_keys_for_formats_and_lists_in_the_source_view_where_the_keys_do_nothing() =>
+         OpenMenuOf(Editor("⟦one⟧", inTheSource: true)).Shown.Must().Satisfy(it => it.Contains("Bold") && it.Contains("Bulleted list") && it.Contains("Paste as quote (Ctrl+Shift+Q)"));
 
       [XFOnUIThread] public void tell_the_keys_that_the_application_has_chosen()
       {
@@ -121,9 +128,30 @@ public class Using_the_menu
          OpenMenuOf(editor).Shown.Must().Satisfy(it => it.Contains("Paste as text") && it.Contains("Paste as quote (F2)"));
       }
 
-      [XFOnUIThread] public void can_all_be_chosen_when_something_is_selected() => OpenMenuOf(Editor("⟦one⟧")).Choices.Must().HaveCount(6);
-      [XFOnUIThread] public void can_not_cut_or_copy_when_nothing_is_selected() => OpenMenuOf(Editor("one‸")).Choices.Must().SequenceEqual(["Paste", "Paste as text", "Paste as quote", "Select all"]);
-      [XFOnUIThread] public void can_only_paste_when_the_document_is_empty() => OpenMenuOf(Editor("‸")).Choices.Must().SequenceEqual(["Paste", "Paste as text", "Paste as quote"]);
+      [XFOnUIThread] public void can_all_be_chosen_when_something_is_selected() => OpenMenuOf(Editor("⟦one⟧")).Choices.Must().HaveCount(12);
+      [XFOnUIThread] public void can_not_cut_or_copy_when_nothing_is_selected() => OpenMenuOf(Editor("one‸")).Choices.Must().Satisfy(it => !it.Contains("Cut") && !it.Contains("Copy") && it.Count == 10);
+      [XFOnUIThread] public void can_not_cut_copy_or_select_all_when_the_document_is_empty() => OpenMenuOf(Editor("‸")).Choices.Must().Satisfy(it => !it.Contains("Cut") && !it.Contains("Copy") && !it.Contains("Select all") && it.Count == 9);
+      [XFOnUIThread] public void can_not_format_in_the_source_view_when_nothing_is_selected() => OpenMenuOf(Editor("one‸", inTheSource: true)).Choices.Must().Satisfy(it => !it.Contains("Bold") && !it.Contains("Code") && it.Contains("Bulleted list"));
+      [XFOnUIThread] public void can_not_make_a_list_of_a_code_block() => OpenMenuOf(Editor("```\none‸\n```")).Choices.Must().Satisfy(it => !it.Contains("Bulleted list") && !it.Contains("Numbered list"));
+   }
+
+   public class The_check_marks : Using_the_menu
+   {
+      ///<summary>The items that the menu shows a check mark beside, with the editor <paramref name="inTheSource"/> or not. The frame of the menu is saved for inspection, named after <paramref name="specification"/>.</summary>
+      static IReadOnlyList<string> CheckedIn(string markdown, bool inTheSource = false, [CallerMemberName] string specification = "")
+      {
+         var menu = OpenMenuOf(Editor(markdown, inTheSource));
+         menu.RenderFrame().SaveForInspectionAs($"The menu, {specification}");
+         return menu.Checked;
+      }
+
+      [XFOnUIThread] public void are_beside_the_formats_of_what_is_selected() => CheckedIn("***⟦one⟧*** two").Must().SequenceEqual(["Bold", "Italic"]);
+      [XFOnUIThread] public void are_beside_no_format_that_only_some_of_what_is_selected_has() => CheckedIn("⟦**one** two⟧").Must().BeEmpty();
+      [XFOnUIThread] public void are_beside_the_formats_of_what_is_typed_at_the_caret() => CheckedIn("`one‸` two").Must().SequenceEqual(["Code"]);
+      [XFOnUIThread] public void are_beside_the_formats_of_what_is_typed_at_the_caret_in_the_source_view() => CheckedIn("~~one‸~~", inTheSource: true).Must().SequenceEqual(["Strikethrough"]);
+      [XFOnUIThread] public void are_beside_the_kind_of_list_that_the_caret_is_in() => CheckedIn("1. one‸").Must().SequenceEqual(["Numbered list"]);
+      [XFOnUIThread] public void are_beside_the_kind_of_list_that_all_that_is_selected_is_in() => CheckedIn("- ⟦one\n- two⟧").Must().SequenceEqual(["Bulleted list"]);
+      [XFOnUIThread] public void are_beside_no_kind_of_list_that_only_some_of_what_is_selected_is_in() => CheckedIn("⟦one\n\n- two⟧").Must().BeEmpty();
    }
 
    public class In_the_rendered_view : Using_the_menu
@@ -134,6 +162,17 @@ public class Using_the_menu
       [XFOnUIThread] public async Task Paste_as_text_pastes() => (await Choose("Paste as text", "a ⟦b⟧", inTheSource: false)).Markdown.Must().Be("a x‸");
       [XFOnUIThread] public async Task Paste_as_quote_pastes_a_quote() => (await Choose("Paste as quote", "a‸", inTheSource: false)).Markdown.Must().Be("a\n\n> x\n\n‸");
       [XFOnUIThread] public async Task Select_all_selects_all() => (await Choose("Select all", "a‸\n\nb", inTheSource: false)).Markdown.Must().Be("⟦a\n\nb⟧");
+      [XFOnUIThread] public async Task Bold_makes_what_is_selected_bold() => (await Choose("Bold", "a ⟦b⟧ c", inTheSource: false)).Markdown.Must().Be("a ⟦**b⟧** c");
+      [XFOnUIThread] public async Task Code_makes_what_is_typed_next_code() => (await ChooseAndType("Code", "a ‸", "b")).Must().Be("a `b‸`");
+      [XFOnUIThread] public async Task Bulleted_list_makes_the_paragraph_an_item_of_a_bulleted_list() => (await Choose("Bulleted list", "a‸", inTheSource: false)).Markdown.Must().Be("- a‸");
+      [XFOnUIThread] public async Task Numbered_list_takes_the_item_out_of_its_numbered_list() => (await Choose("Numbered list", "1. a‸", inTheSource: false)).Markdown.Must().Be("a‸");
+
+      static async Task<string> ChooseAndType(string item, string into, string text)
+      {
+         var editor = Editor(into);
+         await OpenMenuOf(editor).Choose(item);
+         return editor.Type(text).Markdown;
+      }
    }
 
    public class In_the_source_view : Using_the_menu
@@ -144,5 +183,7 @@ public class Using_the_menu
       [XFOnUIThread] public async Task Paste_as_text_pastes() => (await Choose("Paste as text", "a ⟦b⟧", inTheSource: true)).Markdown.Must().Be("a x‸");
       [XFOnUIThread] public async Task Paste_as_quote_pastes_a_quote() => (await Choose("Paste as quote", "a‸", inTheSource: true)).Markdown.Must().Be("a\n\n> x\n\n‸");
       [XFOnUIThread] public async Task Select_all_selects_all() => (await Choose("Select all", "a‸\n\nb", inTheSource: true)).Markdown.Must().Be("⟦a\n\nb⟧");
+      [XFOnUIThread] public async Task Italic_makes_what_is_selected_italic() => (await Choose("Italic", "a ⟦b⟧ c", inTheSource: true)).Markdown.Must().Be("a ⟦*b⟧* c");
+      [XFOnUIThread] public async Task Numbered_list_makes_the_paragraph_an_item_of_a_numbered_list() => (await Choose("Numbered list", "a‸", inTheSource: true)).Markdown.Must().Be("1. a‸");
    }
 }

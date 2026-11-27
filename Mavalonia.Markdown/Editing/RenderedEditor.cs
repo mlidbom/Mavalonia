@@ -111,12 +111,21 @@ public sealed class RenderedEditor : SelectableMarkdown, IDisposable
 
    void ToggleForTheSelection(TextFormats format) => MakeAllKeepingTheSelection(new TogglingAFormat(Selected, format).Changes());
 
+   ///<summary>Whether the text typed next has <paramref name="format"/>, or, with text selected, all of that does: <see cref="Toggle"/> then takes the format away.</summary>
+   internal bool Has(TextFormats format) => Selection.IsEmpty ? FormattingToType.Has(format) : new TogglingAFormat(Selected, format).TakesTheFormatAway;
+
    ///<summary>
    /// Makes each paragraph and heading that is selected, or that the caret is in, an item of a list of <paramref name="kind"/>.
    /// When each of them is one already, it takes them out of their lists instead.
    ///</summary>
    ///<remarks>An item of a list of the other kind turns its whole list into one of <paramref name="kind"/>.</remarks>
    public void ToggleList(ListKind kind) => MakeAllKeepingTheSelection(new TogglingAList(Selected, kind).Changes());
+
+   ///<summary>Whether a paragraph or heading is selected, or the caret is in one, for <see cref="ToggleList"/> to make an item.</summary>
+   internal bool CanToggleAList => new TogglingAList(Selected, ListKind.Bulleted).IsPossible;
+
+   ///<summary>Whether each paragraph and heading that is selected, or that the caret is in, is an item of a list of <paramref name="kind"/>: <see cref="ToggleList"/> then takes them out of their lists.</summary>
+   internal bool IsInAList(ListKind kind) => new TogglingAList(Selected, kind).TakesThemOutOfTheirLists;
 
    ///<summary>Makes <paramref name="changes"/> as one undo, and selects the same as before in what is rendered afterwards: from and to the same chars of the same blocks.</summary>
    void MakeAllKeepingTheSelection(IEnumerable<Func<RenderedMarkdown, SourceChange?>> changes)

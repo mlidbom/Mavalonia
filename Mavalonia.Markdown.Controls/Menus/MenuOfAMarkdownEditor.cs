@@ -1,5 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Mavalonia.Markdown.Rendering.Containers;
+using Mavalonia.Markdown.Rendering.Texts;
 
 namespace Mavalonia.Markdown.Controls.Menus;
 
@@ -24,5 +27,22 @@ class MenuOfAMarkdownEditor : MenuMadeWhenItOpens
       yield return new MenuCommand("Paste as quote", _editor.PasteAsQuote, _editor.PasteAsQuoteGesture);
       yield return new Separator();
       yield return new MenuCommand("Select all", _editor.SelectAll, keys.SelectAll.FirstOrDefault()) { IsEnabled = _editor.Document.TextLength > 0 };
+      yield return new Separator();
+      yield return ToggleOf("Bold", TextFormats.Bold, _editor.ToggleBoldGesture);
+      yield return ToggleOf("Italic", TextFormats.Italic, _editor.ToggleItalicGesture);
+      yield return ToggleOf("Code", TextFormats.Code, _editor.ToggleCodeGesture);
+      yield return ToggleOf("Strikethrough", TextFormats.Strikethrough, _editor.ToggleStrikethroughGesture);
+      yield return new Separator();
+      yield return ToggleOf("Bulleted list", ListKind.Bulleted, _editor.ToggleBulletedListGesture);
+      yield return ToggleOf("Numbered list", ListKind.Numbered, _editor.ToggleNumberedListGesture);
    }
+
+   MenuToggle ToggleOf(string header, TextFormats format, KeyGesture? gesture) =>
+      new(header, () => _editor.ToggleFormat(format), WhereTheyWork(gesture), _editor.HasFormat(format)) { IsEnabled = _editor.CanToggleAFormat };
+
+   MenuToggle ToggleOf(string header, ListKind kind, KeyGesture? gesture) =>
+      new(header, () => _editor.ToggleList(kind), WhereTheyWork(gesture), _editor.IsInAList(kind)) { IsEnabled = _editor.CanToggleAList };
+
+   ///<summary>The keys for formats and lists, which work in the rendered view only. Null while the source is shown.</summary>
+   KeyGesture? WhereTheyWork(KeyGesture? gesture) => _editor.ShowsSource ? null : gesture;
 }

@@ -57,7 +57,7 @@ It shows what GitHub does: tables, task lists, alerts, bare URLs, strikethrough.
 
 ## Menus
 
-A right-click, or the menu key, opens a small menu: in `MarkdownView` copy, copy link where it's opened at one, and select all; in `MarkdownEditor` cut, copy, paste, paste as text, paste as quote and select all. The right button puts the caret where it's pressed, unless it's pressed in what is selected.
+A right-click, or the menu key, opens a small menu: in `MarkdownView` copy, copy link where it's opened at one, and select all; in `MarkdownEditor` cut, copy, paste, paste as text, paste as quote and select all, then bold, italic, code and strikethrough, then bulleted list and numbered list. Each format and kind of list has a check mark when what is selected, or what is typed next, has it; its keys are told in the rendered view, where they work. The right button puts the caret where it's pressed, unless it's pressed in what is selected.
 
 Setting `ContextMenu` or `ContextFlyout`, which all Avalonia controls have, replaces the menu. `ContextFlyout = null` turns it off. The application's menu can't have our items besides its own, so it makes its own of the public actions. Such as one that quotes into Cloyd's writing box:
 

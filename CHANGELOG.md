@@ -14,6 +14,8 @@ here: see [releasing](dev_docs/releasing.md).
   of such a list already. An item of a list of the other kind turns its whole list into one of the kind, and a
   paragraph after a list of the kind becomes its next item. The keys are those of the digits, whatever Shift and the
   digit type on the keyboard's layout, such as `(` for Shift+8 on a Swedish one.
+- The menu of `MarkdownEditor` has bold, italic, code and strikethrough, and bulleted list and numbered list. Each has a
+  check mark when what is selected, or what is typed next, has it, and, in the rendered view, the keys that do the same.
 
 ### Changed
 - In `MarkdownEditor`, the caret moved with the arrow keys stops on both sides of the backticks where code in a line of

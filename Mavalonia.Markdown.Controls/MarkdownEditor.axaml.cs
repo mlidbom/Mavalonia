@@ -100,6 +100,12 @@ public partial class MarkdownEditor : UserControl
       else EditInEitherView(it => it.Toggle(format));
    }
 
+   ///<summary>Whether <see cref="ToggleFormat"/> does anything: with nothing selected, it's only the rendered view that the format of what is typed next is for.</summary>
+   internal bool CanToggleAFormat => !ShowsSource || !Selection.IsEmpty;
+
+   ///<summary>Whether the text typed next has <paramref name="format"/>, or, with text selected, all of that does: <see cref="ToggleFormat"/> then takes the format away.</summary>
+   internal bool HasFormat(TextFormats format) => ReadInEitherView(it => it.Has(format));
+
    ///<summary>
    /// Makes each paragraph and heading that is selected, or that the caret is in, an item of a list of <paramref name="kind"/>.
    /// When each of them is one already, it takes them out of their lists instead.
@@ -109,6 +115,21 @@ public partial class MarkdownEditor : UserControl
    {
       if(RenderedEditorShown is {} rendered) rendered.ToggleList(kind);
       else EditInEitherView(it => it.ToggleList(kind));
+   }
+
+   ///<summary>Whether a paragraph or heading is selected, or the caret is in one, for <see cref="ToggleList"/> to make an item.</summary>
+   internal bool CanToggleAList => ReadInEitherView(it => it.CanToggleAList);
+
+   ///<summary>Whether each paragraph and heading that is selected, or that the caret is in, is an item of a list of <paramref name="kind"/>: <see cref="ToggleList"/> then takes them out of their lists.</summary>
+   internal bool IsInAList(ListKind kind) => ReadInEitherView(it => it.IsInAList(kind));
+
+   ///<summary>What <paramref name="read"/> reads of the editor of the rendered view, or, while the source is shown or the control isn't, of another of the same selection.</summary>
+   TResult ReadInEitherView<TResult>(Func<RenderedEditor, TResult> read)
+   {
+      if(RenderedEditorShown is {} rendered) return read(rendered);
+
+      using var editor = new RenderedEditor(Document, Selection);
+      return read(editor);
    }
 
    ///<summary>Edits also while the source is shown, and while the control isn't.</summary>
