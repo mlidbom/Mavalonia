@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using AvaloniaEdit.Document;
 using JetBrains.Annotations;
 using Mavalonia.Markdown.Controls.Clipboards;
+using Mavalonia.Markdown.Controls.Formatting;
 using Mavalonia.Markdown.Controls.Menus;
 using Mavalonia.Markdown.Controls.Source;
 using Mavalonia.Markdown.Editing;
@@ -13,7 +14,7 @@ using Mavalonia.Markdown.Rendering.Texts;
 namespace Mavalonia.Markdown.Controls;
 
 ///<summary>A control in which a person edits a markdown document, as it is rendered or as its source.</summary>
-public partial class MarkdownEditor : UserControl
+public partial class MarkdownEditor : UserControl, IHasFormattingKeys
 {
    readonly SourceInput _source;
    RenderedEditor? _renderedEditor;

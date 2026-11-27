@@ -5,13 +5,14 @@ using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
 using JetBrains.Annotations;
 using Mavalonia.Markdown.Controls.Clipboards;
+using Mavalonia.Markdown.Controls.Formatting;
 using Mavalonia.Markdown.Controls.Rendered.Input;
 using Mavalonia.Markdown.Editing;
 
 namespace Mavalonia.Markdown.Controls.Rendered;
 
 ///<summary>Shows a markdown document as it is rendered, and lets a person edit it there.</summary>
-public partial class RenderedEditorView : RenderedMarkdownView
+public partial class RenderedEditorView : RenderedMarkdownView, IHasFormattingKeys
 {
    readonly BlinkingCaret _blinkingCaret;
    readonly KeyboardInput _keyboard;

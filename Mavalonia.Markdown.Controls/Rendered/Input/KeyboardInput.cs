@@ -1,9 +1,8 @@
 using Avalonia.Input;
 using Avalonia.Input.Platform;
+using Mavalonia.Markdown.Controls.Formatting;
 using Mavalonia.Markdown.Editing;
 using Mavalonia.Markdown.Rendering.Blocks;
-using Mavalonia.Markdown.Rendering.Containers;
-using Mavalonia.Markdown.Rendering.Texts;
 
 namespace Mavalonia.Markdown.Controls.Rendered.Input;
 
@@ -12,11 +11,13 @@ class KeyboardInput
 {
    readonly RenderedEditorView _view;
    readonly MovementKeys _movement;
+   readonly FormattingKeys _formattingKeys;
 
    internal KeyboardInput(RenderedEditorView view)
    {
       _view = view;
       _movement = new MovementKeys(view);
+      _formattingKeys = new FormattingKeys(view);
    }
 
    PlatformHotkeyConfiguration Hotkeys => _view.Hotkeys;
@@ -47,8 +48,8 @@ class KeyboardInput
       if(_view.BreakLineGesture?.Matches(e) == true) return editor.BreakLine;
       if(Is(Hotkeys.Undo, e)) return editor.Undo;
       if(Is(Hotkeys.Redo, e)) return editor.Redo;
-      if(FormatToToggleBy(e) is {} format) return () => editor.Toggle(format);
-      if(ListToToggleBy(e) is {} kind) return () => editor.ToggleList(kind);
+      if(_formattingKeys.FormatToggledBy(e) is {} format) return () => editor.Toggle(format);
+      if(_formattingKeys.ListToggledBy(e) is {} kind) return () => editor.ToggleList(kind);
 
       var isForWords = e.KeyModifiers == Hotkeys.WholeWordTextActionModifiers;
       return (e.Key, e.KeyModifiers) switch
@@ -61,22 +62,6 @@ class KeyboardInput
          (Key.Tab, KeyModifiers.Shift) => ShiftTab(editor),
          _ => null
       };
-   }
-
-   TextFormats? FormatToToggleBy(KeyEventArgs e)
-   {
-      if(_view.ToggleBoldGesture?.Matches(e) == true) return TextFormats.Bold;
-      if(_view.ToggleItalicGesture?.Matches(e) == true) return TextFormats.Italic;
-      if(_view.ToggleCodeGesture?.Matches(e) == true) return TextFormats.Code;
-      if(_view.ToggleStrikethroughGesture?.Matches(e) == true) return TextFormats.Strikethrough;
-      return null;
-   }
-
-   ListKind? ListToToggleBy(KeyEventArgs e)
-   {
-      if(_view.ToggleBulletedListGesture?.Matches(e) == true) return ListKind.Bulleted;
-      if(_view.ToggleNumberedListGesture?.Matches(e) == true) return ListKind.Numbered;
-      return null;
    }
 
    ///<summary>Null where the key isn't for editing, so that it moves the focus as it does everywhere else.</summary>
