@@ -23,6 +23,11 @@ public class ListItem : BlockContainer
    [PublicAPI]
    public int? Number { get; }
 
+   ///<summary>The first item of a new list of <paramref name="kind"/>.</summary>
+   internal static ListItem FirstOf(ListKind kind) => kind == ListKind.Bulleted ? new ListItem("-", null, 2) : new ListItem("1.", 1, 3);
+
+   internal ListKind Kind => Number is null ? ListKind.Bulleted : ListKind.Numbered;
+
    ///<summary>The number as it's shown before the item, such as <c>1.</c>, or <c>1)</c> when it's written so. Null when the item has a bullet.</summary>
    public string? ShownNumber => Number is {} number ? MarkerOf(number) : null;
 

@@ -33,8 +33,16 @@ class BlockMove
 
    bool IsEntered(BlockContainer container) => Previous?.IsInside(container) != true;
 
-   ///<summary>Without a blank line between them, blocks could become one.</summary>
-   string SeparatorFrom(RenderedBlock other) => StaysAListItem ? _rendered.Source.LineBreak : new LineBreaksInside(_rendered, _containers.SharedWith(other.Containers)).BlankLine + _rendered.Source.LineBreak;
+   ///<summary>Without a blank line between them, blocks could become one. Not so the items of a list, which their markers keep apart.</summary>
+   string SeparatorFrom(RenderedBlock other) =>
+      StaysAListItem || GoesIntoTheListOf(other) ? _rendered.Source.LineBreak : new LineBreaksInside(_rendered, _containers.SharedWith(other.Containers)).BlankLine + _rendered.Source.LineBreak;
+
+   ///<summary>Whether the block goes into a list item of the list that <paramref name="other"/> is in.</summary>
+   bool GoesIntoTheListOf(RenderedBlock other) =>
+      _containers.Innermost is ListItem item
+   && other.Containers.SharedWith(_containers).Count == _containers.Count - 1
+   && other.Containers.OutermostFirst.ElementAtOrDefault(_containers.Count - 1) is ListItem itemOfTheOther
+   && itemOfTheOther.LooksLike(item);
 
    string TextOfTheBlock()
    {

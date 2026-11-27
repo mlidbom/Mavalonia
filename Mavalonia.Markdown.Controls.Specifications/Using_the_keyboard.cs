@@ -34,6 +34,11 @@ public class Using_the_keyboard
    [XFOnUIThread] public void makes_text_code_with_the_keys_that_the_application_chooses() => MarkdownOfASelectedTextAfterF2(it => it.ToggleCodeGesture = new KeyGesture(Key.F2)).Must().Be("⟦`a⟧`");
    [XFOnUIThread] public void strikes_text_through_with_the_keys_that_the_application_chooses() => MarkdownOfASelectedTextAfterF2(it => it.ToggleStrikethroughGesture = new KeyGesture(Key.F2)).Must().Be("⟦~~a⟧~~");
 
+   [XFOnUIThread] public void makes_a_bulleted_list_with_Ctrl_Shift_and_8() => Press(PhysicalKey.Digit8, "a‸", Ctrl | Shift).Must().Be("- a‸");
+   [XFOnUIThread] public void makes_a_numbered_list_with_Ctrl_Shift_and_7() => Press(PhysicalKey.Digit7, "a‸", Ctrl | Shift).Must().Be("1. a‸");
+   [XFOnUIThread] public void makes_a_bulleted_list_with_the_keys_that_the_application_chooses() => MarkdownOfASelectedTextAfterF2(it => it.ToggleBulletedListGesture = new KeyGesture(Key.F2)).Must().Be("- ⟦a⟧");
+   [XFOnUIThread] public void makes_a_numbered_list_with_the_keys_that_the_application_chooses() => MarkdownOfASelectedTextAfterF2(it => it.ToggleNumberedListGesture = new KeyGesture(Key.F2)).Must().Be("1. ⟦a⟧");
+
    [XFOnUIThread] public void leaves_the_keys_for_formatting_to_the_application_when_it_wants_them()
    {
       var editor = new EditorInAWindow("⟦a⟧") { Editor = { ToggleBoldGesture = null, ToggleItalicGesture = null, ToggleCodeGesture = null, ToggleStrikethroughGesture = null } };

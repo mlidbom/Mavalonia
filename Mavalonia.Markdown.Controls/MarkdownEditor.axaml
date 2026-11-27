@@ -32,6 +32,8 @@
                                         ToggleItalicGesture="{Binding #Root.ToggleItalicGesture}"
                                         ToggleCodeGesture="{Binding #Root.ToggleCodeGesture}"
                                         ToggleStrikethroughGesture="{Binding #Root.ToggleStrikethroughGesture}"
+                                        ToggleBulletedListGesture="{Binding #Root.ToggleBulletedListGesture}"
+                                        ToggleNumberedListGesture="{Binding #Root.ToggleNumberedListGesture}"
                                         PasteTextGesture="{Binding #Root.PasteTextGesture}"
                                         PasteAsQuoteGesture="{Binding #Root.PasteAsQuoteGesture}" />
       </ScrollViewer>

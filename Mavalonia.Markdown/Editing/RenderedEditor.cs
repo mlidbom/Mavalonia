@@ -109,12 +109,22 @@ public sealed class RenderedEditor : SelectableMarkdown, IDisposable
          ToggleForTheSelection(format);
    }
 
-   void ToggleForTheSelection(TextFormats format)
-   {
-      var selected = Selected;
-      AsOneUndo(() => MakeAll(new TogglingAFormat(selected, format).Changes()));
+   void ToggleForTheSelection(TextFormats format) => MakeAllKeepingTheSelection(new TogglingAFormat(Selected, format).Changes());
 
-      var selectedAfterwards = selected.ByNumbers.In(Rendered);
+   ///<summary>
+   /// Makes each paragraph and heading that is selected, or that the caret is in, an item of a list of <paramref name="kind"/>.
+   /// When each of them is one already, it takes them out of their lists instead.
+   ///</summary>
+   ///<remarks>An item of a list of the other kind turns its whole list into one of <paramref name="kind"/>.</remarks>
+   public void ToggleList(ListKind kind) => MakeAllKeepingTheSelection(new TogglingAList(Selected, kind).Changes());
+
+   ///<summary>Makes <paramref name="changes"/> as one undo, and selects the same as before in what is rendered afterwards: from and to the same chars of the same blocks.</summary>
+   void MakeAllKeepingTheSelection(IEnumerable<Func<RenderedMarkdown, SourceChange?>> changes)
+   {
+      var selected = Selected.ByNumbers;
+      AsOneUndo(() => MakeAll(changes));
+
+      var selectedAfterwards = selected.In(Rendered);
       Selection = new TextSelection(selectedAfterwards.Start.Offset, selectedAfterwards.End.Offset);
    }
 

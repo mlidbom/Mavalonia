@@ -13,6 +13,8 @@ partial class RenderedEditorView
    public static readonly StyledProperty<KeyGesture?> ToggleItalicGestureProperty = MarkdownEditor.ToggleItalicGestureProperty.AddOwner<RenderedEditorView>();
    public static readonly StyledProperty<KeyGesture?> ToggleCodeGestureProperty = MarkdownEditor.ToggleCodeGestureProperty.AddOwner<RenderedEditorView>();
    public static readonly StyledProperty<KeyGesture?> ToggleStrikethroughGestureProperty = MarkdownEditor.ToggleStrikethroughGestureProperty.AddOwner<RenderedEditorView>();
+   public static readonly StyledProperty<KeyGesture?> ToggleBulletedListGestureProperty = MarkdownEditor.ToggleBulletedListGestureProperty.AddOwner<RenderedEditorView>();
+   public static readonly StyledProperty<KeyGesture?> ToggleNumberedListGestureProperty = MarkdownEditor.ToggleNumberedListGestureProperty.AddOwner<RenderedEditorView>();
    public static readonly StyledProperty<KeyGesture?> PasteTextGestureProperty = MarkdownEditor.PasteTextGestureProperty.AddOwner<RenderedEditorView>();
    public static readonly StyledProperty<KeyGesture?> PasteAsQuoteGestureProperty = MarkdownEditor.PasteAsQuoteGestureProperty.AddOwner<RenderedEditorView>();
 
@@ -42,6 +44,14 @@ partial class RenderedEditorView
    ///<inheritdoc cref="MarkdownEditor.ToggleStrikethroughGesture"/>
    [PublicAPI]
    public KeyGesture? ToggleStrikethroughGesture { get => GetValue(ToggleStrikethroughGestureProperty); set => SetValue(ToggleStrikethroughGestureProperty, value); }
+
+   ///<inheritdoc cref="MarkdownEditor.ToggleBulletedListGesture"/>
+   [PublicAPI]
+   public KeyGesture? ToggleBulletedListGesture { get => GetValue(ToggleBulletedListGestureProperty); set => SetValue(ToggleBulletedListGestureProperty, value); }
+
+   ///<inheritdoc cref="MarkdownEditor.ToggleNumberedListGesture"/>
+   [PublicAPI]
+   public KeyGesture? ToggleNumberedListGesture { get => GetValue(ToggleNumberedListGestureProperty); set => SetValue(ToggleNumberedListGestureProperty, value); }
 
    ///<inheritdoc cref="MarkdownEditor.PasteTextGesture"/>
    [PublicAPI]

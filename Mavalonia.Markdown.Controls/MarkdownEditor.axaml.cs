@@ -7,6 +7,7 @@ using Mavalonia.Markdown.Controls.Menus;
 using Mavalonia.Markdown.Controls.Source;
 using Mavalonia.Markdown.Editing;
 using Mavalonia.Markdown.Rendering;
+using Mavalonia.Markdown.Rendering.Containers;
 using Mavalonia.Markdown.Rendering.Texts;
 
 namespace Mavalonia.Markdown.Controls;
@@ -97,6 +98,17 @@ public partial class MarkdownEditor : UserControl
    {
       if(RenderedEditorShown is {} rendered) rendered.Toggle(format);
       else EditInEitherView(it => it.Toggle(format));
+   }
+
+   ///<summary>
+   /// Makes each paragraph and heading that is selected, or that the caret is in, an item of a list of <paramref name="kind"/>.
+   /// When each of them is one already, it takes them out of their lists instead.
+   ///</summary>
+   ///<remarks>An item of a list of the other kind turns its whole list into one of <paramref name="kind"/>.</remarks>
+   public void ToggleList(ListKind kind)
+   {
+      if(RenderedEditorShown is {} rendered) rendered.ToggleList(kind);
+      else EditInEitherView(it => it.ToggleList(kind));
    }
 
    ///<summary>Edits also while the source is shown, and while the control isn't.</summary>

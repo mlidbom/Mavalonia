@@ -21,6 +21,8 @@ partial class MarkdownEditor
    public static readonly StyledProperty<KeyGesture?> ToggleItalicGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(ToggleItalicGesture), new KeyGesture(Key.I, ControlOrCommand));
    public static readonly StyledProperty<KeyGesture?> ToggleCodeGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(ToggleCodeGesture), new KeyGesture(Key.E, ControlOrCommand));
    public static readonly StyledProperty<KeyGesture?> ToggleStrikethroughGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(ToggleStrikethroughGesture), new KeyGesture(Key.X, ControlOrCommand | KeyModifiers.Shift));
+   public static readonly StyledProperty<KeyGesture?> ToggleBulletedListGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(ToggleBulletedListGesture), new KeyGesture(Key.D8, ControlOrCommand | KeyModifiers.Shift));
+   public static readonly StyledProperty<KeyGesture?> ToggleNumberedListGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(ToggleNumberedListGesture), new KeyGesture(Key.D7, ControlOrCommand | KeyModifiers.Shift));
    public static readonly StyledProperty<KeyGesture?> PasteTextGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteTextGesture), new KeyGesture(Key.V, ControlOrCommand | KeyModifiers.Shift));
    public static readonly StyledProperty<KeyGesture?> PasteAsQuoteGestureProperty = AvaloniaProperty.Register<MarkdownEditor, KeyGesture?>(nameof(PasteAsQuoteGesture), new KeyGesture(Key.Q, ControlOrCommand | KeyModifiers.Shift));
 
@@ -66,6 +68,14 @@ partial class MarkdownEditor
 
    ///<summary>The keys that strike text through, or no longer do, in the rendered view. Null for none.</summary>
    public KeyGesture? ToggleStrikethroughGesture { get => GetValue(ToggleStrikethroughGestureProperty); set => SetValue(ToggleStrikethroughGestureProperty, value); }
+
+   ///<summary>The keys that make the paragraphs and headings that are selected, or that the caret is in, items of a bulleted list, or no longer so, in the rendered view. Null for none.</summary>
+   ///<remarks>The key is the one that types 8 without Shift, whatever Shift+8 types: <c>(</c> on a Swedish keyboard, for one.</remarks>
+   public KeyGesture? ToggleBulletedListGesture { get => GetValue(ToggleBulletedListGestureProperty); set => SetValue(ToggleBulletedListGestureProperty, value); }
+
+   ///<summary>The keys that make the paragraphs and headings that are selected, or that the caret is in, items of a numbered list, or no longer so, in the rendered view. Null for none.</summary>
+   ///<remarks>The key is the one that types 7 without Shift, whatever Shift+7 types.</remarks>
+   public KeyGesture? ToggleNumberedListGesture { get => GetValue(ToggleNumberedListGestureProperty); set => SetValue(ToggleNumberedListGestureProperty, value); }
 
    ///<summary>The keys that paste only the text of what is on the clipboard, when that is rich text. Null for none.</summary>
    public KeyGesture? PasteTextGesture { get => GetValue(PasteTextGestureProperty); set => SetValue(PasteTextGestureProperty, value); }
