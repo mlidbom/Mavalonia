@@ -7,6 +7,10 @@ here: see [releasing](dev_docs/releasing.md).
 
 ## [Unreleased]
 
+### Fixed
+- Toggling code off with nothing selected, at the end of code in a line of text, and typing a space put the space in
+  the code, where its background shows; the text after it went outside. The space now goes outside the code too.
+
 ## [0.10.1] - 2026-11-26
 
 ### Fixed

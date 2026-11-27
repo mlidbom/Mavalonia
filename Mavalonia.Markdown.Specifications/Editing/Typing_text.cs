@@ -58,6 +58,8 @@ public class Typing_text
    [XF] public void after_toggling_bold_at_the_end_of_bold_text_does_not_continue_the_bold_text() => Of("**a‸**", it => it.Toggle(TextFormats.Bold), Type(" b")).Must().Be("**a** b‸");
    [XF] public void after_toggling_bold_inside_bold_text_makes_it_not_bold() => Of("**a‸b**", it => it.Toggle(TextFormats.Bold), Type("x")).Must().Be("**a**x‸**b**");
    [XF] public void after_toggling_code_makes_it_code() => Of("a ‸", it => it.Toggle(TextFormats.Code), Type("b")).Must().Be("a `b‸`");
+   [XF] public void after_toggling_code_at_the_end_of_code_does_not_continue_the_code() => Of("`a‸`", it => it.Toggle(TextFormats.Code), Type(" b")).Must().Be("`a` b‸");
+   [XF] public void after_toggling_code_inside_code_makes_it_not_code() => Of("`a‸b`", it => it.Toggle(TextFormats.Code), Type(" ")).Must().Be("`a` ‸`b`");
 
    static string RenderedAfterTyping(string text)
    {

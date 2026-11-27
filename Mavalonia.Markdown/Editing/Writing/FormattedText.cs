@@ -86,8 +86,8 @@ class FormattedText
    ///<summary>The text without formatting, written as markdown.</summary>
    internal string MarkdownWithoutFormatting => string.Concat(Chars.Select(it => it.Markdown));
 
-   ///<summary>Whether the text looks like <paramref name="other"/>. White space looks the same in bold, so only the formatting of the other chars counts.</summary>
+   ///<summary>Whether the text looks like <paramref name="other"/>. White space looks the same in bold and italic, so for it only the formats that show on it count: see <see cref="TextFormatting.LooksTheSameOnWhiteSpaceAs"/>.</summary>
    internal bool LooksLike(RenderedText other) => Length == other.Length && Chars.Zip(other.Chars).All(it => LookAlike(it.First, it.Second));
 
-   static bool LookAlike(FormattedChar one, RenderedChar other) => one.Value == other.Value && (one.IsWhiteSpace || one.Formatting.LooksLike(other.Formatting));
+   static bool LookAlike(FormattedChar one, RenderedChar other) => one.Value == other.Value && (one.IsWhiteSpace ? one.Formatting.LooksTheSameOnWhiteSpaceAs(other.Formatting) : one.Formatting.LooksLike(other.Formatting));
 }

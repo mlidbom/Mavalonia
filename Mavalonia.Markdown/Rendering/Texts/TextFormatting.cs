@@ -14,6 +14,14 @@ public readonly record struct TextFormatting(TextFormats Formats, Link? Link = n
    ///<summary>Whether text formatted so looks the same as text formatted as <paramref name="other"/>.</summary>
    internal bool LooksLike(TextFormatting other) => Formats == other.Formats && Link?.Target == other.Link?.Target && IsShownAsSource == other.IsShownAsSource && Image?.Source == other.Image?.Source;
 
+   ///<summary>Whether white space formatted so looks the same as white space formatted as <paramref name="other"/>: whether both are code, or neither is.</summary>
+   ///<remarks>
+   /// Code shows on white space, in its background and in the width of a space of its font. Bold and italic don't show on it.<br/>
+   /// Strikethrough shows on it too, but markdown can't start or end strikethrough at white space, so a change written anew moves it on white space to fit the chars around it: counting it would make some changes look wrong that are right.<br/>
+   /// The underline of a link shows on white space as well, and isn't counted either.
+   ///</remarks>
+   internal bool LooksTheSameOnWhiteSpaceAs(TextFormatting other) => Has(TextFormats.Code) == other.Has(TextFormats.Code);
+
    [PublicAPI]
    public bool Has(TextFormats format) => Formats.HasFlag(format);
 
