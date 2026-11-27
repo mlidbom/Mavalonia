@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Input;
+using Avalonia.Input.TextInput;
 using Avalonia.VisualTree;
 using AvaloniaEdit.Document;
 using Mavalonia.Markdown.Controls.Rendered;
@@ -24,6 +25,17 @@ class EditorInAWindow
    internal HeadlessWindow Window { get; }
 
    internal RenderedEditorView RenderedView => Editor.GetVisualDescendants().OfType<RenderedEditorView>().Single();
+
+   ///<summary>What the view tells an input method of the text and the caret, as Avalonia asks it on a desktop. The headless platform has no input method.</summary>
+   internal TextInputMethodClient InputMethodClient
+   {
+      get
+      {
+         var request = new TextInputMethodClientRequestedEventArgs { RoutedEvent = InputElement.TextInputMethodClientRequestedEvent };
+         RenderedView.RaiseEvent(request);
+         return request.Client!;
+      }
+   }
 
    internal string Markdown => new MarkdownWithSelection(Editor.Document.Text, Editor.Selection).ToString();
 

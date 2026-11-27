@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Input;
-using Avalonia.Input.TextInput;
 using Compze.Must;
 using Mavalonia.Markdown.Controls.Specifications.HeadlessAvalonia;
 
@@ -14,9 +13,7 @@ public class Using_an_input_method
 
    public Using_an_input_method()
    {
-      var request = new TextInputMethodClientRequestedEventArgs { RoutedEvent = InputElement.TextInputMethodClientRequestedEvent };
-      _editor.RenderedView.RaiseEvent(request);
-      var client = request.Client!;
+      var client = _editor.InputMethodClient;
       client.CursorRectangleChanged += (_, _) => _placesOfTheCaret.Add(client.CursorRectangle);
    }
 
