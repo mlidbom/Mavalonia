@@ -116,7 +116,7 @@ class HeadlessWindow
       return new RenderedFrame(frame);
    }
 
-   static void DoWhatIsPending()
+   internal static void DoWhatIsPending()
    {
       Dispatcher.UIThread.RunJobs();
       AvaloniaHeadlessPlatform.ForceRenderTimerTick();
