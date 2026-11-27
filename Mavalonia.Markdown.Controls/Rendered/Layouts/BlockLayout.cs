@@ -93,7 +93,7 @@ class BlockLayout
    internal Rect CaretAt(int index) => _text.BoundsAt(index).Translate(_originOfText).WithWidth(WidthOfACaret);
 
    const double WidthOfACaret = 1.5;
-   const double WidthOfACaretInCode = 3;
+   const double WidthOfACaretInCode = 2.25;
 
    internal double BaselineOfTheFirstLine => _originOfText.Y + _text.Baseline;
 
