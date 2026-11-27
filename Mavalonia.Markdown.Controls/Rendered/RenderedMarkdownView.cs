@@ -141,7 +141,7 @@ public abstract partial class RenderedMarkdownView : Control
    private protected virtual void DrawOver(DrawingContext context) {}
 
    ///<summary>Where the end of the selection that moves is.</summary>
-   internal Rect CaretRectangle => Shown is null ? default : Layout.CaretAt(Shown.CaretPosition);
+   internal Rect CaretRectangle => Shown is null ? default : Layout.CaretAt(Shown.CaretPosition, Shown.IsTheCaretOnTheSideOfTheCharBefore);
 
    internal void BringTheCaretIntoView()
    {

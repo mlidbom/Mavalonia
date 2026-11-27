@@ -15,6 +15,19 @@ public class Markdown_that_is_read
       return read;
    }
 
+   public class Moving_the_caret : Markdown_that_is_read
+   {
+      static string Move(string markdown, CaretMovement movement)
+      {
+         var read = Read(markdown);
+         read.Move(movement);
+         return new MarkdownWithSelection(MarkdownWithSelection.Parse(markdown).Markdown, read.Selection).ToString();
+      }
+
+      [XF] public void a_character_on_from_the_end_of_code_passes_its_backticks() => Move("`a‸` b", CaretMovement.ToTheCharacterAfter).Must().Be("`a` ‸b");
+      [XF] public void a_character_back_from_after_code_passes_its_backticks() => Move("`a` ‸b", CaretMovement.ToTheCharacterBefore).Must().Be("`a‸` b");
+   }
+
    public class Selecting_with_the_caret : Markdown_that_is_read
    {
       static string Select(string markdown, CaretMovement movement, int times)

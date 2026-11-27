@@ -60,6 +60,11 @@ public class Typing_text
    [XF] public void after_toggling_code_makes_it_code() => Of("a ‸", it => it.Toggle(TextFormats.Code), Type("b")).Must().Be("a `b‸`");
    [XF] public void after_toggling_code_at_the_end_of_code_does_not_continue_the_code() => Of("`a‸`", it => it.Toggle(TextFormats.Code), Type(" b")).Must().Be("`a` b‸");
    [XF] public void after_toggling_code_inside_code_makes_it_not_code() => Of("`a‸b`", it => it.Toggle(TextFormats.Code), Type(" ")).Must().Be("`a` ‸`b`");
+   [XF] public void inside_the_end_of_code_makes_it_code() => Of("`a‸`", Type(" b")).Must().Be("`a b‸`");
+   [XF] public void outside_the_end_of_code_does_not_make_it_code() => Of("`a`‸", Type(" b")).Must().Be("`a` b‸");
+   [XF] public void after_moving_the_caret_out_of_the_end_of_code_does_not_make_it_code() => Of("`a‸`", it => it.Move(CaretMovement.ToTheCharacterAfter), Type(" b")).Must().Be("`a` b‸");
+   [XF] public void inside_the_start_of_code_makes_it_code() => Of("`‸a`", Type("b ")).Must().Be("`b ‸a`");
+   [XF] public void after_moving_the_caret_into_the_start_of_code_makes_it_code() => Of("x ‸`a`", it => it.Move(CaretMovement.ToTheCharacterAfter), Type("b")).Must().Be("x `b‸a`");
 
    static string RenderedAfterTyping(string text)
    {

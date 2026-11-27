@@ -52,7 +52,25 @@ public abstract class SelectableMarkdown
    ///<summary>The selection in terms of what is shown. In the source, it may start or end where there is nothing to see, such as inside an entity.</summary>
    private protected TextSelection WhereItIsShown(TextSelection selection) => new(Rendered.OffsetWhereTextCanBeTyped(selection.Anchor), Rendered.OffsetWhereTextCanBeTyped(selection.Caret));
 
-   public void Move(CaretMovement movement, bool extendSelection = false) => MoveTo(movement.From(this), extendSelection);
+   ///<summary>Moves the caret by <paramref name="movement"/>. With <paramref name="extendSelection"/>, what is selected then reaches to there.</summary>
+   ///<remarks>Where text is typed at the caret, a caret moved a character at a time stops on both sides of the backticks where inline code starts or ends: see <see cref="Rendering.Texts.RenderedText.CaretStopsAt"/>. A selection that is extended passes them, as nothing is shown between them.</remarks>
+   public void Move(CaretMovement movement, bool extendSelection = false)
+   {
+      if(extendSelection || !TextIsTypedAtTheCaret)
+      {
+         MoveTo(movement.From(this), extendSelection);
+         return;
+      }
+
+      WhenASelectionIsMade();
+      Selection = TextSelection.CaretAt(movement.CaretStopFrom(this));
+   }
+
+   ///<summary>Whether text is typed where the caret is, so that which of the offsets shown at its position it is at matters: whether text typed there is code.</summary>
+   private protected virtual bool TextIsTypedAtTheCaret => false;
+
+   ///<summary>Whether the caret is at the first of several <see cref="RenderedPosition.CaretStops"/>, as inside code where it ends, or outside it where it starts. Text typed there goes with the char before, so the caret is drawn on its side.</summary>
+   internal bool IsTheCaretOnTheSideOfTheCharBefore => CaretPosition.CaretStops is { Count: > 1 } stops && stops[0] == Selection.Caret;
 
    public void SelectAll() => Select(Rendered.Start, Rendered.End);
 

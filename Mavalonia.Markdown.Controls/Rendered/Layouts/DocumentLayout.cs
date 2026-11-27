@@ -48,7 +48,8 @@ class DocumentLayout
 
    BlockLayout LayoutOf(RenderedBlock block) => _blocks.First(it => it.Block == block);
 
-   internal Rect CaretAt(RenderedPosition position) => LayoutOf(position.Block).CaretAt(position.Index);
+   ///<summary>Where a caret is drawn that is at <paramref name="position"/>: see <see cref="BlockLayout.CaretAt"/>.</summary>
+   internal Rect CaretAt(RenderedPosition position, bool onTheSideOfTheCharBefore) => LayoutOf(position.Block).CaretAt(position.Index, onTheSideOfTheCharBefore);
 
    internal Point StartOfTheFirstLine => _blocks[0].StartOfFirstLine;
 

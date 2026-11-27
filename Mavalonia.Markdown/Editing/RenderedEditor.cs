@@ -190,6 +190,8 @@ public sealed class RenderedEditor : SelectableMarkdown, IDisposable
       return _undoSteps.AsOneStep(action);
    }
 
+   private protected override bool TextIsTypedAtTheCaret => true;
+
    private protected override void WhenASelectionIsMade() => StopTyping();
 
    void StopTyping()

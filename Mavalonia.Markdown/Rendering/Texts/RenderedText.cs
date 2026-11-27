@@ -64,6 +64,25 @@ public class RenderedText
    ///<summary>The offset at which text typed before the char at <paramref name="index"/> goes. It continues the char before that one, so after a bold char it is inside the bold markup.</summary>
    public int OffsetAt(int index) => index == 0 ? Source.Start : Chars[index - 1].Source.End;
 
+   ///<summary>
+   /// The offsets that a caret moved a character at a time stops at before the char at <paramref name="index"/>, in the order of the markdown:<br/>
+   /// <see cref="OffsetAt"/>, and, where inline code starts or ends there, also the offset on the other side of its backticks.
+   ///</summary>
+   ///<remarks>
+   /// Text typed inside code is code and text typed outside it isn't, and the two look different, so a person must be able to put the caret on either side.<br/>
+   /// Other markup, such as that of bold, gets no stops of its own: text typed at its edge continues the char before, and the format is toggled to type without it.
+   ///</remarks>
+   internal IReadOnlyList<int> CaretStopsAt(int index)
+   {
+      return [..Markups.Where(it => it.Formatting.Has(TextFormats.Code)).SelectMany(OtherSideOfTheEdgeOf).Prepend(OffsetAt(index)).Distinct().Order()];
+
+      IEnumerable<int> OtherSideOfTheEdgeOf(InlineMarkup code)
+      {
+         if(code.FirstIndex < index && code.EndIndex == index) yield return code.Source.End;
+         if(code.FirstIndex == index && code.EndIndex > index) yield return Chars[index].Source.Start;
+      }
+   }
+
    ///<summary>The index of the first char that is not before <paramref name="offset"/>.</summary>
    public int IndexAt(int offset) => Chars.TakeWhile(it => it.Source.End <= offset).Count();
 

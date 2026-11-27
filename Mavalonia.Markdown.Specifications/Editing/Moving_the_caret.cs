@@ -20,4 +20,20 @@ public class Moving_the_caret
    [XF] public void to_the_start_goes_to_the_start_of_what_is_shown() => To(CaretMovement.ToTheStart, "> a\n\nb‸").Must().Be("> ‸a\n\nb");
    [XF] public void to_the_end_goes_to_the_end_of_what_is_shown() => To(CaretMovement.ToTheEnd, "‸a\n\n- b").Must().Be("a\n\n- b‸");
    [XF] public void can_extend_what_is_selected() => Of("a‸bc", it => it.Move(CaretMovement.ToTheCharacterAfter, extendSelection: true)).Must().Be("a⟦b⟧c");
+
+   [XF] public void to_the_character_after_it_inside_the_end_of_code_goes_outside_the_code() => To(CaretMovement.ToTheCharacterAfter, "`a‸` b").Must().Be("`a`‸ b");
+   [XF] public void to_the_character_after_it_outside_the_end_of_code_goes_past_the_next_character() => To(CaretMovement.ToTheCharacterAfter, "`a`‸ b").Must().Be("`a` ‸b");
+   [XF] public void to_the_character_before_it_outside_the_end_of_code_goes_inside_the_code() => To(CaretMovement.ToTheCharacterBefore, "`a`‸ b").Must().Be("`a‸` b");
+   [XF] public void to_the_character_before_it_from_after_code_stops_outside_the_code() => To(CaretMovement.ToTheCharacterBefore, "`a` ‸b").Must().Be("`a`‸ b");
+   [XF] public void to_the_character_after_it_outside_the_start_of_code_goes_inside_the_code() => To(CaretMovement.ToTheCharacterAfter, "b ‸`a`").Must().Be("b `‸a`");
+   [XF] public void to_the_character_after_it_from_before_code_stops_outside_the_code() => To(CaretMovement.ToTheCharacterAfter, "b‸ `a`").Must().Be("b ‸`a`");
+   [XF] public void to_the_character_before_it_inside_the_start_of_code_goes_outside_the_code() => To(CaretMovement.ToTheCharacterBefore, "b `‸a`").Must().Be("b ‸`a`");
+   [XF] public void to_the_character_before_it_from_inside_code_stops_inside_its_start() => To(CaretMovement.ToTheCharacterBefore, "b `a‸c`").Must().Be("b `‸ac`");
+   [XF] public void to_the_character_after_it_inside_the_end_of_code_in_bold_stays_inside_the_bold() => To(CaretMovement.ToTheCharacterAfter, "**`a‸`**").Must().Be("**`a`‸**");
+   [XF] public void to_the_character_after_it_outside_code_at_the_end_of_the_text_stays_there() => To(CaretMovement.ToTheCharacterAfter, "`a`‸").Must().Be("`a`‸");
+   [XF] public void to_the_character_after_it_outside_code_at_the_end_of_a_paragraph_goes_to_the_next() => To(CaretMovement.ToTheCharacterAfter, "`a`‸\n\nb").Must().Be("`a`\n\n‸b");
+   [XF] public void to_the_character_before_it_at_the_start_of_a_paragraph_stops_outside_code_that_ends_the_one_before() => To(CaretMovement.ToTheCharacterBefore, "`a`\n\n‸b").Must().Be("`a`‸\n\nb");
+   [XF] public void to_the_character_before_it_outside_code_at_the_start_of_the_text_stays_there() => To(CaretMovement.ToTheCharacterBefore, "‸`a`").Must().Be("‸`a`");
+   [XF] public void to_the_word_after_it_goes_past_the_backticks_of_code() => To(CaretMovement.ToTheWordAfter, "‸a `b` c").Must().Be("a ‸`b` c");
+   [XF] public void passes_the_backticks_of_code_when_it_extends_what_is_selected() => Of("`a‸` b", it => it.Move(CaretMovement.ToTheCharacterAfter, extendSelection: true)).Must().Be("`a⟦` ⟧b");
 }

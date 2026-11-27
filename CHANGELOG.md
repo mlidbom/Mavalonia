@@ -7,6 +7,13 @@ here: see [releasing](dev_docs/releasing.md).
 
 ## [Unreleased]
 
+### Changed
+- In `MarkdownEditor`, the caret moved with the arrow keys stops on both sides of the backticks where code in a line of
+  text starts or ends: inside the code, what is typed is code; outside it, it isn't. The caret is drawn over the edge
+  of the code's background when it's inside, and beside it when it's outside. Before, it was always inside the code at
+  its end, so nothing typed there could follow the code, and always outside it at its start. Selecting with Shift and
+  the arrow keys, and moving the caret in `MarkdownView`, pass the backticks as before.
+
 ### Fixed
 - Toggling code off with nothing selected, at the end of code in a line of text, and typing a space put the space in
   the code, where its background shows; the text after it went outside. The space now goes outside the code too.

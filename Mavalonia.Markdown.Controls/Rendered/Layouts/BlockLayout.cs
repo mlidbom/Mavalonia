@@ -77,8 +77,17 @@ class BlockLayout
    internal void DrawText(DrawingContext context, Rect viewport, LinkedStretches links) =>
       _text.Draw(context, _originOfText, new ColoursOfAText(Block is CodeBlock code ? _appearance.ColoursOf(code) : null, links), viewport);
 
-   ///<summary>Where a caret is drawn that is before the character at <paramref name="index"/>.</summary>
-   internal Rect CaretAt(int index) => _text.BoundsAt(index).Translate(_originOfText).WithWidth(1.5);
+   ///<summary>
+   /// Where a caret is drawn that is before the character at <paramref name="index"/>: over the start of that character,
+   /// or, <paramref name="onTheSideOfTheCharBefore"/>, over the end of the one before it, as inside code where it ends.
+   ///</summary>
+   internal Rect CaretAt(int index, bool onTheSideOfTheCharBefore = false)
+   {
+      var caret = _text.BoundsAt(index).Translate(_originOfText).WithWidth(WidthOfTheCaret);
+      return onTheSideOfTheCharBefore ? caret.Translate(new Vector(-WidthOfTheCaret, 0)) : caret;
+   }
+
+   const double WidthOfTheCaret = 1.5;
 
    internal double BaselineOfTheFirstLine => _originOfText.Y + _text.Baseline;
 
