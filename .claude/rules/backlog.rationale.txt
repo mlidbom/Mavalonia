@@ -1,0 +1,8 @@
+# Why the rule on the backlog exists
+
+Magnus, 2026-11-27, deferring the design of a formatting bar above selected text: "Please put this in our backlog and
+make sure that if it was not a known document before it is now by adding references to it to the rules files."
+
+Before then the project had no backlog: what was deferred lived only in the topics and the transcripts of the sessions
+it was discussed in. The rule is what makes the document known to every session; without it, a session would neither
+look in it nor add to it.
