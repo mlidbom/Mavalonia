@@ -64,6 +64,8 @@ class TogglingAList
       var last = _rendered.NumberOf(block);
       while(last < _rendered.Blocks.Count - 1 && IsInAnItemOfTheList(_rendered.Blocks[last + 1])) last++;
 
+      //bug: an item whose first block is inside another container, such as the quote of "- > a", is left as it is, so the list is split there.
+      //   ChangingTheMarkerOfAListItem would need to find the item's marker on the line of a block that isn't directly in the item.
       return _rendered.Blocks.Take(last + 1).Skip(first).Where(it => it.Containers.Count == containersOfTheList.Count + 1 && ItemStartedBy(it, _rendered) is not null);
 
       bool IsInAnItemOfTheList(RenderedBlock other) =>
