@@ -7,6 +7,8 @@ here: see [releasing](dev_docs/releasing.md).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-28
+
 ### Added
 - `MarkdownEditor.ToggleList(ListKind)`, and the keys for it, `ToggleBulletedListGesture` (Ctrl+Shift+8) and
   `ToggleNumberedListGesture` (Ctrl+Shift+7): they make each paragraph and heading that is selected,
